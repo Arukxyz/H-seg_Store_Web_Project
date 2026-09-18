@@ -1,0 +1,6 @@
+# Copiar a application-local.properties (ignorado por git) y activar con
+#   mvn spring-boot:run -Dspring-boot.run.profiles=dev,local
+# Alternativa: definir DB_URL, DB_USER y DB_PASSWORD como variables de entorno.
+spring.datasource.url=jdbc:postgresql://aws-0-sa-east-1.pooler.supabase.com:5432/postgres
+spring.datasource.username=postgres.xxxxxxxxxxxxxxxx
+spring.datasource.password=

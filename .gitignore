@@ -1,0 +1,21 @@
+# Credenciales de Supabase (ver application-local.properties.example)
+application-local.properties
+src/main/resources/application-local.properties
+.env
+
+# Maven
+target/
+*.class
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+nbproject/private/
+.settings/
+.project
+.classpath
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
