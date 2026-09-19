@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<!--
+  Cabecera común. Cada página la incluye con
+      <th:block th:replace="~{fragments/head :: comun('Título')}"/>
+  y añade debajo sus propias hojas de estilo (p. ej. home.css).
+-->
+<th:block th:fragment="comun(titulo)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${titulo}">HÖSÉG</title>
+    <meta name="description" content="HÖSÉG: ropa de abrigo peruana con triple impacto. Por cada prenda, un abrigo para un niño de Cusco; por cada accesorio, un árbol plantado.">
+
+    <!-- Tipografías del diseño (Fraunces para titulares, Outfit para cuerpo); ambas con Ö, É y Ä -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Outfit:wght@300;400;500;600;700&display=swap">
+
+    <!-- Bootstrap servido desde el WebJar; tokens.css lo sobreescribe con la paleta HÖSÉG -->
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/tokens.css}">
+    <link rel="stylesheet" th:href="@{/css/hoseg.css}">
+</th:block>
+</head>
+<body></body>
+</html>

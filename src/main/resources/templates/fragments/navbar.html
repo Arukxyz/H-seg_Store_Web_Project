@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<!--
+  Navbar (desktop + barra superior móvil) y MobileNavPill (óvalo inferior).
+  Traducido de `Navbar` en design/figma-make/src/App.tsx.
+
+  Uso:  <th:block th:replace="~{fragments/navbar :: navbar('inicio', true)}"/>
+    activa       → inicio | tienda | impacto | nosotros | carrito | cuenta
+    transparente → true solo en páginas con banner a pantalla completa: la barra
+                   arranca transparente con texto claro y se vuelve opaca al
+                   hacer scroll (navbar.js añade .is-scrolled).
+  Espera en el modelo `carritoUnidades` (lo pone AtributosGlobales).
+-->
+<body>
+
+<th:block th:fragment="navbar(activa, transparente)">
+
+    <!-- Barra superior: desktop (≥ 768 px) y móvil (solo logo + carrito) -->
+    <nav class="hs-nav" th:classappend="${transparente} ? 'hs-nav--transparente'" data-nav-scroll aria-label="Principal">
+        <a class="hs-logo" th:href="@{/}">HÖSÉG</a>
+
+        <ul class="hs-nav__enlaces d-none d-md-flex list-unstyled m-0">
+            <li><a th:href="@{/}"          data-seccion="inicio"   th:classappend="${activa == 'inicio'}   ? 'is-active'">Inicio</a></li>
+            <li><a th:href="@{/tienda}"    data-seccion="tienda"   th:classappend="${activa == 'tienda'}   ? 'is-active'">Tienda</a></li>
+            <li><a th:href="@{/#impacto}"  data-seccion="impacto"  th:classappend="${activa == 'impacto'}  ? 'is-active'">Impacto</a></li>
+            <li><a th:href="@{/#nosotros}" data-seccion="nosotros" th:classappend="${activa == 'nosotros'} ? 'is-active'">Nosotros</a></li>
+        </ul>
+
+        <div class="hs-nav__acciones">
+            <a class="hs-nav__cuenta d-none d-md-inline-flex" th:href="@{/login}" sec:authorize="!isAuthenticated()">
+                <th:block th:replace="~{fragments/icons :: cuenta}"/>
+                <span class="d-none d-lg-inline">Ingresar</span>
+            </a>
+            <a class="hs-nav__cuenta d-none d-md-inline-flex" th:href="@{/cuenta}" sec:authorize="isAuthenticated()">
+                <th:block th:replace="~{fragments/icons :: cuenta}"/>
+                <span class="d-none d-lg-inline" sec:authentication="name">Cliente</span>
+            </a>
+            <a class="hs-nav__carrito" th:href="@{/carrito}" aria-label="Carrito">
+                <th:block th:replace="~{fragments/navbar :: icono-carrito}"/>
+            </a>
+        </div>
+    </nav>
+
+    <th:block th:replace="~{fragments/navbar :: pill(${activa})}"/>
+</th:block>
+
+
+<!-- Icono de carrito con contador; el badge solo existe si hay ítems -->
+<span class="hs-carrito-icono" th:fragment="icono-carrito">
+    <th:block th:replace="~{fragments/icons :: carrito}"/>
+    <span class="hs-carrito-icono__badge" th:if="${carritoUnidades > 0}" th:text="${carritoUnidades}">2</span>
+</span>
+
+
+<!-- MobileNavPill: óvalo flotante inferior, solo < 768 px -->
+<nav class="hs-pill d-md-none" th:fragment="pill(activa)" data-pill aria-label="Navegación móvil">
+    <div class="hs-pill__interior">
+        <span class="hs-pill__indicador" aria-hidden="true"></span>
+
+        <a class="hs-pill__item" th:href="@{/}" data-seccion="inicio" th:classappend="${activa == 'inicio'} ? 'is-active'">
+            <th:block th:replace="~{fragments/icons :: casa}"/>
+            <span>Inicio</span>
+        </a>
+        <a class="hs-pill__item" th:href="@{/tienda}" data-seccion="tienda" th:classappend="${activa == 'tienda'} ? 'is-active'">
+            <th:block th:replace="~{fragments/icons :: tienda}"/>
+            <span>Tienda</span>
+        </a>
+        <a class="hs-pill__item" th:href="@{/#impacto}" data-seccion="impacto" th:classappend="${activa == 'impacto'} ? 'is-active'">
+            <th:block th:replace="~{fragments/icons :: impacto}"/>
+            <span>Impacto</span>
+        </a>
+        <a class="hs-pill__item" th:href="@{/carrito}" data-seccion="carrito" th:classappend="${activa == 'carrito'} ? 'is-active'">
+            <th:block th:replace="~{fragments/navbar :: icono-carrito}"/>
+            <span>Carrito</span>
+        </a>
+        <a class="hs-pill__item" th:href="@{/login}" data-seccion="cuenta" th:classappend="${activa == 'cuenta'} ? 'is-active'" sec:authorize="!isAuthenticated()">
+            <th:block th:replace="~{fragments/icons :: cuenta}"/>
+            <span>Cuenta</span>
+        </a>
+        <a class="hs-pill__item" th:href="@{/cuenta}" data-seccion="cuenta" th:classappend="${activa == 'cuenta'} ? 'is-active'" sec:authorize="isAuthenticated()">
+            <th:block th:replace="~{fragments/icons :: cuenta}"/>
+            <span>Cuenta</span>
+        </a>
+    </div>
+</nav>
+
+</body>
+</html>
