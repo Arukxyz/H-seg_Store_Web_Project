@@ -146,6 +146,19 @@
     line-height: 1;
 }
 
+/* Páginas sin banner: la barra es fija, así que el contenido principal
+   necesita un hueco arriba del mismo alto que la barra (56 / 64 px). La
+   Home no lo usa porque su banner ocupa toda la pantalla. */
+.hs-main--bajo-nav {
+    padding-top: 56px;
+}
+
+@media (min-width: 768px) {
+    .hs-main--bajo-nav {
+        padding-top: 64px;
+    }
+}
+
 /* ---------- Óvalo de navegación móvil (MobileNavPill) ---------------- */
 .hs-pill {
     position: fixed;
@@ -370,6 +383,24 @@
     font-weight: 500;
     line-height: 1.4;
 }
+
+/* ---------- Secciones de página ------------------------------------- */
+.hs-seccion {
+    padding: 4rem 0;
+}
+
+.hs-seccion--alterna {
+    background: var(--hs-cream-dark);
+}
+
+@media (min-width: 768px) {
+    .hs-seccion        { padding: 6rem 0; }
+    .hs-seccion--corta { padding: 5rem 0; }
+}
+
+/* Anchos de lectura del diseño (max-w-5xl / max-w-2xl) sobre .container */
+.container.hs-ancho-md { max-width: 1024px; }
+.container.hs-ancho-sm { max-width: 672px; }
 
 /* ---------- Tipografía de sección ----------------------------------- */
 .hs-kicker {

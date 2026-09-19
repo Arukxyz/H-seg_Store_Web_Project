@@ -48,10 +48,22 @@ Todos los componentes del brief están implementados. Correspondencia para la im
 
 Los datos de `PRODUCTS`, `IMPACT_COUNTERS` y `COMMUNITIES` (líneas 7–78) son valores de maqueta: coinciden con el catálogo real, pero al implementar salen de la base de datos.
 
-## Decisiones pendientes antes de implementar
+## Estado: Home implementada
 
-1. **Fotografía propia.** Reemplazar las imágenes de Unsplash antes de la entrega.
-2. **Logo en SVG.** Si no habrá logo gráfico, dejarlo como texto en Fraunces es una decisión consciente, no un pendiente.
+La Home está traducida por completo (`templates/index.html` + `fragments/`, `static/css/hoseg.css` y `home.css`, `static/js/navbar.js` y `home.js`). Cómo reutilizar los fragmentos en las demás páginas: `docs/guia-plantillas.md`.
+
+Diferencias deliberadas respecto al export:
+
+- La `ProductCard` **no tiene botón "Agregar"**: el brief (§2.3 y §7) dice que desde la Home no se agrega al carrito, porque la talla se elige en el detalle. Solo "Ver detalle".
+- La "Mochila artesanal" sale **sin badge**: en la base tiene `aplica_triple_impacto = FALSE`. Los datos mandan sobre la maqueta.
+- Los destacados se **intercalan** ABRIGO / ARBOL (no hay columna "destacado" en el esquema) para que el carrusel muestre ambos compromisos desde la primera vista.
+- Las cifras de `ImpactCounters` cuentan **lo entregado** (`donacion.estado = ENTREGADA`, lotes `ENTREGADO`), igual que el reporte del escritorio.
+- El carrusel es JS propio (no el de Bootstrap) para poder mostrar 1,4 tarjetas en móvil.
+
+Pendiente (solo assets):
+
+1. **Fotografía propia.** El banner y la franja "Nosotros" siguen con URLs de Unsplash, marcadas con comentario en `index.html`. Las fotos de producto salen de `producto.url_imagen`, que en la semilla está en NULL (la tarjeta muestra un icono neutro); cargarlas es un script SQL del equipo de escritorio.
+2. **Logo en SVG.** Hoy es texto "HÖSÉG" en Fraunces (`.hs-logo`). Si no habrá logo gráfico, queda así como decisión consciente.
 
 ## Decisión tomada: Bootstrap 5, no Tailwind
 
