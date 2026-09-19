@@ -22,7 +22,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/carrito/confirmar", "/cuenta/**").authenticated()
                         .requestMatchers("/", "/tienda/**", "/consulta-impacto", "/carrito/**",
-                                "/login", "/registro", "/error",
+                                "/login", "/registro", "/error", "/ejemplo",
                                 "/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(form -> form

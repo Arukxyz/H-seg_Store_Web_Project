@@ -104,6 +104,15 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- mvn spring-boot:run arranca en desarrollo con las credenciales de
+                         application-local.properties. Solo afecta a ese goal; el jar
+                         empaquetado no activa ningún perfil. -->
+                    <profiles>
+                        <profile>dev</profile>
+                        <profile>local</profile>
+                    </profiles>
+                </configuration>
             </plugin>
         </plugins>
     </build>

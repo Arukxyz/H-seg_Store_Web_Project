@@ -1,26 +1,8 @@
 /* =====================================================================
    HÖSÉG Web · Página principal
    HeroBanner, FeaturedCarousel, ImpactSteps, ImpactCounters, ImpactCTA
-   y AboutStrip. Los componentes reutilizables están en hoseg.css.
+   y AboutStrip. Secciones, tipografía y componentes reutilizables: hoseg.css.
    ===================================================================== */
-
-/* ---------- Secciones ----------------------------------------------- */
-.hs-seccion {
-    padding: 4rem 0;
-}
-
-.hs-seccion--alterna {
-    background: var(--hs-cream-dark);
-}
-
-@media (min-width: 768px) {
-    .hs-seccion        { padding: 6rem 0; }
-    .hs-seccion--corta { padding: 5rem 0; }
-}
-
-/* Anchos de lectura del diseño (max-w-5xl / max-w-2xl) sobre .container */
-.container.hs-ancho-md { max-width: 1024px; }
-.container.hs-ancho-sm { max-width: 672px; }
 
 /* ---------- HeroBanner ---------------------------------------------- */
 .hs-hero {

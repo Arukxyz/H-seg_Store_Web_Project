@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<!--
+  PLANTILLA DE EJEMPLO para páginas nuevas (Tienda, Detalle, Carrito, Login,
+  Consulta de impacto...). Copiar este archivo, renombrarlo y borrar lo que
+  no aplique. Guía completa: docs/guia-plantillas.md.
+
+  Se sirve en /ejemplo solo con el perfil dev (EjemploController).
+-->
+<head>
+    <!-- 1. Cabecera común: meta, fuentes, Bootstrap, tokens.css y hoseg.css.
+            El parámetro es el <title> de la página. -->
+    <th:block th:replace="~{fragments/head :: comun('Ejemplo · HÖSÉG')}"/>
+    <!-- 2. Hoja de estilo propia de la página, si la necesita (opcional). -->
+    <!-- <link rel="stylesheet" th:href="@{/css/tienda.css}"> -->
+</head>
+<body>
+
+<!-- 3. Barra superior + óvalo móvil.
+        activa:       inicio | tienda | impacto | nosotros | carrito | cuenta
+        transparente: false en toda página sin banner a pantalla completa. -->
+<th:block th:replace="~{fragments/navbar :: navbar(${paginaActiva}, false)}"/>
+
+<!-- 4. hs-main--bajo-nav deja el hueco de la barra fija (56/64 px).
+        hs-seccion da el relleno vertical estándar de una sección. -->
+<main class="hs-main--bajo-nav">
+    <section class="hs-seccion">
+        <div class="container">
+
+            <p class="hs-kicker">Ejemplo de página interior</p>
+            <h1 class="hs-h2 mb-3">Así se arma una página nueva.</h1>
+            <p class="hs-texto-secundario mb-5" style="max-width: 36rem">
+                Esta página existe solo en desarrollo. Muestra los fragmentos y las clases
+                <code>hs-*</code> disponibles para que las demás páginas se vean como la Home
+                sin copiar CSS. Los colores y tipografías salen de <code>tokens.css</code>.
+            </p>
+
+            <!-- Botones -->
+            <h2 class="h5 mb-3">Botones</h2>
+            <div class="d-flex flex-wrap gap-2 mb-5">
+                <a class="hs-btn hs-btn--primario" href="#">Primario</a>
+                <a class="hs-btn hs-btn--secundario" href="#">Secundario</a>
+                <span class="hs-btn hs-btn--deshabilitado">Deshabilitado</span>
+                <button type="button" class="hs-btn-redondo" aria-label="Siguiente">
+                    <th:block th:replace="~{fragments/icons :: chevron-der}"/>
+                </button>
+            </div>
+
+            <!-- Badges y chips -->
+            <h2 class="h5 mb-3">Badges y chips</h2>
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-5">
+                <!-- El badge recibe un TipoCompromiso; aquí vienen del modelo (EjemploController) -->
+                <th:block th:replace="~{fragments/product-card :: badge(${abrigo})}"/>
+                <th:block th:replace="~{fragments/product-card :: badge(${arbol})}"/>
+                <span class="hs-chip">Omacha</span>
+                <span class="hs-chip hs-chip--pequeno">Triple impacto</span>
+                <span class="hs-chip-talla">M</span>
+            </div>
+
+            <!-- Formulario -->
+            <h2 class="h5 mb-3">Campo de texto</h2>
+            <form class="d-flex flex-column flex-sm-row gap-2 mb-5" style="max-width: 24rem" onsubmit="return false">
+                <label class="visually-hidden" for="ejemplo-boleta">Boleta</label>
+                <input class="hs-input" id="ejemplo-boleta" type="text" placeholder="WEB-000110">
+                <button type="submit" class="hs-btn hs-btn--primario">Consultar</button>
+            </form>
+
+            <!-- Tarjetas de producto: reciben un dto.TarjetaProducto -->
+            <h2 class="h5 mb-3">Tarjetas de producto</h2>
+            <div class="row g-3 mb-5">
+                <div class="col-6 col-md-4 col-xl-3" th:each="p : ${tarjetas}">
+                    <th:block th:replace="~{fragments/product-card :: card(${p})}"/>
+                </div>
+            </div>
+
+            <!-- Iconos -->
+            <h2 class="h5 mb-3">Iconos (<code>fragments/icons</code>)</h2>
+            <div class="d-flex flex-wrap gap-3 mb-5 hs-texto-secundario">
+                <span title="casa"><th:block th:replace="~{fragments/icons :: casa}"/></span>
+                <span title="tienda"><th:block th:replace="~{fragments/icons :: tienda}"/></span>
+                <span title="impacto"><th:block th:replace="~{fragments/icons :: impacto}"/></span>
+                <span title="carrito"><th:block th:replace="~{fragments/icons :: carrito}"/></span>
+                <span title="cuenta"><th:block th:replace="~{fragments/icons :: cuenta}"/></span>
+                <span title="abrigo"><th:block th:replace="~{fragments/icons :: abrigo}"/></span>
+                <span title="arbol"><th:block th:replace="~{fragments/icons :: arbol}"/></span>
+                <span title="comunidad"><th:block th:replace="~{fragments/icons :: comunidad}"/></span>
+                <span title="corazon"><th:block th:replace="~{fragments/icons :: corazon}"/></span>
+                <span title="flecha-der"><th:block th:replace="~{fragments/icons :: flecha-der}"/></span>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Franja alterna (fondo crema oscuro) -->
+    <section class="hs-seccion hs-seccion--alterna">
+        <div class="container hs-ancho-sm text-center">
+            <p class="hs-kicker">Sección alterna</p>
+            <h2 class="hs-h2">Alterna fondos para separar bloques.</h2>
+        </div>
+    </section>
+</main>
+
+<!-- 5. Footer (deja hueco abajo para el óvalo móvil). -->
+<th:block th:replace="~{fragments/footer :: footer}"/>
+
+<!-- 6. Scripts: Bootstrap y navbar.js siempre; home.js solo en la Home. -->
+<script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}" defer></script>
+<script th:src="@{/js/navbar.js}" defer></script>
+</body>
+</html>
