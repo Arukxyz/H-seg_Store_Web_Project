@@ -1,0 +1,635 @@
+/* =====================================================================
+   HÖSÉG Web · Componentes compartidos
+   Navbar, óvalo móvil, botones, badges, chips, tarjeta de producto y
+   footer. Traducidos del export de Figma Make (design/figma-make/src/
+   App.tsx) a CSS estándar sobre la grilla de Bootstrap 5. Todo color y
+   medida de marca viene de tokens.css.
+   ===================================================================== */
+
+/* ---------- Barra superior (Navbar) ----------------------------------
+   Fija. Por defecto es opaca (páginas interiores). Con .hs-nav--transparente
+   arranca transparente con texto claro sobre el banner y navbar.js le
+   añade .is-scrolled al bajar más de 60 px. */
+.hs-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    padding: 0 20px;
+    color: var(--hs-bark);
+    background: rgba(245, 240, 232, 0.72);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(217, 206, 184, 0.5);
+    box-shadow: 0 2px 24px rgba(44, 24, 16, 0.08);
+    transition: background 0.3s, box-shadow 0.3s, border-color 0.3s, color 0.3s;
+}
+
+@media (min-width: 768px) {
+    .hs-nav {
+        height: 64px;
+        padding: 0 32px;
+    }
+}
+
+.hs-nav--transparente:not(.is-scrolled) {
+    color: var(--hs-cream);
+    background: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border-bottom-color: transparent;
+    box-shadow: none;
+}
+
+.hs-logo {
+    font-family: var(--hs-font-display);
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: inherit;
+    text-decoration: none;
+}
+
+@media (min-width: 768px) {
+    .hs-logo { font-size: 1.25rem; }
+}
+
+.hs-nav__enlaces {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+.hs-nav__enlaces a {
+    position: relative;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: inherit;
+    text-decoration: none;
+    opacity: 0.75;
+    transition: color var(--hs-t-fast), opacity var(--hs-t-fast);
+}
+
+.hs-nav__enlaces a:hover,
+.hs-nav__enlaces a.is-active {
+    opacity: 1;
+}
+
+.hs-nav:not(.hs-nav--transparente) .hs-nav__enlaces a,
+.hs-nav.is-scrolled .hs-nav__enlaces a {
+    opacity: 1;
+}
+
+.hs-nav:not(.hs-nav--transparente) .hs-nav__enlaces a.is-active,
+.hs-nav.is-scrolled .hs-nav__enlaces a.is-active {
+    color: var(--hs-terracotta);
+}
+
+/* Subrayado de 1 px bajo el enlace activo */
+.hs-nav__enlaces a.is-active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -4px;
+    height: 1px;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-terracotta);
+}
+
+.hs-nav__acciones {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.hs-nav__cuenta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: inherit;
+    text-decoration: none;
+}
+
+.hs-nav__carrito {
+    display: inline-flex;
+    color: inherit;
+}
+
+/* Icono de carrito con contador. El badge solo se renderiza si hay ítems. */
+.hs-carrito-icono {
+    position: relative;
+    display: inline-flex;
+}
+
+.hs-carrito-icono__badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-terracotta);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+/* ---------- Óvalo de navegación móvil (MobileNavPill) ---------------- */
+.hs-pill {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    z-index: 1030;
+    transform: translateX(-50%);
+    padding: 8px;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-pill-bg);
+    -webkit-backdrop-filter: var(--hs-pill-blur);
+    backdrop-filter: var(--hs-pill-blur);
+    border: 1px solid var(--hs-pill-border);
+    box-shadow: var(--hs-shadow-pill);
+}
+
+.hs-pill__interior {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+/* Indicador que se desliza hasta el destino activo (lo mueve navbar.js) */
+.hs-pill__indicador {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 56px;
+    opacity: 0;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-terracotta);
+    pointer-events: none;
+    transition: left var(--hs-t-pill) var(--hs-ease), width var(--hs-t-pill) var(--hs-ease);
+}
+
+.hs-pill__indicador.sin-transicion {
+    transition: none;
+}
+
+.hs-pill__item {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-width: 52px;
+    padding: 6px 12px;
+    border-radius: var(--hs-radius-pill);
+    color: var(--hs-pill-inactive);
+    text-decoration: none;
+    transition: color var(--hs-t-fast);
+}
+
+.hs-pill__item span {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1;
+}
+
+.hs-pill__item.is-active {
+    color: var(--hs-card);
+}
+
+/* ---------- Botones ------------------------------------------------- */
+.hs-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background var(--hs-t-fast), color var(--hs-t-fast), border-color var(--hs-t-fast);
+}
+
+.hs-btn--primario {
+    background: var(--hs-terracotta);
+    color: var(--hs-card);
+}
+
+.hs-btn--primario:hover,
+.hs-btn--primario:focus-visible {
+    background: var(--hs-terracotta-hover);
+    color: var(--hs-card);
+}
+
+.hs-btn--secundario {
+    background: var(--hs-cream-dark);
+    color: var(--hs-bark);
+    border-color: var(--hs-sand);
+}
+
+.hs-btn--secundario:hover,
+.hs-btn--secundario:focus-visible {
+    background: var(--hs-sand);
+    color: var(--hs-bark);
+}
+
+/* Botón de vidrio sobre fotografía (hero) */
+.hs-btn--vidrio {
+    background: rgba(245, 240, 232, 0.12);
+    color: var(--hs-cream);
+    border-color: rgba(245, 240, 232, 0.28);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    backdrop-filter: blur(16px) saturate(160%);
+}
+
+.hs-btn--vidrio:hover,
+.hs-btn--vidrio:focus-visible {
+    background: rgba(245, 240, 232, 0.22);
+    color: var(--hs-cream);
+}
+
+.hs-btn--deshabilitado {
+    background: var(--hs-sand);
+    color: var(--hs-muted);
+    cursor: default;
+}
+
+/* Botón circular (controles del carrusel) */
+.hs-btn-redondo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--hs-sand);
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-card);
+    color: var(--hs-bark);
+    transition: background var(--hs-t-fast);
+}
+
+.hs-btn-redondo:hover {
+    background: var(--hs-cream-dark);
+}
+
+/* ---------- Badges y chips ------------------------------------------ */
+/* Badge de impacto sobre la foto del producto */
+.hs-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border: 1px solid transparent;
+    border-radius: var(--hs-radius-pill);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.5;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    backdrop-filter: blur(10px) saturate(160%);
+}
+
+.hs-badge--abrigo {
+    background: rgba(254, 240, 232, 0.72);
+    color: var(--hs-terracotta);
+    border-color: rgba(245, 205, 179, 0.6);
+}
+
+.hs-badge--arbol {
+    background: rgba(232, 240, 232, 0.72);
+    color: var(--hs-sage);
+    border-color: rgba(181, 208, 184, 0.6);
+}
+
+/* Chip neutro (comunidades, etiquetas de "Nosotros") */
+.hs-chip {
+    display: inline-block;
+    padding: 6px 16px;
+    border: 1px solid var(--hs-sand);
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-cream-dark);
+    color: var(--hs-bark);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.hs-chip--pequeno {
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Chip translúcido sobre fotografía (hero) */
+.hs-chip-vidrio {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border: 1px solid rgba(245, 240, 232, 0.2);
+    border-radius: var(--hs-radius-pill);
+    color: var(--hs-cream);
+    font-size: 11px;
+    font-weight: 600;
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    backdrop-filter: blur(12px) saturate(160%);
+}
+
+.hs-chip-vidrio--terracota { background: rgba(196, 98, 45, 0.45); }
+.hs-chip-vidrio--salvia    { background: rgba(90, 122, 92, 0.45); }
+
+/* Chip de talla dentro de la tarjeta */
+.hs-chip-talla {
+    padding: 2px 6px;
+    border: 1px solid var(--hs-sand);
+    border-radius: 4px;
+    background: var(--hs-cream-dark);
+    color: var(--hs-muted);
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+/* ---------- Tipografía de sección ----------------------------------- */
+.hs-kicker {
+    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--hs-muted);
+}
+
+.hs-kicker--estrecho {
+    letter-spacing: 0.15em;
+}
+
+.hs-h2 {
+    font-family: var(--hs-font-display);
+    font-size: clamp(1.875rem, 4vw, 2.25rem);
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.hs-texto-secundario {
+    color: var(--hs-muted);
+    font-size: 0.875rem;
+    line-height: 1.65;
+}
+
+.hs-enlace-flecha {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--hs-terracotta);
+    text-decoration: none;
+    transition: color var(--hs-t-fast);
+}
+
+.hs-enlace-flecha:hover {
+    color: var(--hs-terracotta-hover);
+}
+
+/* ---------- Campo de texto ------------------------------------------ */
+.hs-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--hs-sand);
+    border-radius: 12px;
+    background: var(--hs-card);
+    color: var(--hs-bark);
+    font-family: var(--hs-font-body);
+    font-size: 0.875rem;
+    transition: border-color var(--hs-t-fast), box-shadow var(--hs-t-fast);
+}
+
+.hs-input:focus {
+    outline: none;
+    border-color: var(--hs-terracotta);
+    box-shadow: 0 0 0 3px rgba(196, 98, 45, 0.15);
+}
+
+/* ---------- Tarjeta de producto (ProductCard) ----------------------- */
+.hs-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    border: 1px solid var(--hs-sand);
+    border-radius: 16px;
+    background: var(--hs-card);
+    box-shadow: 0 1px 4px rgba(44, 24, 16, 0.06);
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.hs-card:not(.hs-card--agotado):hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(44, 24, 16, 0.12);
+}
+
+.hs-card--agotado {
+    opacity: 0.65;
+}
+
+.hs-card__imagen {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    background: var(--hs-cream-dark);
+}
+
+.hs-card__imagen img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s;
+}
+
+.hs-card:not(.hs-card--agotado):hover .hs-card__imagen img {
+    transform: scale(1.04);
+}
+
+.hs-card__sin-imagen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--hs-sand);
+}
+
+.hs-card__sin-imagen svg {
+    width: 64px;
+    height: 64px;
+}
+
+.hs-card__badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+}
+
+.hs-card__velo {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(245, 240, 232, 0.55);
+}
+
+.hs-card__agotado-etiqueta {
+    padding: 4px 12px;
+    border-radius: var(--hs-radius-pill);
+    background: rgba(44, 24, 16, 0.75);
+    color: var(--hs-cream);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.hs-card__cuerpo {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+}
+
+.hs-card__coleccion {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--hs-muted);
+}
+
+.hs-card__nombre {
+    margin: 2px 0 0;
+    font-family: var(--hs-font-display);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--hs-bark);
+}
+
+.hs-card__fila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 4px;
+}
+
+.hs-card__precio {
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.hs-card__tallas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px;
+}
+
+.hs-card .hs-btn {
+    margin-top: 4px;
+    padding: 8px 16px;
+}
+
+/* ---------- Footer -------------------------------------------------- */
+.hs-footer {
+    padding: 56px 0 7rem;   /* abajo: hueco para el óvalo de navegación */
+    background: var(--hs-bark);
+    color: var(--hs-sand);
+}
+
+@media (min-width: 768px) {
+    .hs-footer {
+        padding: 64px 0;
+    }
+}
+
+.hs-footer__logo {
+    font-family: var(--hs-font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--hs-cream);
+}
+
+.hs-footer__lema {
+    max-width: 20rem;
+    font-size: 0.875rem;
+    line-height: 1.65;
+    color: var(--hs-footer-text);
+}
+
+.hs-footer__red {
+    padding: 4px 12px;
+    border: 1px solid var(--hs-footer-border);
+    border-radius: var(--hs-radius-pill);
+    color: var(--hs-footer-text);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background var(--hs-t-fast), color var(--hs-t-fast);
+}
+
+.hs-footer__red:hover {
+    background: var(--hs-bark-light);
+    color: var(--hs-cream);
+}
+
+.hs-footer__titulo {
+    margin-bottom: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--hs-muted);
+}
+
+.hs-footer ul a {
+    font-size: 0.875rem;
+    color: var(--hs-footer-text);
+    text-decoration: none;
+    transition: color var(--hs-t-fast);
+}
+
+.hs-footer ul a:hover {
+    color: var(--hs-cream);
+}
+
+.hs-footer__pie {
+    padding-top: 24px;
+    border-top: 1px solid var(--hs-footer-line);
+    font-size: 0.75rem;
+    color: var(--hs-footer-copy);
+}

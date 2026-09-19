@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<!--
+  Footer. Traducido de `Footer` en design/figma-make/src/App.tsx.
+  En móvil lleva relleno inferior extra para que el óvalo de navegación no
+  tape el copyright. Espera `rutaConsulta` en el modelo (AtributosGlobales).
+-->
+<body>
+
+<footer class="hs-footer" th:fragment="footer">
+    <div class="container">
+        <div class="row g-4 g-sm-5 mb-5">
+            <div class="col-12 col-md-6 d-flex flex-column gap-3">
+                <span class="hs-footer__logo">HÖSÉG</span>
+                <p class="hs-footer__lema mb-0">
+                    Buy One, Give One · Buy One, Plant One.<br>
+                    Ropa de abrigo peruana con triple impacto.
+                </p>
+                <!-- Redes: enlaces pendientes de las cuentas reales de la marca -->
+                <div class="d-flex gap-2 mt-1">
+                    <a class="hs-footer__red" href="#" rel="noopener">Instagram</a>
+                    <a class="hs-footer__red" href="#" rel="noopener">Facebook</a>
+                    <a class="hs-footer__red" href="#" rel="noopener">TikTok</a>
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <p class="hs-footer__titulo">Navegar</p>
+                <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
+                    <li><a th:href="@{/tienda}">Tienda</a></li>
+                    <li><a th:href="@{/#impacto}">Impacto</a></li>
+                    <li><a th:href="@{/#nosotros}">Nosotros</a></li>
+                    <li><a th:href="@{${rutaConsulta}}">Consulta tu impacto</a></li>
+                </ul>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <p class="hs-footer__titulo">Legal y contacto</p>
+                <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
+                    <!-- Páginas legales y número de WhatsApp: pendientes de definir con la marca -->
+                    <li><a href="#">Política de responsabilidad social</a></li>
+                    <li><a href="#">Términos y condiciones</a></li>
+                    <li><a href="#">Contacto por WhatsApp</a></li>
+                    <li><a href="mailto:hola@hoseg.pe">hola@hoseg.pe</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="hs-footer__pie">
+            <p class="mb-0">© 2026 HÖSÉG Store · 14-DIEZ S.A.C. · Hecho en Perú con propósito.</p>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<!--
+  ProductCard e ImpactBadge. Traducidos de `ProductCard` e `ImpactBadge` en
+  design/figma-make/src/App.tsx. Reciben un dto.TarjetaProducto.
+
+  Solo muestra datos que existen en el sistema: nombre, colección, precio
+  mínimo entre tallas, tallas, tipo_compromiso y si queda stock. Desde la Home
+  no se agrega al carrito (la talla se elige en el detalle), así que la única
+  acción es "Ver detalle"; el export traía además "Agregar" y se omite adrede.
+-->
+<body>
+
+<article class="hs-card" th:fragment="card(p)" th:classappend="${!p.disponible} ? 'hs-card--agotado'">
+    <div class="hs-card__imagen">
+        <img th:if="${p.urlImagen != null}" th:src="${p.urlImagen}" th:alt="${p.nombre}" loading="lazy">
+        <!-- Sin foto cargada aún: fondo neutro con el icono del compromiso -->
+        <div class="hs-card__sin-imagen" th:unless="${p.urlImagen != null}" aria-hidden="true">
+            <th:block th:if="${p.tipoCompromiso?.name() == 'ARBOL'}"><th:block th:replace="~{fragments/icons :: arbol}"/></th:block>
+            <th:block th:unless="${p.tipoCompromiso?.name() == 'ARBOL'}"><th:block th:replace="~{fragments/icons :: abrigo}"/></th:block>
+        </div>
+
+        <div class="hs-card__badge" th:if="${p.tipoCompromiso != null}">
+            <th:block th:replace="~{fragments/product-card :: badge(${p.tipoCompromiso})}"/>
+        </div>
+
+        <div class="hs-card__velo" th:unless="${p.disponible}">
+            <span class="hs-card__agotado-etiqueta">Agotado</span>
+        </div>
+    </div>
+
+    <div class="hs-card__cuerpo">
+        <div>
+            <p class="hs-card__coleccion" th:text="${p.coleccion}">Älpafill</p>
+            <h3 class="hs-card__nombre" th:text="${p.nombre}">Casaca Älpafill Cusco</h3>
+        </div>
+
+        <div class="hs-card__fila">
+            <span class="hs-card__precio" th:text="|S/ ${#numbers.formatDecimal(p.precio, 1, 'COMMA', 2, 'POINT')}|">S/ 259.90</span>
+            <div class="hs-card__tallas">
+                <span class="hs-chip-talla" th:each="t : ${p.tallas}" th:text="${t}">M</span>
+            </div>
+        </div>
+
+        <a class="hs-btn hs-btn--secundario w-100" th:if="${p.disponible}"
+           th:href="@{/tienda/{codigo}(codigo=${p.codigo})}">Ver detalle</a>
+        <span class="hs-btn hs-btn--deshabilitado w-100" th:unless="${p.disponible}">Agotado</span>
+    </div>
+</article>
+
+
+<!-- Badge "1 abrigo" / "1 árbol" según producto.tipo_compromiso -->
+<span th:fragment="badge(tipo)" class="hs-badge" th:classappend="${tipo.name() == 'ARBOL'} ? 'hs-badge--arbol' : 'hs-badge--abrigo'">
+    <th:block th:if="${tipo.name() == 'ARBOL'}"><th:block th:replace="~{fragments/icons :: badge-arbol}"/></th:block>
+    <th:block th:unless="${tipo.name() == 'ARBOL'}"><th:block th:replace="~{fragments/icons :: badge-abrigo}"/></th:block>
+    <th:block th:text="${tipo.etiqueta}">1 abrigo</th:block>
+</span>
+
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/head :: comun('HÖSÉG · Abriga a alguien más con cada compra')}"/>
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+</head>
+<body class="hs-home">
+
+<th:block th:replace="~{fragments/navbar :: navbar('inicio', true)}"/>
+
+<main>
+
+    <!-- ══ HeroBanner ══════════════════════════════════════════════════════ -->
+    <!-- Foto temporal de Unsplash (el export no trae imágenes propias);
+         reemplazar por fotografía de HÖSÉG en static/images/ antes de la entrega. -->
+    <section id="inicio" class="hs-hero" data-nav="inicio">
+        <img class="hs-hero__imagen"
+             src="https://images.unsplash.com/photo-1785810116787-489fb894b9f7?w=1440&h=900&fit=crop&auto=format"
+             alt="Paisaje altoandino de Cusco">
+        <div class="hs-hero__velo" aria-hidden="true"></div>
+
+        <div class="container hs-hero__contenido">
+            <div class="hs-hero__texto">
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <span class="hs-chip-vidrio hs-chip-vidrio--terracota">Buy One, Give One</span>
+                    <span class="hs-chip-vidrio hs-chip-vidrio--salvia">Buy One, Plant One</span>
+                </div>
+
+                <h1 class="hs-hero__titulo">Abriga a alguien más con cada compra.</h1>
+
+                <p class="hs-hero__bajada">
+                    Empresa peruana de ropa de abrigo con triple impacto. Cada prenda llega a dos personas:
+                    a ti y a un niño de una comunidad altoandina de Cusco.
+                </p>
+
+                <div class="d-flex flex-column flex-sm-row gap-3">
+                    <a class="hs-btn hs-btn--primario" th:href="@{/tienda}">Ver tienda</a>
+                    <a class="hs-btn hs-btn--vidrio" href="#consulta">Consulta tu impacto</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ FeaturedCarousel ════════════════════════════════════════════════ -->
+    <section id="destacados" class="hs-seccion" data-nav="inicio">
+        <div class="container">
+            <div class="d-flex flex-column flex-sm-row align-items-sm-end justify-content-sm-between gap-4 mb-4">
+                <div>
+                    <p class="hs-kicker">Productos destacados</p>
+                    <h2 class="hs-h2 mb-0">Cada prenda<br class="d-none d-sm-block"> abriga dos veces.</h2>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="hs-btn-redondo" data-carrusel-anterior aria-label="Anterior">
+                        <th:block th:replace="~{fragments/icons :: chevron-izq}"/>
+                    </button>
+                    <button type="button" class="hs-btn-redondo" data-carrusel-siguiente aria-label="Siguiente">
+                        <th:block th:replace="~{fragments/icons :: chevron-der}"/>
+                    </button>
+                </div>
+            </div>
+
+            <div class="hs-carrusel" data-carrusel data-intervalo="5000">
+                <div class="hs-carrusel__pista">
+                    <div class="hs-carrusel__item" th:each="p : ${destacados}">
+                        <th:block th:replace="~{fragments/product-card :: card(${p})}"/>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-center hs-texto-secundario mt-4 mb-0" th:if="${#lists.isEmpty(destacados)}">
+                Estamos renovando el catálogo. Vuelve pronto.
+            </p>
+
+            <div class="hs-carrusel__puntos" data-carrusel-puntos role="tablist" aria-label="Ir a"></div>
+        </div>
+    </section>
+
+    <!-- ══ ImpactSteps ═════════════════════════════════════════════════════ -->
+    <section id="impacto" class="hs-seccion hs-seccion--alterna" data-nav="impacto">
+        <div class="container hs-ancho-md">
+            <div class="text-center mb-5">
+                <p class="hs-kicker">Así funciona</p>
+                <h2 class="hs-h2 mb-0">Tu compra tiene nombre y apellido.</h2>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-12 col-md-4">
+                    <div class="hs-paso">
+                        <span class="hs-paso__numero">01</span>
+                        <div class="hs-paso__icono"><th:block th:replace="~{fragments/icons :: paso-compra}"/></div>
+                        <h3 class="hs-paso__titulo">Compras</h3>
+                        <p class="hs-paso__texto">Eliges una prenda o accesorio HÖSÉG y completas tu pedido en nuestra tienda.</p>
+                        <span class="hs-paso__flecha d-none d-md-flex"><th:block th:replace="~{fragments/icons :: flecha-der}"/></span>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="hs-paso">
+                        <span class="hs-paso__numero">02</span>
+                        <div class="hs-paso__icono"><th:block th:replace="~{fragments/icons :: paso-registro}"/></div>
+                        <h3 class="hs-paso__titulo">Registramos</h3>
+                        <p class="hs-paso__texto">Con el número de tu boleta vinculamos tu abrigo o árbol a una comunidad real de Cusco.</p>
+                        <span class="hs-paso__flecha d-none d-md-flex"><th:block th:replace="~{fragments/icons :: flecha-der}"/></span>
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="hs-paso">
+                        <span class="hs-paso__numero">03</span>
+                        <div class="hs-paso__icono"><th:block th:replace="~{fragments/icons :: paso-entrega}"/></div>
+                        <h3 class="hs-paso__titulo">Entregamos</h3>
+                        <p class="hs-paso__texto">Nuestra ONG aliada coordina la entrega. Tú puedes ver el resultado en línea con tu boleta.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ ImpactCounters ══════════════════════════════════════════════════ -->
+    <section id="cifras" class="hs-seccion" data-nav="impacto">
+        <div class="container hs-ancho-md">
+            <div class="text-center mb-5">
+                <p class="hs-kicker">Impacto real</p>
+                <h2 class="hs-h2 mb-0">Cada número es una persona,<br class="d-none d-sm-block"> cada árbol tiene raíces.</h2>
+            </div>
+
+            <!-- Las cifras salen de la base compartida; home.js las anima al entrar en pantalla -->
+            <div class="row g-3 mb-5">
+                <div class="col-6 col-md-3">
+                    <div class="hs-contador">
+                        <div class="hs-contador__icono"><th:block th:replace="~{fragments/icons :: abrigo}"/></div>
+                        <div class="hs-contador__cifra" data-contador th:attr="data-valor=${impacto.abrigosEntregados}"
+                             th:text="${#numbers.formatInteger(impacto.abrigosEntregados, 1, 'COMMA')}">1,248</div>
+                        <p class="hs-contador__etiqueta">Abrigos entregados</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="hs-contador">
+                        <div class="hs-contador__icono"><th:block th:replace="~{fragments/icons :: arbol}"/></div>
+                        <div class="hs-contador__cifra" data-contador th:attr="data-valor=${impacto.arbolesPlantados}"
+                             th:text="${#numbers.formatInteger(impacto.arbolesPlantados, 1, 'COMMA')}">874</div>
+                        <p class="hs-contador__etiqueta">Árboles plantados</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="hs-contador">
+                        <div class="hs-contador__icono"><th:block th:replace="~{fragments/icons :: comunidad}"/></div>
+                        <div class="hs-contador__cifra" data-contador th:attr="data-valor=${impacto.comunidadesAlcanzadas}"
+                             th:text="${#numbers.formatInteger(impacto.comunidadesAlcanzadas, 1, 'COMMA')}">5</div>
+                        <p class="hs-contador__etiqueta">Comunidades alcanzadas</p>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="hs-contador">
+                        <div class="hs-contador__icono"><th:block th:replace="~{fragments/icons :: corazon}"/></div>
+                        <div class="hs-contador__cifra" data-contador th:attr="data-valor=${impacto.pedidosConImpacto}"
+                             th:text="${#numbers.formatInteger(impacto.pedidosConImpacto, 1, 'COMMA')}">2,104</div>
+                        <p class="hs-contador__etiqueta">Pedidos con impacto</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <p class="hs-kicker hs-kicker--estrecho mb-2">Comunidades beneficiadas</p>
+                <div class="d-flex flex-wrap justify-content-center gap-2">
+                    <span class="hs-chip" th:each="c : ${comunidades}" th:text="${c}">Omacha</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ══ ImpactCTA ═══════════════════════════════════════════════════════ -->
+    <section id="consulta" class="hs-seccion hs-seccion--alterna hs-seccion--corta" data-nav="impacto">
+        <div class="container hs-ancho-sm text-center">
+            <p class="hs-kicker">Consulta tu impacto</p>
+            <h2 class="hs-h2 mb-3">¿Ya compraste? Mira a quién abrigaste.</h2>
+            <p class="hs-texto-secundario hs-cta__texto mx-auto mb-4">
+                Ingresa el número de tu boleta (ej. <strong>WEB-000110</strong>) y te mostramos a qué comunidad
+                llegó tu donación. También puedes escanear el QR impreso en tu boleta.
+            </p>
+            <!-- Solo redirige: la consulta la resuelve la página del portal (GET ?boleta=) -->
+            <form class="hs-cta__form mx-auto" method="get" th:action="@{${rutaConsulta}}">
+                <label class="visually-hidden" for="boleta">Número de boleta</label>
+                <input class="hs-input" type="text" id="boleta" name="boleta" placeholder="WEB-000110"
+                       pattern="[A-Za-z]+-\d+" title="Formato WEB-000110" autocomplete="off" required>
+                <button type="submit" class="hs-btn hs-btn--primario">Consultar</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- ══ AboutStrip ══════════════════════════════════════════════════════ -->
+    <section id="nosotros" class="hs-seccion" data-nav="nosotros">
+        <div class="container">
+            <div class="row g-4 g-sm-5 align-items-center">
+                <div class="col-12 col-md-6">
+                    <!-- Foto temporal de Unsplash; reemplazar por fotografía propia -->
+                    <div class="hs-about__imagen">
+                        <img src="https://images.unsplash.com/photo-1761810833690-5b866a047c2c?w=800&h=600&fit=crop&auto=format"
+                             alt="Comunidad altoandina de Cusco" loading="lazy">
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 d-flex flex-column gap-4">
+                    <p class="hs-kicker mb-0">Quiénes somos</p>
+                    <h2 class="hs-h2 mb-0">Ropa que calienta en los dos sentidos.</h2>
+                    <div class="hs-texto-secundario d-flex flex-column gap-3">
+                        <p class="mb-0">
+                            HÖSÉG nació en Perú con una pregunta simple: ¿puede vender ropa de abrigo y al mismo tiempo
+                            asegurarse de que quienes más la necesitan también la tengan? La respuesta es sí, y lo
+                            probamos con cada pedido.
+                        </p>
+                        <p class="mb-0">
+                            Trabajamos con una ONG aliada que coordina la entrega de abrigos a comunidades altoandinas
+                            de Cusco y la plantación de cedros andinos. Cada donación es rastreable con el número de tu boleta.
+                        </p>
+                        <p class="mb-0">
+                            Somos una empresa de triple impacto: hacemos bien a las personas, al planeta y al negocio.
+                            Estamos en proceso de certificación B Corp.
+                        </p>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="hs-chip hs-chip--pequeno">Triple impacto</span>
+                        <span class="hs-chip hs-chip--pequeno">B Corp (en proceso)</span>
+                        <span class="hs-chip hs-chip--pequeno">ONG aliada</span>
+                        <span class="hs-chip hs-chip--pequeno">Trazabilidad 100%</span>
+                    </div>
+                    <!-- Página "Nosotros" completa: pendiente; por ahora ancla a esta franja -->
+                    <a class="hs-enlace-flecha" href="#nosotros">
+                        Conoce más <th:block th:replace="~{fragments/icons :: flecha-der}"/>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<th:block th:replace="~{fragments/footer :: footer}"/>
+
+<script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}" defer></script>
+<script th:src="@{/js/navbar.js}" defer></script>
+<script th:src="@{/js/home.js}" defer></script>
+</body>
+</html>

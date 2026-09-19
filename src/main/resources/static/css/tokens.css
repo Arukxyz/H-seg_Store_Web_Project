@@ -30,6 +30,15 @@
     --hs-amber:             #D4820A;
     --hs-amber-light:       #FEF3DC;
 
+    /* Derivados que el export usa como literales */
+    --hs-terracotta-light:  #FEF0E8;   /* fondo de cajas de icono (pasos, contadores) */
+    --hs-footer-text:       #A08878;   /* texto y enlaces del footer */
+    --hs-footer-border:     #4A3830;   /* borde de las píldoras de redes */
+    --hs-footer-line:       #3D2820;   /* línea sobre el copyright */
+    --hs-footer-copy:       #5A4038;   /* texto del copyright */
+    --hs-cream-82:          rgba(245, 240, 232, 0.82); /* texto claro sobre foto */
+    --hs-cream-75:          rgba(245, 240, 232, 0.75);
+
     /* ---------- Tipografía ---------- */
     /* Ambas familias tienen soporte de Ö, É y Ä (HÖSÉG, Älpafill). */
     --hs-font-display: 'Fraunces', Georgia, serif;
@@ -72,6 +81,13 @@
 /* ---------- Base ---------- */
 html {
     scroll-behavior: smooth;
+}
+
+/* Red de seguridad contra el scroll horizontal en móvil (sombras, filas
+   con gutter grande). `clip` no crea contenedor de scroll, así que no
+   afecta a la barra ni al óvalo fijos. */
+html, body {
+    overflow-x: clip;
 }
 
 body {
