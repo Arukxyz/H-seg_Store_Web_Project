@@ -1,0 +1,107 @@
+/* =====================================================================
+   HÖSÉG Web · Tokens de diseño
+   Extraídos del export de Figma Make (design/figma-make/src/index.css) y
+   traducidos a CSS estándar: aquí no hay Tailwind, solo variables que
+   consumen las plantillas Thymeleaf y los estilos propios.
+
+   Fuente de verdad del color y la tipografía. Si el diseño cambia, se
+   cambia aquí, no en cada plantilla.
+   ===================================================================== */
+
+:root {
+    /* ---------- Paleta de marca ---------- */
+    --hs-cream:             #F5F0E8;   /* fondo general */
+    --hs-cream-dark:        #EDE6D6;   /* fondo secundario, franjas */
+    --hs-card:              #FDFAF5;   /* fondo de tarjetas */
+    --hs-sand:              #D9CEB8;   /* bordes, apagado */
+    --hs-bark:              #2C1810;   /* texto principal */
+    --hs-bark-light:        #4A2E20;
+    --hs-muted:             #7A6152;   /* texto secundario */
+
+    /* Acento cálido: botones primarios, badge ABRIGO, indicador activo */
+    --hs-terracotta:        #C4622D;
+    --hs-terracotta-hover:  #A8501E;
+
+    /* Acento frío: badge ARBOL, impacto ambiental */
+    --hs-sage:              #5A7A5C;
+    --hs-sage-light:        #E8F0E8;
+
+    /* Complementario: destacados, cifras */
+    --hs-amber:             #D4820A;
+    --hs-amber-light:       #FEF3DC;
+
+    /* ---------- Tipografía ---------- */
+    /* Ambas familias tienen soporte de Ö, É y Ä (HÖSÉG, Älpafill). */
+    --hs-font-display: 'Fraunces', Georgia, serif;
+    --hs-font-body:    'Outfit', system-ui, -apple-system, sans-serif;
+
+    /* ---------- Formas y elevación ---------- */
+    --hs-radius:       14px;
+    --hs-radius-pill:  999px;
+    --hs-shadow-card:  0 2px 16px rgba(44, 24, 16, 0.07);
+    --hs-shadow-pill:  0 12px 40px rgba(44, 24, 16, 0.4),
+                       inset 0 1px 0 rgba(245, 240, 232, 0.12);
+
+    /* ---------- Óvalo de navegación móvil ---------- */
+    --hs-pill-bg:      rgba(30, 14, 6, 0.55);
+    --hs-pill-border:  rgba(245, 240, 232, 0.14);
+    --hs-pill-blur:    blur(24px) saturate(180%);
+    --hs-pill-inactive: rgba(217, 206, 184, 0.6);
+
+    /* ---------- Transiciones ---------- */
+    --hs-ease:       cubic-bezier(0.4, 0, 0.2, 1);
+    --hs-t-fast:     0.18s;
+    --hs-t-pill:     0.22s;
+    --hs-t-carousel: 0.5s;
+}
+
+/* ---------- Mapeo a las variables de Bootstrap 5 ----------
+   Permite que los componentes de Bootstrap tomen la paleta de HÖSÉG sin
+   reescribir sus estilos. Ampliar conforme se usen más componentes. */
+:root {
+    --bs-body-bg:          var(--hs-cream);
+    --bs-body-color:       var(--hs-bark);
+    --bs-body-font-family: var(--hs-font-body);
+    --bs-border-color:     var(--hs-sand);
+    --bs-border-radius:    var(--hs-radius);
+    --bs-primary:          var(--hs-terracotta);
+    --bs-link-color:       var(--hs-terracotta);
+    --bs-link-hover-color: var(--hs-terracotta-hover);
+}
+
+/* ---------- Base ---------- */
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: var(--hs-cream);
+    color: var(--hs-bark);
+    font-family: var(--hs-font-body);
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .hs-display {
+    font-family: var(--hs-font-display);
+}
+
+/* ---------- Animaciones del diseño ---------- */
+@keyframes hsCountUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hsFadeSlide {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.hs-count-animate { animation: hsCountUp 0.6s ease forwards; }
+.hs-fade-in       { animation: hsFadeSlide 0.7s ease forwards; }
+
+/* Respetar a quien pide menos movimiento (accesibilidad). */
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .hs-count-animate,
+    .hs-fade-in { animation: none; opacity: 1; transform: none; }
+}
