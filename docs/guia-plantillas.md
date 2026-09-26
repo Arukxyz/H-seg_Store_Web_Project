@@ -34,7 +34,7 @@ Cómo hacer que Tienda, Detalle, Carrito, Login, Registro y Consulta de impacto 
 | Pieza | Qué hace | Parámetros |
 |---|---|---|
 | `fragments/head :: comun(titulo)` | `<meta>`, Google Fonts (Fraunces + Outfit), Bootstrap desde el WebJar, `tokens.css`, `hoseg.css` | `titulo`: texto del `<title>` |
-| `fragments/navbar :: navbar(activa, transparente)` | Barra superior fija (desktop y móvil) **y** óvalo inferior móvil | `activa`: `inicio` \| `tienda` \| `impacto` \| `nosotros` \| `carrito` \| `cuenta`. `transparente`: `true` solo si la página tiene un banner a pantalla completa (la Home); en todas las demás, `false` |
+| `fragments/navbar :: navbar(activa, transparente)` | Barra superior fija (desktop y móvil) **y** óvalo inferior móvil | `activa`: `inicio` \| `tienda` \| `cafe` \| `impacto` \| `nosotros` \| `carrito` \| `cuenta` (el óvalo móvil tiene Inicio, Tienda, Café, Impacto y Cuenta; `carrito` no marca ninguno porque en móvil el carrito está en la barra superior). `transparente`: `true` solo si la página tiene un banner a pantalla completa (la Home); en todas las demás, `false` |
 | `main.hs-main--bajo-nav` | Deja el hueco de la barra fija (56 px móvil / 64 px desktop). Sin esta clase el contenido queda debajo de la barra | — |
 | `fragments/footer :: footer` | Footer; en móvil añade relleno inferior para que el óvalo no tape el copyright | — |
 | `js/navbar.js` | Opacidad de la barra al hacer scroll y el indicador deslizante del óvalo. **Siempre** | — |
@@ -70,7 +70,7 @@ Recibe un `TipoCompromiso` (`ABRIGO` → "1 abrigo", `ARBOL` → "1 árbol"). Co
 <th:block th:replace="~{fragments/icons :: carrito}"/>
 ```
 
-Nombres: `casa`, `tienda`, `impacto`, `carrito`, `cuenta`, `abrigo`, `arbol`, `comunidad`, `corazon`, `badge-abrigo`, `badge-arbol`, `paso-compra`, `paso-registro`, `paso-entrega`, `chevron-izq`, `chevron-der`, `flecha-der`. Son SVG en línea que toman el color del texto (`currentColor`). No hay Bootstrap Icons en el proyecto; si hace falta uno nuevo, se añade a `fragments/icons.html`.
+Nombres: `casa`, `tienda`, `taza`, `impacto`, `carrito`, `cuenta`, `libro`, `sello`, `abrigo`, `arbol`, `comunidad`, `corazon`, `badge-abrigo`, `badge-arbol`, `paso-compra`, `paso-registro`, `paso-entrega`, `chevron-izq`, `chevron-der`, `flecha-der`. Son SVG en línea que toman el color del texto (`currentColor`). No hay Bootstrap Icons en el proyecto; si hace falta uno nuevo, se añade a `fragments/icons.html`.
 
 ## 3. Clases `hs-*` (en `static/css/hoseg.css`)
 
@@ -108,6 +108,12 @@ Quien implemente cada página debe usar exactamente estas rutas, porque ya está
 | `/cuenta` | Datos y pedidos del cliente | **Exige sesión** |
 | `/consulta-impacto?boleta=WEB-000110` | Consulta pública | Además debe aceptar `?donacion=<id>`, que es lo que imprime el QR de la boleta del escritorio |
 | `/logout` | Cierra sesión | Ya configurado, `POST` |
+| `/cafe` | Höség Café (CU-05) | Pública |
+| `/contacto` | Formulario de contacto (CU-08) | Pública |
+| `/terminos`, `/politica-rsu` | Páginas legales (CU-06) | Públicas; una sola plantilla de texto largo |
+| `/libro-reclamaciones` | Libro de Reclamaciones | Pública; obligatoria por ley para tiendas en línea en Perú |
+| `/boletin` | Suscripción al boletín (CU-09) | Pública, `POST` con campo `email` desde el footer |
+| `/cuenta?seccion=datos` | Pestaña "Mis datos" de la cuenta | La enlaza el menú de usuario del navbar |
 
 La ruta de consulta se lee de la propiedad `hoseg.consulta.ruta` (modelo: `${rutaConsulta}`); no escribirla a mano.
 

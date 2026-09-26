@@ -9,8 +9,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
- * Qué es público y qué exige cliente autenticado. El catálogo, la Home y la
- * consulta de impacto son públicos; confirmar la compra y la cuenta, no.
+ * Qué es público y qué exige cliente autenticado. El catálogo, la Home, la
+ * consulta de impacto, el Café, las páginas institucionales y el boletín son
+ * públicos; confirmar la compra y la cuenta, no.
  */
 @Configuration
 @EnableWebSecurity
@@ -23,6 +24,8 @@ public class SecurityConfig {
                         .requestMatchers("/carrito/confirmar", "/cuenta/**").authenticated()
                         .requestMatchers("/", "/tienda/**", "/consulta-impacto", "/carrito/**",
                                 "/login", "/registro", "/error", "/ejemplo",
+                                // Enlazadas desde el navbar y el footer
+                                "/cafe", "/contacto", "/terminos", "/politica-rsu", "/libro-reclamaciones", "/boletin",
                                 "/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(form -> form

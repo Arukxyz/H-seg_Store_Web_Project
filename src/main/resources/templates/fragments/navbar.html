@@ -5,7 +5,9 @@
   Traducido de `Navbar` en design/figma-make/src/App.tsx.
 
   Uso:  <th:block th:replace="~{fragments/navbar :: navbar('inicio', true)}"/>
-    activa       → inicio | tienda | impacto | nosotros | carrito | cuenta
+    activa       → inicio | tienda | cafe | impacto | nosotros | carrito | cuenta
+                   (carrito no marca ningún destino del óvalo: en móvil el
+                   carrito vive en la barra superior)
     transparente → true solo en páginas con banner a pantalla completa: la barra
                    arranca transparente con texto claro y se vuelve opaca al
                    hacer scroll (navbar.js añade .is-scrolled).
@@ -22,6 +24,7 @@
         <ul class="hs-nav__enlaces d-none d-md-flex list-unstyled m-0">
             <li><a th:href="@{/}"          data-seccion="inicio"   th:classappend="${activa == 'inicio'}   ? 'is-active'">Inicio</a></li>
             <li><a th:href="@{/tienda}"    data-seccion="tienda"   th:classappend="${activa == 'tienda'}   ? 'is-active'">Tienda</a></li>
+            <li><a th:href="@{/cafe}"      data-seccion="cafe"     th:classappend="${activa == 'cafe'}     ? 'is-active'">Café</a></li>
             <li><a th:href="@{/#impacto}"  data-seccion="impacto"  th:classappend="${activa == 'impacto'}  ? 'is-active'">Impacto</a></li>
             <li><a th:href="@{/#nosotros}" data-seccion="nosotros" th:classappend="${activa == 'nosotros'} ? 'is-active'">Nosotros</a></li>
         </ul>
@@ -31,10 +34,26 @@
                 <th:block th:replace="~{fragments/icons :: cuenta}"/>
                 <span class="d-none d-lg-inline">Ingresar</span>
             </a>
-            <a class="hs-nav__cuenta d-none d-md-inline-flex" th:href="@{/cuenta}" sec:authorize="isAuthenticated()">
-                <th:block th:replace="~{fragments/icons :: cuenta}"/>
-                <span class="d-none d-lg-inline" sec:authentication="name">Cliente</span>
-            </a>
+            <!-- Con sesión: inicial del cliente y menú con su cuenta y la salida.
+                 Cerrar sesión es POST: th:action añade el token CSRF. -->
+            <div class="dropdown d-none d-md-block" sec:authorize="isAuthenticated()">
+                <button class="hs-nav__cuenta hs-nav__usuario" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="hs-avatar" aria-hidden="true"
+                          th:text="${#strings.toUpperCase(#strings.substring(#authentication.name, 0, 1))}">M</span>
+                    <span class="d-none d-lg-inline">Mi cuenta</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end hs-menu-cuenta">
+                    <li class="hs-menu-cuenta__quien" sec:authentication="name">cliente@correo.com</li>
+                    <li><a class="dropdown-item" th:href="@{/cuenta}">Mis pedidos e impacto</a></li>
+                    <li><a class="dropdown-item" th:href="@{/cuenta(seccion='datos')}">Mis datos</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form th:action="@{/logout}" method="post" class="m-0">
+                            <button class="dropdown-item" type="submit">Cerrar sesión</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
             <a class="hs-nav__carrito" th:href="@{/carrito}" aria-label="Carrito">
                 <th:block th:replace="~{fragments/navbar :: icono-carrito}"/>
             </a>
@@ -52,7 +71,9 @@
 </span>
 
 
-<!-- MobileNavPill: óvalo flotante inferior, solo < 768 px -->
+<!-- MobileNavPill: óvalo flotante inferior, solo < 768 px.
+     Cinco destinos como máximo para que entre en móviles de 360 px. El carrito
+     no está aquí porque la barra superior móvil ya lo muestra con su contador. -->
 <nav class="hs-pill d-md-none" th:fragment="pill(activa)" data-pill aria-label="Navegación móvil">
     <div class="hs-pill__interior">
         <span class="hs-pill__indicador" aria-hidden="true"></span>
@@ -65,13 +86,13 @@
             <th:block th:replace="~{fragments/icons :: tienda}"/>
             <span>Tienda</span>
         </a>
+        <a class="hs-pill__item" th:href="@{/cafe}" data-seccion="cafe" th:classappend="${activa == 'cafe'} ? 'is-active'">
+            <th:block th:replace="~{fragments/icons :: taza}"/>
+            <span>Café</span>
+        </a>
         <a class="hs-pill__item" th:href="@{/#impacto}" data-seccion="impacto" th:classappend="${activa == 'impacto'} ? 'is-active'">
             <th:block th:replace="~{fragments/icons :: impacto}"/>
             <span>Impacto</span>
-        </a>
-        <a class="hs-pill__item" th:href="@{/carrito}" data-seccion="carrito" th:classappend="${activa == 'carrito'} ? 'is-active'">
-            <th:block th:replace="~{fragments/navbar :: icono-carrito}"/>
-            <span>Carrito</span>
         </a>
         <a class="hs-pill__item" th:href="@{/login}" data-seccion="cuenta" th:classappend="${activa == 'cuenta'} ? 'is-active'" sec:authorize="!isAuthenticated()">
             <th:block th:replace="~{fragments/icons :: cuenta}"/>
