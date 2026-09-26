@@ -1,53 +1,80 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <!--
-  Footer. Traducido de `Footer` en design/figma-make/src/App.tsx.
+  Footer. Traducido de `Footer` en design/figma-make/src/App.tsx y ampliado
+  con lo que el portal necesita: boletín (CU-09), enlaces al Café (CU-05),
+  contacto (CU-08), páginas legales (CU-06), sello de Empresa B y el Libro de
+  Reclamaciones, obligatorio por ley para tiendas en línea en Perú.
   En móvil lleva relleno inferior extra para que el óvalo de navegación no
-  tape el copyright. Espera `rutaConsulta` en el modelo (AtributosGlobales).
+  tape el pie. Espera `rutaConsulta` en el modelo (AtributosGlobales).
 -->
 <body>
 
 <footer class="hs-footer" th:fragment="footer">
     <div class="container">
         <div class="row g-4 g-sm-5 mb-5">
-            <div class="col-12 col-md-6 d-flex flex-column gap-3">
+            <div class="col-12 col-md-6 col-lg-4 d-flex flex-column gap-3">
                 <span class="hs-footer__logo">HÖSÉG</span>
                 <p class="hs-footer__lema mb-0">
                     Buy One, Give One · Buy One, Plant One.<br>
                     Ropa de abrigo peruana con triple impacto.
                 </p>
                 <!-- Redes: enlaces pendientes de las cuentas reales de la marca -->
-                <div class="d-flex gap-2 mt-1">
+                <div class="d-flex flex-wrap gap-2 mt-1">
                     <a class="hs-footer__red" href="#" rel="noopener">Instagram</a>
                     <a class="hs-footer__red" href="#" rel="noopener">Facebook</a>
                     <a class="hs-footer__red" href="#" rel="noopener">TikTok</a>
                 </div>
+                <span class="hs-footer__sello">
+                    <th:block th:replace="~{fragments/icons :: sello}"/>
+                    Empresa B · certificación en proceso
+                </span>
             </div>
 
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-3 col-lg-2">
                 <p class="hs-footer__titulo">Navegar</p>
                 <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
                     <li><a th:href="@{/tienda}">Tienda</a></li>
+                    <li><a th:href="@{/cafe}">Höség Café</a></li>
                     <li><a th:href="@{/#impacto}">Impacto</a></li>
                     <li><a th:href="@{/#nosotros}">Nosotros</a></li>
                     <li><a th:href="@{${rutaConsulta}}">Consulta tu impacto</a></li>
                 </ul>
             </div>
 
-            <div class="col-6 col-md-3">
-                <p class="hs-footer__titulo">Legal y contacto</p>
+            <div class="col-6 col-md-3 col-lg-2">
+                <p class="hs-footer__titulo">Ayuda</p>
                 <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
-                    <!-- Páginas legales y número de WhatsApp: pendientes de definir con la marca -->
-                    <li><a href="#">Política de responsabilidad social</a></li>
-                    <li><a href="#">Términos y condiciones</a></li>
-                    <li><a href="#">Contacto por WhatsApp</a></li>
+                    <li><a th:href="@{/contacto}">Contacto</a></li>
+                    <li><a th:href="@{/terminos}">Términos y condiciones</a></li>
+                    <li><a th:href="@{/politica-rsu}">Política de responsabilidad social</a></li>
+                    <!-- Número de WhatsApp: pendiente de definir con la marca -->
+                    <li><a href="#">WhatsApp</a></li>
                     <li><a href="mailto:hola@hoseg.pe">hola@hoseg.pe</a></li>
                 </ul>
             </div>
+
+            <!-- Boletín Changemaker (CU-09). Es POST: th:action añade el token CSRF. -->
+            <div class="col-12 col-lg-4">
+                <p class="hs-footer__titulo">Boletín Changemaker</p>
+                <p class="hs-footer__lema mb-3">
+                    Campañas, lanzamientos y el informe de lo que tus compras lograron en Cusco.
+                </p>
+                <form class="hs-footer__boletin" th:action="@{/boletin}" method="post">
+                    <label class="visually-hidden" for="boletin-email">Tu correo electrónico</label>
+                    <input class="hs-footer__boletin-campo" id="boletin-email" type="email" name="email"
+                           placeholder="tu@correo.com" autocomplete="email" required>
+                    <button class="hs-btn hs-btn--primario" type="submit">Suscribirme</button>
+                </form>
+            </div>
         </div>
 
-        <div class="hs-footer__pie">
+        <div class="hs-footer__pie d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
             <p class="mb-0">© 2026 HÖSÉG Store · 14-DIEZ S.A.C. · Hecho en Perú con propósito.</p>
+            <a class="hs-footer__reclamaciones" th:href="@{/libro-reclamaciones}">
+                <th:block th:replace="~{fragments/icons :: libro}"/>
+                Libro de Reclamaciones
+            </a>
         </div>
     </div>
 </footer>

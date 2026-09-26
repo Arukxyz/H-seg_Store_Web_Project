@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import pe.edu.utp.hoseg.web.config.SecurityConfig;
@@ -74,7 +75,37 @@ class HomeControllerTest {
                 .andExpect(content().string(containsString("hs-carrito-icono__badge\">2<")))
                 .andExpect(content().string(containsString("Ingresar")))
                 // ImpactCTA apunta al portal de consulta configurado
-                .andExpect(content().string(containsString("action=\"/consulta-impacto\"")));
+                .andExpect(content().string(containsString("action=\"/consulta-impacto\"")))
+                // Navbar: enlace al Café, y en el óvalo móvil Café reemplaza a Carrito
+                .andExpect(content().string(containsString("href=\"/cafe\"")))
+                .andExpect(content().string(containsString("<span>Café</span>")))
+                .andExpect(content().string(not(containsString("<span>Carrito</span>"))))
+                // Footer: boletín con token CSRF, legales, contacto, sello B y Libro de Reclamaciones
+                .andExpect(content().string(containsString("action=\"/boletin\"")))
+                .andExpect(content().string(containsString("name=\"_csrf\"")))
+                .andExpect(content().string(containsString("href=\"/contacto\"")))
+                .andExpect(content().string(containsString("href=\"/terminos\"")))
+                .andExpect(content().string(containsString("href=\"/politica-rsu\"")))
+                .andExpect(content().string(containsString("Empresa B · certificación en proceso")))
+                .andExpect(content().string(containsString("href=\"/libro-reclamaciones\"")));
+    }
+
+    @Test
+    @WithMockUser(username = "maria.gutierrez@example.com")
+    void conSesionElNavbarMuestraLaInicialYElMenuDeCuenta() throws Exception {
+        when(catalogoService.destacados(anyInt())).thenReturn(List.of());
+        when(impactoService.resumen()).thenReturn(new ResumenImpacto(0, 0, 0, 0));
+        when(impactoService.nombresComunidades()).thenReturn(List.of());
+        when(carritoService.totalUnidades()).thenReturn(0);
+
+        mvc.perform(get("/"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("hs-avatar\" aria-hidden=\"true\">M<")))
+                .andExpect(content().string(containsString("maria.gutierrez@example.com")))
+                .andExpect(content().string(containsString("href=\"/cuenta?seccion=datos\"")))
+                .andExpect(content().string(containsString("action=\"/logout\"")))
+                .andExpect(content().string(containsString("Cerrar sesión")))
+                .andExpect(content().string(not(containsString("Ingresar"))));
     }
 
     @Test
