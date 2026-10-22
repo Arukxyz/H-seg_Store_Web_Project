@@ -44,8 +44,13 @@ public class LoteDonacion {
     @Column(name = "fecha_creacion", nullable = false)
     private OffsetDateTime fechaCreacion;
 
+    /** Salida a ruta (EN_RUTA). */
     @Column(name = "fecha_despacho")
     private OffsetDateTime fechaDespacho;
+
+    /** Entrega a la comunidad (ENTREGADO). */
+    @Column(name = "fecha_entrega")
+    private OffsetDateTime fechaEntrega;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 12)
@@ -60,6 +65,7 @@ public class LoteDonacion {
     public Integer getIdUsuarioResponsable() { return idUsuarioResponsable; }
     public OffsetDateTime getFechaCreacion() { return fechaCreacion; }
     public OffsetDateTime getFechaDespacho() { return fechaDespacho; }
+    public OffsetDateTime getFechaEntrega() { return fechaEntrega; }
     public EstadoLote getEstado() { return estado; }
     public String getObservaciones() { return observaciones; }
 }
