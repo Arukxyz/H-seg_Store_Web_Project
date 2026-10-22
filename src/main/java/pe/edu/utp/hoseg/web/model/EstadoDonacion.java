@@ -1,6 +1,10 @@
 package pe.edu.utp.hoseg.web.model;
 
-/** donacion.estado. La web crea PENDIENTE; el escritorio asigna a lote y entrega. */
+/**
+ * donacion.estado. La web la crea EN_ESPERA (la venta aún no está pagada);
+ * el escritorio la pasa a PENDIENTE al confirmar el pago, y luego la asigna
+ * a un lote y la entrega (07_normalizacion.sql).
+ */
 public enum EstadoDonacion {
-    PENDIENTE, ASIGNADA, ENTREGADA
+    EN_ESPERA, PENDIENTE, ASIGNADA, ENTREGADA
 }

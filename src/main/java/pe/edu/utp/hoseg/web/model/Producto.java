@@ -55,7 +55,8 @@ public class Producto {
     @Column(name = "stock_minimo", nullable = false)
     private int stockMinimo;
 
-    @Column(name = "aplica_triple_impacto", nullable = false)
+    /** Columna generada por la base (tipo_compromiso IS NOT NULL): solo lectura. */
+    @Column(name = "aplica_triple_impacto", insertable = false, updatable = false)
     private boolean aplicaTripleImpacto;
 
     @Enumerated(EnumType.STRING)

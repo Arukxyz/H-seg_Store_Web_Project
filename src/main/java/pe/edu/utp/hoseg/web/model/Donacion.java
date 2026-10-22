@@ -17,7 +17,7 @@ import java.time.OffsetDateTime;
 
 /**
  * Tabla donacion: nace de una línea de venta con compromiso y termina en un
- * lote. La web la crea PENDIENTE y sin lote; el resto lo hace el escritorio.
+ * lote. La web la crea EN_ESPERA y sin lote; el resto lo hace el escritorio.
  */
 @Entity
 @Table(name = "donacion")

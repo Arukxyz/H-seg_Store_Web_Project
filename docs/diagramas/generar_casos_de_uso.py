@@ -3,6 +3,7 @@
 (un archivo, 6 páginas) y la matriz de trazabilidad en Markdown.
 
 Uso: python docs/diagramas/generar_casos_de_uso.py docs/diagramas"""
+import math
 import os
 import sys
 from xml.sax.saxutils import escape
@@ -106,7 +107,7 @@ CU = [
          ruta="GET /consulta-impacto?boleta=WEB-000110 · GET /api/impacto?boleta= (AJAX)",
          ctrl="ConsultaImpactoController → ImpactoService",
          tablas=["venta (lee)", "detalle_venta (lee)", "donacion (lee)", "lote_donacion (lee)", "comunidad (lee)", "ong (lee)"],
-         logica="Ingresa el código de su boleta y ve cada abrigo o árbol que generó, su estado (Pendiente de asignar → Lote asignado → Entregada) y la comunidad beneficiada.",
+         logica="Ingresa el código de su boleta y ve cada abrigo o árbol que generó, su estado (En espera de pago → Pendiente de asignar → Lote asignado → Entregada) y la comunidad beneficiada.",
          db="venta.codigo_comprobante → detalle_venta → donacion (índice idx_donacion_detalle) → lote_donacion → comunidad, ong. Solo lectura."),
     dict(cod="CU-10.1", nombre="Acceder desde el QR de la boleta", grupo="vis", tipo="extend", base="CU-10",
          rf="RF06", vista="consulta-impacto.html", ruta="GET /consulta-impacto?donacion={id}",
@@ -150,7 +151,7 @@ CU = [
          ctrl="CarritoController → VentaService (@Transactional)",
          tablas=["venta (inserta)", "detalle_venta (inserta)", "donacion (inserta)", "producto (lee)", "cliente (lee)"],
          logica="Confirma su carrito; en una sola transacción se registran la venta, sus líneas y las donaciones 1:1. Se vacía el carrito y se muestra el código de boleta. El pedido queda PENDIENTE hasta confirmarse el pago: la web no descuenta stock.",
-         db="Una transacción: venta (origen WEB, estado PENDIENTE) + detalle_venta + donacion (PENDIENTE). Si algo falla se revierte todo.",
+         db="Una transacción: venta (origen WEB, estado PENDIENTE) + detalle_venta + donacion (EN_ESPERA hasta que se confirme el pago). Si algo falla se revierte todo.",
          correo=dict(tipo="Pedido recibido", para="El cliente que compró",
                      contenido="Código WEB-nnnnnn, detalle, impacto generado y enlace a la consulta de impacto. Se envía después del commit: si el correo falla, la compra no se revierte.",
                      plantilla="templates/correo/pedido-recibido.html")),
@@ -165,7 +166,7 @@ CU = [
     dict(cod="CU-15.3", nombre="Registrar compromiso 1:1", grupo="cli", tipo="include", base="CU-15",
          rf="RF04", vista="compra-exito.html (resumen de impacto)", ruta="Dentro de POST /carrito/confirmar",
          ctrl="VentaService", tablas=["producto (lee)", "donacion (inserta)"],
-         logica="Por cada línea con compromiso crea una donación PENDIENTE: 1 abrigo por casaca o chaleco, 1 árbol por accesorio o café, tantas unidades como las compradas."),
+         logica="Por cada línea con compromiso crea una donación EN_ESPERA (pasa a PENDIENTE cuando se confirma el pago): 1 abrigo por casaca o chaleco, 1 árbol por accesorio o café, tantas unidades como las compradas."),
     # --- Administrador web ----------------------------------------------------
     dict(cod="CU-16", nombre="Iniciar sesión administrativa", grupo="adm", tipo="base",
          rf="RF01", vista="admin/login.html", ruta="GET /admin/login · POST /admin/login · POST /admin/logout",

@@ -15,7 +15,7 @@ Portal e-commerce de Höség Store (14-DIEZ S.A.C.), proyecto académico UTP. Ja
    | Hace la web (este repo) | Hace el escritorio |
    |---|---|
    | Catálogo, registro/login de clientes, carrito en sesión | Confirmar pedidos (`PENDIENTE` → `PAGADO`) |
-   | Al confirmar compra: `INSERT venta` (`origen='WEB'`, `estado='PENDIENTE'`) + `detalle_venta` + `donacion` (`estado='PENDIENTE'`) | **Descontar `stock_comercial` e incrementar `stock_comprometido`** |
+   | Al confirmar compra: `INSERT venta` (`origen='WEB'`, `estado='PENDIENTE'`) + `detalle_venta` + `donacion` (`estado='EN_ESPERA'`) | **Descontar `stock_comercial` e incrementar `stock_comprometido`**, y pasar las donaciones de `EN_ESPERA` a `PENDIENTE` |
    | Consulta pública de impacto por boleta | Lotes de donación, despacho, reportes, boleta PDF con QR |
 
    **La web NO modifica stock.** Solo valida que `stock_comercial >= cantidad` antes de registrar la venta. Si además lo descontara, se descontaría dos veces cuando el encargado confirme el pedido. Tampoco registra movimientos en `movimiento_inventario`.
@@ -41,8 +41,11 @@ Detalles que se olvidan fácil:
 - **Cada talla es una fila distinta de `producto`** (`HSG-CAS-001` = M, `HSG-CAS-002` = L, mismo `nombre`). El "selector de tallas" agrupa por `nombre` y lista las filas.
 - Precios: `NUMERIC(10,2)` → **`BigDecimal`**. Fechas: `TIMESTAMPTZ` → **`OffsetDateTime`**.
 - El catálogo web filtra **`activo = true AND visible_web = true`**.
-- Estados reales: `venta.estado` ∈ `PENDIENTE|PAGADO|ANULADO`; `donacion.estado` ∈ `PENDIENTE|ASIGNADA|ENTREGADA`; `donacion.tipo` ∈ `ABRIGO|ARBOL`.
-- Solo se crea `donacion` si el producto tiene `aplica_triple_impacto = true` y `tipo_compromiso` no nulo. `tipo` de la donación = `producto.tipo_compromiso`.
+- Estados reales: `venta.estado` ∈ `PENDIENTE|PAGADO|ANULADO`; `donacion.estado` ∈ `EN_ESPERA|PENDIENTE|ASIGNADA|ENTREGADA` (`EN_ESPERA` = la venta aún no está pagada; la web siempre crea en este estado); `donacion.tipo` ∈ `ABRIGO|ARBOL`.
+- Solo se crea `donacion` si el producto tiene `tipo_compromiso` no nulo; `tipo` de la donación = `producto.tipo_compromiso`. `aplica_triple_impacto` es una **columna generada** a partir de `tipo_compromiso`: se lee, nunca se escribe.
+- `producto.categoria` y `producto.coleccion` solo admiten valores de las tablas `categoria` y `coleccion` (clave foránea por nombre).
+- `lote_donacion.fecha_despacho` = salida a ruta; `lote_donacion.fecha_entrega` = entrega a la comunidad. Para "entregado el…" se usa `fecha_entrega`.
+- `cliente` guarda `nombre` y `apellido` por separado; el nombre completo es la concatenación.
 - `cliente.password_hash` guarda **BCrypt**. Los clientes de la semilla lo tienen en `NULL`: existen como compradores históricos y no pueden iniciar sesión hasta registrarse con su mismo email. (`usuario` es otra tabla, del personal interno, con SHA-256+salt; la web no la toca.)
 - Portal de consulta: debe aceptar `?boleta=WEB-000110` y `?donacion=<id>`, porque el QR de las boletas PDF que genera el escritorio apunta a la segunda forma.
 
@@ -52,7 +55,7 @@ Detalles que se olvidan fácil:
 2. Por ítem: producto `activo`, `visible_web`, `stock_comercial >= cantidad` (solo validar).
 3. `INSERT venta` con `codigo_comprobante` de la secuencia, `origen='WEB'`, `estado='PENDIENTE'`.
 4. `INSERT detalle_venta` por línea.
-5. `INSERT donacion` (`PENDIENTE`) por cada línea con compromiso.
+5. `INSERT donacion` (`EN_ESPERA`) por cada línea con compromiso.
 6. Limpiar el carrito de sesión y redirigir mostrando el código de comprobante.
 
 Resultado esperado: el pedido aparece en `PedidosWebJFrame` del escritorio (recarga cada 30 s), el encargado lo confirma y ahí recién se mueve el stock.
