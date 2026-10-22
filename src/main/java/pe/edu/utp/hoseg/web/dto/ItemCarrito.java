@@ -1,5 +1,6 @@
 package pe.edu.utp.hoseg.web.dto;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 /** Una línea del carrito en sesión: producto (con su talla) y cantidad. */
@@ -8,7 +9,7 @@ public record ItemCarrito(
         String nombre,
         String talla,
         BigDecimal precioUnitario,
-        int cantidad) {
+        int cantidad) implements Serializable {
 
     public BigDecimal subtotal() {
         return precioUnitario.multiply(BigDecimal.valueOf(cantidad));

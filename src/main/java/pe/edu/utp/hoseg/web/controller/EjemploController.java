@@ -24,10 +24,8 @@ public class EjemploController {
 
     @GetMapping("/ejemplo")
     public String ejemplo(Model model) {
-        model.addAttribute("paginaActiva", "tienda");
         model.addAttribute("tarjetas", catalogoService.destacados(4));
-        model.addAttribute("abrigo", TipoCompromiso.ABRIGO);
-        model.addAttribute("arbol", TipoCompromiso.ARBOL);
+        model.addAttribute("compromisos", TipoCompromiso.values());
         return "ejemplo-pagina";
     }
 }

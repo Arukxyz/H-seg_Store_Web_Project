@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<!--
+  Layout común de todas las páginas: <head>, navbar + óvalo móvil, footer y
+  scripts compartidos. Cada página solo escribe su <main> y, si los necesita,
+  su hoja de estilo y su script propios. Guía: docs/guia-plantillas.md.
+
+  Uso (en el <html> de la página):
+    th:replace="~{layout/base :: pagina(titulo='…', activa='tienda', transparente=false,
+                                        contenido=~{::main}, estilos=~{}, scripts=~{})}"
+
+    titulo       → <title> de la página
+    activa       → inicio | tienda | cafe | impacto | nosotros | carrito | cuenta
+    transparente → true solo con banner a pantalla completa (la Home)
+    contenido    → el <main> de la página
+    estilos      → ~{::link} si la página trae su propio CSS; ~{} si no
+    scripts      → ~{::script} si la página trae su propio JS; ~{} si no
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:fragment="pagina(titulo, activa, transparente, contenido, estilos, scripts)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${titulo}">HÖSÉG</title>
+    <meta name="description" content="HÖSÉG: ropa de abrigo peruana con triple impacto. Por cada prenda, un abrigo para un niño de Cusco; por cada accesorio, un árbol plantado.">
+
+    <!-- Tipografías del diseño (Fraunces para titulares, Outfit para cuerpo); ambas con Ö, É y Ä -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Outfit:wght@300;400;500;600;700&display=swap">
+
+    <!-- Bootstrap e iconos servidos desde WebJars; tokens.css aplica la paleta HÖSÉG -->
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.min.css}">
+    <link rel="stylesheet" th:href="@{/css/tokens.css}">
+    <link rel="stylesheet" th:href="@{/css/hoseg.css}">
+    <th:block th:replace="${estilos}"/>
+</head>
+<body>
+
+<th:block th:replace="~{fragments/navbar :: navbar(${activa}, ${transparente})}"/>
+
+<th:block th:replace="${contenido}"/>
+
+<th:block th:replace="~{fragments/footer :: footer}"/>
+
+<script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}" defer></script>
+<script th:src="@{/js/navbar.js}" defer></script>
+<th:block th:replace="${scripts}"/>
+</body>
+</html>

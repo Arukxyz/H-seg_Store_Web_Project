@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<!--
+  Piezas de las secciones de impacto. Traducidas de `ImpactSteps` e
+  `ImpactCounters` en design/figma-make/src/App.tsx.
+-->
+<body>
+
+<!-- Paso de "Así funciona".
+     flecha → true en todos menos el último: dibuja la flecha hacia el siguiente (solo desktop) -->
+<div class="hs-paso" th:fragment="paso(numero, icono, titulo, texto, flecha)">
+    <span class="hs-paso__numero" th:text="${numero}">01</span>
+    <div class="hs-paso__icono"><i class="bi" th:classappend="${icono}" aria-hidden="true"></i></div>
+    <h3 class="hs-paso__titulo" th:text="${titulo}">Compras</h3>
+    <p class="hs-paso__texto" th:text="${texto}">Texto del paso.</p>
+    <span class="hs-paso__flecha d-none d-md-flex" th:if="${flecha}" aria-hidden="true">
+        <i class="bi bi-arrow-right"></i>
+    </span>
+</div>
+
+<!-- Contador de impacto. home.js anima la cifra desde 0 hasta `valor` al entrar en pantalla -->
+<div class="hs-contador" th:fragment="contador(icono, valor, etiqueta)">
+    <div class="hs-contador__icono"><i class="bi" th:classappend="${icono}" aria-hidden="true"></i></div>
+    <div class="hs-contador__cifra" data-contador th:data-valor="${valor}"
+         th:text="${#numbers.formatInteger(valor, 1, 'COMMA')}">1,248</div>
+    <p class="hs-contador__etiqueta" th:text="${etiqueta}">Abrigos entregados</p>
+</div>
+
+</body>
+</html>

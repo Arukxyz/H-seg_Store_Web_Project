@@ -57,7 +57,8 @@ src/main/resources/
 └── templates/
     ├── index.html                    # página principal
     ├── ejemplo-pagina.html           # plantilla de partida (solo perfil dev)
-    └── fragments/                    # head, navbar, footer, product-card, icons
+    ├── layout/base.html              # head, navbar, footer y scripts comunes
+    └── fragments/                    # navbar, footer, product-card, impacto
 ```
 
 Regla de capas: los controladores no contienen reglas de negocio ni acceden a repositorios; la lógica transaccional vive en `service`.

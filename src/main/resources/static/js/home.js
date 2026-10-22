@@ -7,115 +7,113 @@
    - Scroll-spy: marca en la navegación la sección visible.
    Requiere navbar.js cargado antes (window.hsNavActivar).
    ===================================================================== */
-(function () {
+(() => {
     'use strict';
 
-    var menosMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const menosMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     /* ---------- Carrusel de destacados ---------- */
-    var carrusel = document.querySelector('[data-carrusel]');
+    const iniciarCarrusel = (carrusel) => {
+        const UMBRAL_DESLIZAR = 40; // px de desplazamiento táctil para cambiar de tarjeta
+        const seccion = carrusel.closest('section');
+        const pista = carrusel.querySelector('.hs-carrusel__pista');
+        const items = pista.children;
+        const puntos = seccion.querySelector('[data-carrusel-puntos]');
+        const intervalo = parseInt(carrusel.dataset.intervalo, 10) || 5000;
+        let indice = 0;
+        let temporizador = null;
+        let pausado = false;
+        let toqueInicioX = null;
 
-    if (carrusel) {
-        var pista = carrusel.querySelector('.hs-carrusel__pista');
-        var items = pista.children;
-        var puntos = document.querySelector('[data-carrusel-puntos]');
-        var intervalo = parseInt(carrusel.dataset.intervalo, 10) || 5000;
-        var indice = 0;
-        var temporizador = null;
-        var pausado = false;
-        var toqueInicioX = null;
-
-        function visibles() {
-            return parseFloat(getComputedStyle(carrusel).getPropertyValue('--visibles')) || 1;
-        }
+        const visibles = () => parseFloat(getComputedStyle(carrusel).getPropertyValue('--visibles')) || 1;
 
         /* Última posición útil: no se avanza hasta dejar hueco vacío a la derecha. */
-        function indiceMaximo() {
-            return Math.max(0, Math.ceil(items.length - visibles()));
-        }
+        const indiceMaximo = () => Math.max(0, Math.ceil(items.length - visibles()));
 
-        function separacion() {
-            var estilo = getComputedStyle(pista);
+        const separacion = () => {
+            const estilo = getComputedStyle(pista);
             return parseFloat(estilo.columnGap || estilo.gap) || 16;
-        }
+        };
 
-        function pintar() {
+        const pintar = () => {
             if (!items.length) {
                 return;
             }
-            var paso = items[0].offsetWidth + separacion();
-            pista.style.transform = 'translateX(' + (-indice * paso) + 'px)';
-            Array.prototype.forEach.call(puntos.children, function (boton, i) {
+            const paso = items[0].offsetWidth + separacion();
+            pista.style.transform = `translateX(${-indice * paso}px)`;
+            [...puntos.children].forEach((boton, i) => {
                 boton.classList.toggle('is-active', i === indice);
-                boton.setAttribute('aria-selected', i === indice ? 'true' : 'false');
+                boton.setAttribute('aria-selected', String(i === indice));
             });
-        }
+        };
 
-        function irA(n) {
-            var maximo = indiceMaximo();
+        const irA = (n) => {
+            const maximo = indiceMaximo();
             indice = n > maximo ? 0 : (n < 0 ? maximo : n);
             pintar();
-        }
+        };
 
-        function siguiente() { irA(indice + 1); }
-        function anterior()  { irA(indice - 1); }
+        const siguiente = () => irA(indice + 1);
+        const anterior = () => irA(indice - 1);
 
-        function reiniciarAutoavance() {
+        const reiniciarAutoavance = () => {
             window.clearInterval(temporizador);
             if (menosMovimiento || indiceMaximo() === 0) {
                 return;
             }
-            temporizador = window.setInterval(function () {
+            temporizador = window.setInterval(() => {
                 if (!pausado) {
                     siguiente();
                 }
             }, intervalo);
-        }
+        };
 
-        function construirPuntos() {
-            puntos.innerHTML = '';
-            var total = indiceMaximo() + 1;
+        /* Toda acción manual reinicia la cuenta del auto-avance. */
+        const conReinicio = (accion) => () => {
+            accion();
+            reiniciarAutoavance();
+        };
+
+        const construirPuntos = () => {
+            puntos.replaceChildren();
+            const total = indiceMaximo() + 1;
             if (total <= 1) {
                 return;
             }
-            for (var i = 0; i < total; i++) {
-                var boton = document.createElement('button');
+            for (let i = 0; i < total; i++) {
+                const boton = document.createElement('button');
                 boton.type = 'button';
                 boton.setAttribute('role', 'tab');
-                boton.setAttribute('aria-label', 'Ir a la posición ' + (i + 1));
-                boton.addEventListener('click', (function (destino) {
-                    return function () { irA(destino); reiniciarAutoavance(); };
-                })(i));
+                boton.setAttribute('aria-label', `Ir a la posición ${i + 1}`);
+                boton.addEventListener('click', conReinicio(() => irA(i)));
                 puntos.appendChild(boton);
             }
-        }
+        };
 
-        carrusel.closest('section').querySelector('[data-carrusel-anterior]')
-            .addEventListener('click', function () { anterior(); reiniciarAutoavance(); });
-        carrusel.closest('section').querySelector('[data-carrusel-siguiente]')
-            .addEventListener('click', function () { siguiente(); reiniciarAutoavance(); });
+        seccion.querySelector('[data-carrusel-anterior]').addEventListener('click', conReinicio(anterior));
+        seccion.querySelector('[data-carrusel-siguiente]').addEventListener('click', conReinicio(siguiente));
 
-        carrusel.addEventListener('mouseenter', function () { pausado = true; });
-        carrusel.addEventListener('mouseleave', function () { pausado = false; });
+        carrusel.addEventListener('mouseenter', () => { pausado = true; });
+        carrusel.addEventListener('mouseleave', () => { pausado = false; });
 
-        carrusel.addEventListener('touchstart', function (e) {
+        carrusel.addEventListener('touchstart', (e) => {
             toqueInicioX = e.touches[0].clientX;
         }, { passive: true });
-        carrusel.addEventListener('touchend', function (e) {
+        carrusel.addEventListener('touchend', (e) => {
             if (toqueInicioX === null) {
                 return;
             }
-            var dx = e.changedTouches[0].clientX - toqueInicioX;
-            if (dx < -40) {
+            const dx = e.changedTouches[0].clientX - toqueInicioX;
+            if (dx < -UMBRAL_DESLIZAR) {
                 siguiente();
-            } else if (dx > 40) {
+            } else if (dx > UMBRAL_DESLIZAR) {
                 anterior();
             }
             toqueInicioX = null;
             reiniciarAutoavance();
         });
 
-        window.addEventListener('resize', function () {
+        window.addEventListener('resize', () => {
             indice = Math.min(indice, indiceMaximo());
             construirPuntos();
             pintar();
@@ -125,60 +123,60 @@
         construirPuntos();
         pintar();
         reiniciarAutoavance();
+    };
+
+    const carrusel = document.querySelector('[data-carrusel]');
+    if (carrusel) {
+        iniciarCarrusel(carrusel);
     }
 
     /* ---------- Contadores de impacto ---------- */
-    function formatear(n) {
-        return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    }
+    /* Mismo formato que el servidor (#numbers.formatInteger con 'COMMA'): 1,248 */
+    const formatear = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-    function animarContador(el) {
-        var objetivo = parseInt(el.dataset.valor, 10) || 0;
-        var duracion = 1600;
-        var inicio = null;
+    const animarContador = (el) => {
+        const objetivo = parseInt(el.dataset.valor, 10) || 0;
+        const duracion = 1600;
+        let inicio = null;
         if (objetivo === 0) {
             return;
         }
-        function paso(t) {
-            if (inicio === null) {
-                inicio = t;
-            }
-            var progreso = Math.min((t - inicio) / duracion, 1);
-            var suavizado = 1 - Math.pow(1 - progreso, 3);
+        const paso = (t) => {
+            inicio ??= t;
+            const progreso = Math.min((t - inicio) / duracion, 1);
+            const suavizado = 1 - Math.pow(1 - progreso, 3);
             el.textContent = formatear(Math.floor(objetivo * suavizado));
             if (progreso < 1) {
                 window.requestAnimationFrame(paso);
             } else {
                 el.textContent = formatear(objetivo);
             }
-        }
+        };
         el.textContent = '0';
         window.requestAnimationFrame(paso);
-    }
+    };
 
-    var contadores = document.querySelectorAll('[data-contador]');
+    const contadores = document.querySelectorAll('[data-contador]');
     if (contadores.length && !menosMovimiento && 'IntersectionObserver' in window) {
-        var observadorContadores = new IntersectionObserver(function (entradas) {
-            entradas.forEach(function (entrada) {
-                if (entrada.isIntersecting) {
+        const observadorContadores = new IntersectionObserver((entradas) => {
+            entradas
+                .filter((entrada) => entrada.isIntersecting)
+                .forEach((entrada) => {
                     animarContador(entrada.target);
                     observadorContadores.unobserve(entrada.target);
-                }
-            });
+                });
         }, { threshold: 0.3 });
-        contadores.forEach(function (c) { observadorContadores.observe(c); });
+        contadores.forEach((c) => observadorContadores.observe(c));
     }
 
     /* ---------- Scroll-spy ---------- */
-    var secciones = document.querySelectorAll('[data-nav]');
+    const secciones = document.querySelectorAll('[data-nav]');
     if (secciones.length && typeof window.hsNavActivar === 'function' && 'IntersectionObserver' in window) {
-        var observadorSecciones = new IntersectionObserver(function (entradas) {
-            entradas.forEach(function (entrada) {
-                if (entrada.isIntersecting) {
-                    window.hsNavActivar(entrada.target.dataset.nav);
-                }
-            });
+        const observadorSecciones = new IntersectionObserver((entradas) => {
+            entradas
+                .filter((entrada) => entrada.isIntersecting)
+                .forEach((entrada) => window.hsNavActivar(entrada.target.dataset.nav));
         }, { rootMargin: '-40% 0px -55% 0px' }); // franja central de la ventana
-        secciones.forEach(function (s) { observadorSecciones.observe(s); });
+        secciones.forEach((s) => observadorSecciones.observe(s));
     }
 })();

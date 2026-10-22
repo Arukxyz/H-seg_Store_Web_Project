@@ -6,7 +6,8 @@
   contacto (CU-08), páginas legales (CU-06), sello de Empresa B y el Libro de
   Reclamaciones, obligatorio por ley para tiendas en línea en Perú.
   En móvil lleva relleno inferior extra para que el óvalo de navegación no
-  tape el pie. Espera `rutaConsulta` en el modelo (AtributosGlobales).
+  tape el pie. Espera `menuPrincipal` y `rutaConsulta` en el modelo
+  (AtributosGlobales). Lo incluye layout/base.html.
 -->
 <body>
 
@@ -26,18 +27,18 @@
                     <a class="hs-footer__red" href="#" rel="noopener">TikTok</a>
                 </div>
                 <span class="hs-footer__sello">
-                    <th:block th:replace="~{fragments/icons :: sello}"/>
+                    <i class="bi bi-shield-check hs-icono-sm" aria-hidden="true"></i>
                     Empresa B · certificación en proceso
                 </span>
             </div>
 
+            <!-- Mismos destinos que el navbar (salvo Inicio, que es el logo) y la consulta -->
             <div class="col-6 col-md-3 col-lg-2">
                 <p class="hs-footer__titulo">Navegar</p>
                 <ul class="list-unstyled d-flex flex-column gap-2 mb-0">
-                    <li><a th:href="@{/tienda}">Tienda</a></li>
-                    <li><a th:href="@{/cafe}">Höség Café</a></li>
-                    <li><a th:href="@{/#impacto}">Impacto</a></li>
-                    <li><a th:href="@{/#nosotros}">Nosotros</a></li>
+                    <li th:each="e : ${menuPrincipal}" th:unless="${e.seccion == 'inicio'}">
+                        <a th:href="@{${e.ruta}}" th:text="${e.etiqueta}">Tienda</a>
+                    </li>
                     <li><a th:href="@{${rutaConsulta}}">Consulta tu impacto</a></li>
                 </ul>
             </div>
@@ -70,9 +71,10 @@
         </div>
 
         <div class="hs-footer__pie d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-            <p class="mb-0">© 2026 HÖSÉG Store · 14-DIEZ S.A.C. · Hecho en Perú con propósito.</p>
+            <p class="mb-0">© <th:block th:text="${#temporals.year(#temporals.createNow())}">2026</th:block>
+                HÖSÉG Store · 14-DIEZ S.A.C. · Hecho en Perú con propósito.</p>
             <a class="hs-footer__reclamaciones" th:href="@{/libro-reclamaciones}">
-                <th:block th:replace="~{fragments/icons :: libro}"/>
+                <i class="bi bi-journal-text hs-icono-sm" aria-hidden="true"></i>
                 Libro de Reclamaciones
             </a>
         </div>
