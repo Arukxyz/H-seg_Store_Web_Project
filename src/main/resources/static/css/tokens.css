@@ -38,6 +38,34 @@
     --hs-footer-copy:       #5A4038;   /* texto del copyright */
     --hs-cream-82:          rgba(245, 240, 232, 0.82); /* texto claro sobre foto */
     --hs-cream-75:          rgba(245, 240, 232, 0.75);
+    --hs-sobre-acento:      #FFFFFF;   /* texto sobre terracota en piezas pequeñas (contador del carrito) */
+
+    /* ---------- Transparencias ---------- */
+    /* Barra superior opaca (vidrio crema) */
+    --hs-nav-bg:            rgba(245, 240, 232, 0.72);
+    --hs-nav-borde:         rgba(217, 206, 184, 0.5);
+
+    /* Vidrio sobre fotografía (botón y chips del hero) */
+    --hs-vidrio-bg:         rgba(245, 240, 232, 0.12);
+    --hs-vidrio-bg-hover:   rgba(245, 240, 232, 0.22);
+    --hs-vidrio-borde:      rgba(245, 240, 232, 0.28);
+    --hs-vidrio-borde-suave: rgba(245, 240, 232, 0.2);
+    --hs-chip-terracota-bg: rgba(196, 98, 45, 0.45);
+    --hs-chip-salvia-bg:    rgba(90, 122, 92, 0.45);
+
+    /* Badges de impacto sobre la foto del producto */
+    --hs-badge-abrigo-bg:    rgba(254, 240, 232, 0.72);
+    --hs-badge-abrigo-borde: rgba(245, 205, 179, 0.6);
+    --hs-badge-arbol-bg:     rgba(232, 240, 232, 0.72);
+    --hs-badge-arbol-borde:  rgba(181, 208, 184, 0.6);
+
+    /* Velos */
+    --hs-velo-agotado:      rgba(245, 240, 232, 0.55);
+    --hs-etiqueta-agotado:  rgba(44, 24, 16, 0.75);
+    --hs-velo-hero:         linear-gradient(to bottom,
+                                rgba(28, 12, 6, 0.55) 0%,
+                                rgba(28, 12, 6, 0.25) 50%,
+                                rgba(28, 12, 6, 0.70) 100%);
 
     /* ---------- Tipografía ---------- */
     /* Ambas familias tienen soporte de Ö, É y Ä (HÖSÉG, Älpafill). */
@@ -48,6 +76,13 @@
     --hs-radius:       14px;
     --hs-radius-pill:  999px;
     --hs-shadow-card:  0 2px 16px rgba(44, 24, 16, 0.07);
+    --hs-shadow-card-reposo: 0 1px 4px rgba(44, 24, 16, 0.06);
+    --hs-shadow-card-hover:  0 8px 32px rgba(44, 24, 16, 0.12);
+    --hs-shadow-nav:   0 2px 24px rgba(44, 24, 16, 0.08);
+    --hs-brillo-vidrio: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    --hs-brillo-badge:  inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    --hs-anillo-foco:        0 0 0 3px rgba(196, 98, 45, 0.15);
+    --hs-anillo-foco-oscuro: 0 0 0 3px rgba(196, 98, 45, 0.25);
     --hs-shadow-pill:  0 12px 40px rgba(44, 24, 16, 0.4),
                        inset 0 1px 0 rgba(245, 240, 232, 0.12);
 

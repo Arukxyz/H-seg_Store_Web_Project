@@ -24,10 +24,7 @@
 .hs-hero__velo {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom,
-        rgba(28, 12, 6, 0.55) 0%,
-        rgba(28, 12, 6, 0.25) 50%,
-        rgba(28, 12, 6, 0.70) 100%);
+    background: var(--hs-velo-hero);
 }
 
 .hs-hero__contenido {
@@ -147,6 +144,7 @@
     border-radius: 16px;
     background: var(--hs-terracotta-light);
     color: var(--hs-terracotta);
+    font-size: 36px;
 }
 
 .hs-paso__titulo {
@@ -171,6 +169,7 @@
     align-items: center;
     transform: translateY(-50%);
     color: var(--hs-bark);
+    font-size: 16px;
 }
 
 /* ---------- ImpactCounters ------------------------------------------ */
@@ -196,6 +195,7 @@
     border-radius: 12px;
     background: var(--hs-terracotta-light);
     color: var(--hs-terracotta);
+    font-size: 28px;
 }
 
 .hs-contador__cifra {

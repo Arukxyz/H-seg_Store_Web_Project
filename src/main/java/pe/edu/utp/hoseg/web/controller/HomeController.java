@@ -23,7 +23,6 @@ public class HomeController {
 
     @GetMapping("/")
     public String inicio(Model model) {
-        model.addAttribute("paginaActiva", "inicio");
         model.addAttribute("destacados", catalogoService.destacados(DESTACADOS));
         model.addAttribute("impacto", impactoService.resumen());
         model.addAttribute("comunidades", impactoService.nombresComunidades());

@@ -16,8 +16,7 @@
         <img th:if="${p.urlImagen != null}" th:src="${p.urlImagen}" th:alt="${p.nombre}" loading="lazy">
         <!-- Sin foto cargada aún: fondo neutro con el icono del compromiso -->
         <div class="hs-card__sin-imagen" th:unless="${p.urlImagen != null}" aria-hidden="true">
-            <th:block th:if="${p.tipoCompromiso?.name() == 'ARBOL'}"><th:block th:replace="~{fragments/icons :: arbol}"/></th:block>
-            <th:block th:unless="${p.tipoCompromiso?.name() == 'ARBOL'}"><th:block th:replace="~{fragments/icons :: abrigo}"/></th:block>
+            <i class="bi" th:classappend="${p.tipoCompromiso?.icono ?: 'bi-bag'}"></i>
         </div>
 
         <div class="hs-card__badge" th:if="${p.tipoCompromiso != null}">
@@ -49,10 +48,9 @@
 </article>
 
 
-<!-- Badge "1 abrigo" / "1 árbol" según producto.tipo_compromiso -->
-<span th:fragment="badge(tipo)" class="hs-badge" th:classappend="${tipo.name() == 'ARBOL'} ? 'hs-badge--arbol' : 'hs-badge--abrigo'">
-    <th:block th:if="${tipo.name() == 'ARBOL'}"><th:block th:replace="~{fragments/icons :: badge-arbol}"/></th:block>
-    <th:block th:unless="${tipo.name() == 'ARBOL'}"><th:block th:replace="~{fragments/icons :: badge-abrigo}"/></th:block>
+<!-- Badge "1 abrigo" / "1 árbol": icono, clase y texto salen de TipoCompromiso -->
+<span th:fragment="badge(tipo)" class="hs-badge" th:classappend="|hs-badge--${tipo.clave}|">
+    <i class="bi" th:classappend="|${tipo.icono}-fill|" aria-hidden="true"></i>
     <th:block th:text="${tipo.etiqueta}">1 abrigo</th:block>
 </span>
 

@@ -25,6 +25,11 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <bootstrap.version>5.3.3</bootstrap.version>
+        <bootstrap-icons.version>1.11.3</bootstrap-icons.version>
+
+        <!-- Mockito (Byte Buddy) aún no reconoce JDK posteriores a 24; sin esto los
+             tests no arrancan si Maven corre con un JDK más nuevo que el 21 del proyecto. -->
+        <argLine>-Dnet.bytebuddy.experimental=true</argLine>
         <thymeleaf-extras-springsecurity.version>3.1.3.RELEASE</thymeleaf-extras-springsecurity.version>
     </properties>
 
@@ -71,6 +76,12 @@
             <groupId>org.webjars</groupId>
             <artifactId>bootstrap</artifactId>
             <version>${bootstrap.version}</version>
+        </dependency>
+        <!-- Iconos como fuente (clases bi-*): sin SVG en las plantillas -->
+        <dependency>
+            <groupId>org.webjars.npm</groupId>
+            <artifactId>bootstrap-icons</artifactId>
+            <version>${bootstrap-icons.version}</version>
         </dependency>
         <dependency>
             <groupId>org.webjars</groupId>

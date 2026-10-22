@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: pagina(titulo='HÖSÉG · Abriga a alguien más con cada compra', activa='inicio',
+                                          transparente=true, contenido=~{::main}, estilos=~{::link}, scripts=~{::script})}">
 <head>
-    <th:block th:replace="~{fragments/head :: comun('HÖSÉG · Abriga a alguien más con cada compra')}"/>
     <link rel="stylesheet" th:href="@{/css/home.css}">
 </head>
-<body class="hs-home">
-
-<th:block th:replace="~{fragments/navbar :: navbar('inicio', true)}"/>
+<body>
 
 <main>
 
@@ -51,10 +50,10 @@
                 </div>
                 <div class="d-flex gap-2">
                     <button type="button" class="hs-btn-redondo" data-carrusel-anterior aria-label="Anterior">
-                        <th:block th:replace="~{fragments/icons :: chevron-izq}"/>
+                        <i class="bi bi-chevron-left" aria-hidden="true"></i>
                     </button>
                     <button type="button" class="hs-btn-redondo" data-carrusel-siguiente aria-label="Siguiente">
-                        <th:block th:replace="~{fragments/icons :: chevron-der}"/>
+                        <i class="bi bi-chevron-right" aria-hidden="true"></i>
                     </button>
                 </div>
             </div>
@@ -85,30 +84,16 @@
 
             <div class="row g-4">
                 <div class="col-12 col-md-4">
-                    <div class="hs-paso">
-                        <span class="hs-paso__numero">01</span>
-                        <div class="hs-paso__icono"><th:block th:replace="~{fragments/icons :: paso-compra}"/></div>
-                        <h3 class="hs-paso__titulo">Compras</h3>
-                        <p class="hs-paso__texto">Eliges una prenda o accesorio HÖSÉG y completas tu pedido en nuestra tienda.</p>
-                        <span class="hs-paso__flecha d-none d-md-flex"><th:block th:replace="~{fragments/icons :: flecha-der}"/></span>
-                    </div>
+                    <th:block th:replace="~{fragments/impacto :: paso('01', 'bi-bag', 'Compras',
+                        'Eliges una prenda o accesorio HÖSÉG y completas tu pedido en nuestra tienda.', true)}"/>
                 </div>
                 <div class="col-12 col-md-4">
-                    <div class="hs-paso">
-                        <span class="hs-paso__numero">02</span>
-                        <div class="hs-paso__icono"><th:block th:replace="~{fragments/icons :: paso-registro}"/></div>
-                        <h3 class="hs-paso__titulo">Registramos</h3>
-                        <p class="hs-paso__texto">Con el número de tu boleta vinculamos tu abrigo o árbol a una comunidad real de Cusco.</p>
-                        <span class="hs-paso__flecha d-none d-md-flex"><th:block th:replace="~{fragments/icons :: flecha-der}"/></span>
-                    </div>
+                    <th:block th:replace="~{fragments/impacto :: paso('02', 'bi-file-earmark-text', 'Registramos',
+                        'Con el número de tu boleta vinculamos tu abrigo o árbol a una comunidad real de Cusco.', true)}"/>
                 </div>
                 <div class="col-12 col-md-4">
-                    <div class="hs-paso">
-                        <span class="hs-paso__numero">03</span>
-                        <div class="hs-paso__icono"><th:block th:replace="~{fragments/icons :: paso-entrega}"/></div>
-                        <h3 class="hs-paso__titulo">Entregamos</h3>
-                        <p class="hs-paso__texto">Nuestra ONG aliada coordina la entrega. Tú puedes ver el resultado en línea con tu boleta.</p>
-                    </div>
+                    <th:block th:replace="~{fragments/impacto :: paso('03', 'bi-clock', 'Entregamos',
+                        'Nuestra ONG aliada coordina la entrega. Tú puedes ver el resultado en línea con tu boleta.', false)}"/>
                 </div>
             </div>
         </div>
@@ -122,39 +107,19 @@
                 <h2 class="hs-h2 mb-0">Cada número es una persona,<br class="d-none d-sm-block"> cada árbol tiene raíces.</h2>
             </div>
 
-            <!-- Las cifras salen de la base compartida; home.js las anima al entrar en pantalla -->
+            <!-- Las cifras salen de la base compartida (ImpactoService) -->
             <div class="row g-3 mb-5">
                 <div class="col-6 col-md-3">
-                    <div class="hs-contador">
-                        <div class="hs-contador__icono"><th:block th:replace="~{fragments/icons :: abrigo}"/></div>
-                        <div class="hs-contador__cifra" data-contador th:attr="data-valor=${impacto.abrigosEntregados}"
-                             th:text="${#numbers.formatInteger(impacto.abrigosEntregados, 1, 'COMMA')}">1,248</div>
-                        <p class="hs-contador__etiqueta">Abrigos entregados</p>
-                    </div>
+                    <th:block th:replace="~{fragments/impacto :: contador('bi-gift', ${impacto.abrigosEntregados}, 'Abrigos entregados')}"/>
                 </div>
                 <div class="col-6 col-md-3">
-                    <div class="hs-contador">
-                        <div class="hs-contador__icono"><th:block th:replace="~{fragments/icons :: arbol}"/></div>
-                        <div class="hs-contador__cifra" data-contador th:attr="data-valor=${impacto.arbolesPlantados}"
-                             th:text="${#numbers.formatInteger(impacto.arbolesPlantados, 1, 'COMMA')}">874</div>
-                        <p class="hs-contador__etiqueta">Árboles plantados</p>
-                    </div>
+                    <th:block th:replace="~{fragments/impacto :: contador('bi-tree', ${impacto.arbolesPlantados}, 'Árboles plantados')}"/>
                 </div>
                 <div class="col-6 col-md-3">
-                    <div class="hs-contador">
-                        <div class="hs-contador__icono"><th:block th:replace="~{fragments/icons :: comunidad}"/></div>
-                        <div class="hs-contador__cifra" data-contador th:attr="data-valor=${impacto.comunidadesAlcanzadas}"
-                             th:text="${#numbers.formatInteger(impacto.comunidadesAlcanzadas, 1, 'COMMA')}">5</div>
-                        <p class="hs-contador__etiqueta">Comunidades alcanzadas</p>
-                    </div>
+                    <th:block th:replace="~{fragments/impacto :: contador('bi-people', ${impacto.comunidadesAlcanzadas}, 'Comunidades alcanzadas')}"/>
                 </div>
                 <div class="col-6 col-md-3">
-                    <div class="hs-contador">
-                        <div class="hs-contador__icono"><th:block th:replace="~{fragments/icons :: corazon}"/></div>
-                        <div class="hs-contador__cifra" data-contador th:attr="data-valor=${impacto.pedidosConImpacto}"
-                             th:text="${#numbers.formatInteger(impacto.pedidosConImpacto, 1, 'COMMA')}">2,104</div>
-                        <p class="hs-contador__etiqueta">Pedidos con impacto</p>
-                    </div>
+                    <th:block th:replace="~{fragments/impacto :: contador('bi-heart', ${impacto.pedidosConImpacto}, 'Pedidos con impacto')}"/>
                 </div>
             </div>
 
@@ -223,7 +188,7 @@
                     </div>
                     <!-- Página "Nosotros" completa: pendiente; por ahora ancla a esta franja -->
                     <a class="hs-enlace-flecha" href="#nosotros">
-                        Conoce más <th:block th:replace="~{fragments/icons :: flecha-der}"/>
+                        Conoce más <i class="bi bi-arrow-right" aria-hidden="true"></i>
                     </a>
                 </div>
             </div>
@@ -232,10 +197,6 @@
 
 </main>
 
-<th:block th:replace="~{fragments/footer :: footer}"/>
-
-<script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}" defer></script>
-<script th:src="@{/js/navbar.js}" defer></script>
 <script th:src="@{/js/home.js}" defer></script>
 </body>
 </html>

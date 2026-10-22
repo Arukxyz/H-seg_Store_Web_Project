@@ -26,7 +26,7 @@ Qué entregó el diseño, dónde quedó cada cosa y en qué se convierte al impl
 - **Ninguna imagen propia.** Las 8 fotos de producto y del banner son URLs de Unsplash incrustadas en `App.tsx`. Hay que reemplazarlas por fotos reales de HÖSÉG en `static/images/`; para maquetar sirven temporalmente, pero no pueden quedar en la entrega.
 - **Ningún logo.** "HÖSÉG" está puesto como texto con la tipografía Fraunces, no como SVG.
 - **Ningún archivo de fuente.** Fraunces y Outfit se cargan desde Google Fonts (`@import` en `index.css`).
-- **Ningún icono suelto.** Los 12 iconos son componentes React con SVG en línea (`HomeIcon`, `ShopIcon`, `ImpactNavIcon`, `CartIcon`, `AccountIcon`, `CoatIcon`, `TreeIcon`, `CommunityIcon`, `HeartIcon`, `ChevronLeft`, `ChevronRight`, `ArrowRight`). Se copian sus `<svg>` a los fragmentos, o se sustituyen por Bootstrap Icons.
+- **Ningún icono suelto.** Los 12 iconos son componentes React con SVG en línea (`HomeIcon`, `ShopIcon`, `ImpactNavIcon`, `CartIcon`, `AccountIcon`, `CoatIcon`, `TreeIcon`, `CommunityIcon`, `HeartIcon`, `ChevronLeft`, `ChevronRight`, `ArrowRight`). **Decidido:** se sustituyen por Bootstrap Icons (WebJar); no hay SVG en las plantillas. `CoatIcon` no tiene equivalente y se usa `bi-gift`.
 
 ## Componentes del export → fragmentos Thymeleaf
 
@@ -35,13 +35,13 @@ Todos los componentes del brief están implementados. Correspondencia para la im
 | Componente en `App.tsx` | Línea | Fragmento destino | Datos que consumirá |
 |---|---|---|---|
 | `Navbar` (barra superior + óvalo móvil) | 735 | `fragments/navbar.html` | Sesión del cliente, nº de ítems del carrito |
-| Óvalo móvil (dentro de `Navbar`) | 851 | `fragments/navbar.html :: pill` | Página activa, contador del carrito |
+| Óvalo móvil (dentro de `Navbar`) | 851 | `fragments/navbar.html` (mismo fragmento) | Página activa, destinos de `menuPrincipal` |
 | `HeroBanner` | 916 | `index.html` | Estático |
 | `FeaturedCarousel` | 344 | `index.html` + `fragments/product-card.html` | Productos destacados (`activo` y `visible_web`) |
 | `ProductCard` | 250 | `fragments/product-card.html` | `nombre`, `coleccion`, `precio`, `talla`, `tipo_compromiso`, `stock_comercial` |
 | `ImpactBadge` | 229 | `fragments/product-card.html :: badge` | `tipo_compromiso` (ABRIGO / ARBOL) |
-| `ImpactSteps` | 450 | `index.html` | Estático |
-| `ImpactCounters` + `CounterCard` | 543 / 522 | `index.html` | Cifras reales desde la BD |
+| `ImpactSteps` | 450 | `index.html` + `fragments/impacto.html :: paso` | Estático |
+| `ImpactCounters` + `CounterCard` | 543 / 522 | `index.html` + `fragments/impacto.html :: contador` | Cifras reales desde la BD |
 | `ImpactCTA` | 578 | `index.html` | Formulario que redirige a `/consulta-impacto` |
 | `AboutStrip` | 622 | `index.html` | Estático |
 | `Footer` | 673 | `fragments/footer.html` | Estático |
@@ -50,7 +50,7 @@ Los datos de `PRODUCTS`, `IMPACT_COUNTERS` y `COMMUNITIES` (líneas 7–78) son 
 
 ## Estado: Home implementada
 
-La Home está traducida por completo (`templates/index.html` + `fragments/`, `static/css/hoseg.css` y `home.css`, `static/js/navbar.js` y `home.js`). Cómo reutilizar los fragmentos en las demás páginas: `docs/guia-plantillas.md`.
+La Home está traducida por completo (`templates/index.html` sobre `layout/base.html` + `fragments/`, `static/css/hoseg.css` y `home.css`, `static/js/navbar.js` y `home.js`). Cómo reutilizar los fragmentos en las demás páginas: `docs/guia-plantillas.md`.
 
 Diferencias deliberadas respecto al export:
 

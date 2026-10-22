@@ -87,7 +87,39 @@ class HomeControllerTest {
                 .andExpect(content().string(containsString("href=\"/terminos\"")))
                 .andExpect(content().string(containsString("href=\"/politica-rsu\"")))
                 .andExpect(content().string(containsString("Empresa B · certificación en proceso")))
-                .andExpect(content().string(containsString("href=\"/libro-reclamaciones\"")));
+                .andExpect(content().string(containsString("href=\"/libro-reclamaciones\"")))
+                // Layout: título de la página, CSS y JS propios de la Home además de los comunes
+                .andExpect(content().string(containsString("<title>HÖSÉG · Abriga a alguien más con cada compra</title>")))
+                .andExpect(content().string(containsString("/css/home.css")))
+                .andExpect(content().string(containsString("/js/home.js")))
+                .andExpect(content().string(containsString("/js/navbar.js")))
+                // Iconos: Bootstrap Icons, sin SVG en línea
+                .andExpect(content().string(containsString("bootstrap-icons.min.css")))
+                .andExpect(content().string(containsString("bi bi-gift-fill")))
+                .andExpect(content().string(containsString("bi bi-tree-fill")))
+                .andExpect(content().string(containsString("hs-badge--arbol")))
+                .andExpect(content().string(not(containsString("<svg"))))
+                // Menú desde AtributosGlobales: Nosotros va en la barra pero no en el óvalo
+                .andExpect(content().string(containsString("data-seccion=\"nosotros\"")))
+                .andExpect(content().string(not(containsString("<span>Nosotros</span>"))))
+                .andExpect(content().string(containsString("<a class=\"hs-pill__item is-active\" href=\"/\" data-seccion=\"inicio\">")))
+                // Óvalo sin sesión: Cuenta lleva al login
+                .andExpect(content().string(containsString("href=\"/login\" data-seccion=\"cuenta\"")));
+    }
+
+    @Test
+    void lasCifrasDeImpactoSeRenderizanEnLosCuatroContadores() throws Exception {
+        when(catalogoService.destacados(anyInt())).thenReturn(List.of());
+        when(impactoService.resumen()).thenReturn(new ResumenImpacto(1248, 874, 5, 2104));
+        when(impactoService.nombresComunidades()).thenReturn(List.of());
+
+        mvc.perform(get("/"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("data-valor=\"874\"")))
+                .andExpect(content().string(containsString("data-valor=\"5\"")))
+                .andExpect(content().string(containsString("2,104")))
+                .andExpect(content().string(containsString("Árboles plantados")))
+                .andExpect(content().string(containsString("Registramos")));
     }
 
     @Test
@@ -105,6 +137,7 @@ class HomeControllerTest {
                 .andExpect(content().string(containsString("href=\"/cuenta?seccion=datos\"")))
                 .andExpect(content().string(containsString("action=\"/logout\"")))
                 .andExpect(content().string(containsString("Cerrar sesión")))
+                .andExpect(content().string(containsString("href=\"/cuenta\" data-seccion=\"cuenta\"")))
                 .andExpect(content().string(not(containsString("Ingresar"))));
     }
 

@@ -5,6 +5,8 @@ import org.springframework.web.context.annotation.SessionScope;
 import pe.edu.utp.hoseg.web.dto.ItemCarrito;
 import pe.edu.utp.hoseg.web.model.Producto;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,12 +15,16 @@ import java.util.List;
 /**
  * Carrito de compras. Vive en la sesión HTTP (un bean por visitante); no hay
  * tabla en la base de datos hasta que el cliente confirma la compra.
+ * Serializable para que Tomcat conserve el carrito al reiniciar el servidor.
  */
 @Service
 @SessionScope
-public class CarritoService {
+public class CarritoService implements Serializable {
 
-    private final List<ItemCarrito> items = new ArrayList<>();
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private final ArrayList<ItemCarrito> items = new ArrayList<>();
 
     /** Agrega unidades de un producto (una talla = un código); si ya estaba, suma. */
     public void agregar(Producto producto, int cantidad) {
