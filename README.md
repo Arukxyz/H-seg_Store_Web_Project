@@ -4,7 +4,7 @@ Tienda en línea de Höség Store (14-DIEZ S.A.C.) bajo el modelo **"Buy One, Gi
 
 Java 21 + Spring Boot 3 (Web, Thymeleaf, Data JPA, Validation, Security) + Bootstrap 5, sobre PostgreSQL en Supabase. **Comparte la base de datos con el escritorio [SEGITD-HÖSÉG](https://github.com/Arukxyz/Hoseg_Store)**, que es quien define el esquema.
 
-📚 **Documentación técnica:** [docs/README.md](docs/README.md) (índice) · [docs/arquitectura.md](docs/arquitectura.md) (cómo se integran web y escritorio).
+ **Documentación técnica:** [docs/README.md](docs/README.md) (índice) · [docs/arquitectura.md](docs/arquitectura.md) (cómo se integran web y escritorio).
 
 ## División de responsabilidades
 
