@@ -23,7 +23,7 @@ Java 21 + Spring Boot 3 (Web, Thymeleaf, Data JPA, Validation, Security) + Boots
 Credenciales del **Session pooler** (puerto 5432) de Supabase, por una de estas vías:
 
 1. Variables de entorno `DB_URL`, `DB_USER`, `DB_PASSWORD` (las mismas del escritorio), o
-2. Copiar `src/main/resources/application-local.properties.example` a `application-local.properties` (ignorado por git). `mvn spring-boot:run` lo carga solo: los perfiles `dev,local` vienen activados por defecto en el `pom.xml`.
+2. Copiar `src/main/resources/application-local.properties.example` a `application-local.properties` (ignorado por git) y completar la contraseña. Se carga siempre, también con el botón Run del IDE; `mvn spring-boot:run` además activa el perfil `dev` (SQL visible, plantillas sin caché).
 
 `spring.jpa.hibernate.ddl-auto` está fijado en `validate`: Hibernate solo comprueba que las entidades coincidan con el esquema; cualquier cambio de tablas se hace con un script SQL versionado en el repositorio del escritorio.
 
