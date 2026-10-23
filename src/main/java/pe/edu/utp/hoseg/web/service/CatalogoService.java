@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.utp.hoseg.web.dto.DetalleProducto;
 import pe.edu.utp.hoseg.web.dto.FiltroCatalogo;
+import pe.edu.utp.hoseg.web.dto.ProductoAdmin;
 import pe.edu.utp.hoseg.web.dto.TarjetaProducto;
 import pe.edu.utp.hoseg.web.dto.VarianteProducto;
 import pe.edu.utp.hoseg.web.model.Categoria;
@@ -174,6 +175,47 @@ public class CatalogoService {
             throw new NegocioException(producto.getNombre() + " (" + producto.getTallaMostrada() + ") está agotado.");
         }
         return producto;
+    }
+
+    // ---------- Panel (4.3, CU-17) ----------
+
+    /** Máximo de modelos en el carrusel de la Home: dos vueltas a 4 visibles. */
+    public static final int MAX_DESTACADOS = 8;
+
+    /** Todo lo activo, por modelo y talla, con el stock en solo lectura. */
+    public List<ProductoAdmin> paraAdministrar() {
+        return productoRepository.findByActivoTrueOrderByNombreAscCodigoAsc().stream()
+                .map(p -> new ProductoAdmin(p.getCodigo(), p.getNombre(), p.getTallaMostrada(), p.getCategoria(),
+                        p.tieneCompromiso() ? p.getTipoCompromiso() : null, p.getStockComercial(),
+                        p.isVisibleWeb(), p.isDestacado()))
+                .toList();
+    }
+
+    public long modelosDestacados() {
+        return productoRepository.contarModelosDestacados();
+    }
+
+    /** Muestra u oculta una talla en la tienda web. No toca stock ni nada que use el escritorio. */
+    @Transactional
+    public void cambiarVisibilidad(String codigo, boolean visible) {
+        Producto producto = productoRepository.findById(codigo)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Producto inexistente: " + codigo));
+        producto.setVisibleWeb(visible);
+    }
+
+    /**
+     * Marca o desmarca un modelo (todas sus tallas) como destacado de la Home.
+     *
+     * @throws NegocioException si ya hay {@value #MAX_DESTACADOS} modelos destacados
+     */
+    @Transactional
+    public void cambiarDestacado(String codigo, boolean destacado) {
+        Producto producto = productoRepository.findById(codigo)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Producto inexistente: " + codigo));
+        if (destacado && !producto.isDestacado() && productoRepository.contarModelosDestacados() >= MAX_DESTACADOS) {
+            throw new NegocioException("Ya hay " + MAX_DESTACADOS + " modelos destacados. Quita uno antes de agregar otro.");
+        }
+        productoRepository.marcarDestacado(producto.getNombre(), destacado);
     }
 
     /** Modelos visibles en el orden de la semilla: nombre → sus tallas. */

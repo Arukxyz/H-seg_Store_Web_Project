@@ -100,6 +100,22 @@ class CatalogoServiceTest {
         assertThatThrownBy(() -> catalogoService.detalle("HSG-X")).isInstanceOf(RecursoNoEncontradoException.class);
     }
 
+    @Test
+    void noSePuedeDestacarUnNovenoModeloPeroSiQuitarUno() {
+        Producto gorro = producto("HSG-ACC-001", "Gorro", null, "49.90", 1, TipoCompromiso.ARBOL, true);
+        Producto casaca = producto("HSG-CAS-001", "Casaca", "M", "259.90", 1, TipoCompromiso.ABRIGO, true);
+        casaca.setDestacado(true);
+        when(productoRepository.findById("HSG-ACC-001")).thenReturn(Optional.of(gorro));
+        when(productoRepository.findById("HSG-CAS-001")).thenReturn(Optional.of(casaca));
+        when(productoRepository.contarModelosDestacados()).thenReturn(8L);
+
+        assertThatThrownBy(() -> catalogoService.cambiarDestacado("HSG-ACC-001", true))
+                .isInstanceOf(NegocioException.class);
+
+        catalogoService.cambiarDestacado("HSG-CAS-001", false);
+        org.mockito.Mockito.verify(productoRepository).marcarDestacado("Casaca", false);   // todas sus tallas
+    }
+
     private List<String> nombres(FiltroCatalogo filtro) {
         return catalogoService.tarjetas(filtro).stream().map(TarjetaProducto::nombre).toList();
     }
