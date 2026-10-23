@@ -20,4 +20,12 @@ public interface VentaRepository extends JpaRepository<Venta, Integer> {
                and exists (select 1 from Donacion d where d.detalleVenta.venta = v)
             """)
     long contarConDonacion(@Param("estado") EstadoVenta estado);
+
+    /**
+     * Siguiente número de comprobante web. Lo da la secuencia de la base
+     * (06_web_clientes.sql), nunca un MAX + 1: dos compras simultáneas no
+     * pueden repetir número.
+     */
+    @Query(value = "select nextval(cast(:secuencia as regclass))", nativeQuery = true)
+    long siguienteComprobante(@Param("secuencia") String secuencia);
 }
