@@ -6,5 +6,24 @@ package pe.edu.utp.hoseg.web.model;
  * a un lote y la entrega (07_normalizacion.sql).
  */
 public enum EstadoDonacion {
-    EN_ESPERA, PENDIENTE, ASIGNADA, ENTREGADA
+    EN_ESPERA("En espera de pago"),
+    PENDIENTE("Pendiente de asignar"),
+    ASIGNADA("Lote asignado"),
+    ENTREGADA("Entregada");
+
+    private final String etiqueta;
+
+    EstadoDonacion(String etiqueta) {
+        this.etiqueta = etiqueta;
+    }
+
+    /** Texto de cada paso de la línea de tiempo de la donación. */
+    public String getEtiqueta() {
+        return etiqueta;
+    }
+
+    /** Posición en la línea de tiempo (0 a 3): los pasos anteriores se marcan como cumplidos. */
+    public int getPaso() {
+        return ordinal();
+    }
 }
