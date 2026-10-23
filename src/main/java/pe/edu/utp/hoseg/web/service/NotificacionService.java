@@ -64,6 +64,42 @@ public class NotificacionService {
                 """.formatted(nombre, urlPublica, token));
     }
 
+    /** Acuse de recibo del formulario de contacto (CU-08). */
+    public void acuseContacto(String email, String nombre, String asunto) {
+        correoService.enviar(email, "Recibimos tu mensaje: " + asunto, """
+                Hola %s:
+
+                Recibimos tu mensaje y te responderemos pronto a este correo.
+
+                Equipo HÖSÉG
+                """.formatted(nombre));
+    }
+
+    /** Constancia del Libro de Reclamaciones con su número de hoja (CU-24). */
+    public void constanciaReclamo(String email, String nombre, String numeroHoja, String tipo) {
+        correoService.enviar(email, "Libro de Reclamaciones: hoja " + numeroHoja, """
+                Hola %s:
+
+                Registramos tu %s con el número de hoja %s. Guarda este número:
+                lo necesitarás para cualquier seguimiento. Te responderemos a este correo.
+
+                Equipo HÖSÉG
+                """.formatted(nombre, tipo, numeroHoja));
+    }
+
+    /** Respuesta del administrador a una hoja del Libro de Reclamaciones. */
+    public void respuestaReclamo(String email, String nombre, String numeroHoja, String respuesta) {
+        correoService.enviar(email, "Respuesta a tu hoja de reclamación " + numeroHoja, """
+                Hola %s:
+
+                Esta es nuestra respuesta a tu hoja %s:
+
+                %s
+
+                Equipo HÖSÉG
+                """.formatted(nombre, numeroHoja, respuesta));
+    }
+
     private static String soles(BigDecimal monto) {
         return monto.setScale(2, RoundingMode.HALF_UP).toPlainString();
     }
