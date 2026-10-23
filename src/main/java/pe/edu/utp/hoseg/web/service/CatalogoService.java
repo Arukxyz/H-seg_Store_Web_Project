@@ -74,7 +74,7 @@ public class CatalogoService {
         if (filtro.impacto() != null) {
             cumple = cumple.and(m -> filtro.impacto() == compromiso(m));
         }
-        if (filtro.disponibles()) {
+        if (filtro.soloDisponibles()) {
             cumple = cumple.and(m -> m.stream().anyMatch(Producto::estaDisponible));
         }
 

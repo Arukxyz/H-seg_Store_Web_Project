@@ -12,16 +12,21 @@ public record FiltroCatalogo(
         String categoria,
         String coleccion,
         TipoCompromiso impacto,
-        boolean disponibles,
+        Boolean disponibles,
         OrdenCatalogo orden) {
 
     public static FiltroCatalogo ninguno() {
-        return new FiltroCatalogo(null, null, null, null, false, null);
+        return new FiltroCatalogo(null, null, null, null, null, null);
+    }
+
+    /** "Solo disponibles": Boolean porque el parámetro suele no venir en la URL. */
+    public boolean soloDisponibles() {
+        return Boolean.TRUE.equals(disponibles);
     }
 
     /** true si hay algún filtro aplicado (para mostrar "Limpiar filtros"). */
     public boolean hayFiltros() {
-        return tieneTexto(q) || tieneTexto(categoria) || tieneTexto(coleccion) || impacto != null || disponibles;
+        return tieneTexto(q) || tieneTexto(categoria) || tieneTexto(coleccion) || impacto != null || soloDisponibles();
     }
 
     public OrdenCatalogo ordenEfectivo() {

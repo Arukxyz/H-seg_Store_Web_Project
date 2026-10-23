@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 1 · 1.6 Compra registrada (GET /compra-exito, justo después de confirmar).
+  Modelo:
+    compra  CompraRegistrada (codigoComprobante, totalProductos, costoEnvio, totalAPagar, tipoEnvio,
+            impacto ImpactoCompra)
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: pagina(titulo='Compra registrada · HÖSÉG', activa='carrito',
+                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+<body>
+<main class="hs-main--bajo-nav">
+    <section class="hs-seccion">
+        <div class="container text-center">
+            <p class="hs-kicker">Compra registrada</p>
+            <h1 class="hs-h2" th:text="${compra.codigoComprobante}">WEB-000110</h1>
+            <p>Tu pedido quedó registrado y está pendiente de confirmación de pago.</p>
+            <p th:text="'Total a pagar: S/ ' + ${#numbers.formatDecimal(compra.totalAPagar, 1, 'COMMA', 2, 'POINT')}
+                        + ' (envío S/ ' + ${#numbers.formatDecimal(compra.costoEnvio, 1, 'COMMA', 2, 'POINT')} + ')'">Total</p>
+            <p th:if="${compra.impacto.tieneImpacto()}" th:text="'Con esta compra generas ' + ${compra.impacto.texto} + '.'">Impacto</p>
+            <p><strong>Instrucciones de pago:</strong> texto de ejemplo.</p>
+            <a class="hs-btn hs-btn--primario" th:href="@{/cuenta/pedidos/{c}(c=${compra.codigoComprobante})}">Ver mi pedido</a>
+            <a class="hs-btn hs-btn--secundario" th:href="@{${rutaConsulta}(boleta=${compra.codigoComprobante})}">Sigue tu impacto</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

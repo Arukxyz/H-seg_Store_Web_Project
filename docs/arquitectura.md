@@ -62,12 +62,12 @@ flowchart TB
 
 | Paquete | Contenido actual |
 |---|---|
-| `config` | `SecurityConfig` (rutas públicas y protegidas, BCrypt), `WebConfig` (locale es-PE) |
-| `model` | `Producto`, `Cliente`, `Venta`, `DetalleVenta`, `Donacion`, `LoteDonacion`, `Comunidad`, `Ong` y los enums de estado |
-| `repository` | Un repositorio por entidad consultada |
-| `service` | `CatalogoService` (tarjetas agrupadas por talla), `ImpactoService` (cifras públicas), `CarritoService` (carrito en sesión) |
-| `dto` | `TarjetaProducto`, `ResumenImpacto`, `ItemCarrito` |
-| `controller` | `HomeController`, `AtributosGlobales` (datos comunes a todas las vistas), `EjemploController` (solo en desarrollo) |
+| `config` | `SecurityConfig` (dos logins: clientes con BCrypt y panel `/admin` con la tabla `usuario`; bloqueo por intentos), `Sha256ConSaltPasswordEncoder`, `ClienteAutenticado`, `AdministradorAutenticado`, `WebConfig` (locale es-PE) |
+| `model` | Una entidad por tabla que usa la web (incluidas `Envio`, `Resena`, `TokenRecuperacion`, `ContenidoWeb`, `CafeCarta`, `CafeLocal`, `MensajeContacto`, `SuscriptorBoletin`, `LibroReclamacion` y `Usuario` de solo lectura) y los enums de estado con su etiqueta |
+| `repository` | Un repositorio por entidad. Sumas, conteos, secuencias y bloqueo se calculan en Postgres |
+| `service` | Un servicio por área: `CatalogoService`, `CarritoService`, `VentaService`, `ResenaService`, `ClienteService`, `RecuperacionService`, `ImpactoService`, `CafeService`, `ContenidoService`, `ContactoService`, `BoletinService`, `ReclamacionService`, `PanelAdminService`, y `CorreoService`/`NotificacionService` para los correos |
+| `dto` | Formularios validados (`*Form`) y vistas de solo lectura que reciben las plantillas (contrato en [contrato-backend.md](contrato-backend.md)) |
+| `controller` | Uno por grupo de pantallas (tienda, carrito, cuenta, impacto, institucional, contacto y tres del panel), `AtributosGlobales` (datos comunes) y `EjemploController` (solo en desarrollo) |
 
 ## 4. Base de datos compartida
 
@@ -302,4 +302,4 @@ Las instrucciones detalladas están en el `README.md` de cada repositorio.
 | Sistema | Implementado | En desarrollo |
 |---|---|---|
 | Escritorio | RF-01 a RF-08: login con bloqueo, roles, catálogo e inventario dual, pedidos web, lotes y despacho, reportes Excel, proveedores, usuarios, boleta PDF con QR, respaldos | — |
-| Portal web | Página principal con datos reales, fragmentos reutilizables (navbar, óvalo móvil, footer, tarjeta de producto), entidades y repositorios del esquema, seguridad de rutas, carrito en sesión | Tienda y detalle, carrito, registro e inicio de sesión, checkout, consulta de impacto, páginas institucionales |
+| Portal web | Backend completo de los 5 bloques: catálogo con filtros, detalle con reseñas, carrito y checkout con envío, registro, login con bloqueo, recuperación de contraseña, mi cuenta y pedidos, consulta de impacto (boleta y QR), café, contenido editable, contacto, boletín, Libro de Reclamaciones y panel `/admin`. Página principal con datos reales y plantillas esqueleto funcionales de todas las pantallas | Diseño de las pantallas de cada bloque sobre los esqueletos ([contrato-backend.md](contrato-backend.md)) |

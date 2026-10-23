@@ -36,7 +36,7 @@ public class ContenidoService {
 
     /**
      * Varios bloques para una página, por clave. En Thymeleaf:
-     * {@code ${contenido['home.banner']?.titulo ?: 'texto por defecto'}}.
+     * {@code ${bloques['home.banner']?.titulo ?: 'texto por defecto'}} (no llamar "contenido" al atributo: es un parámetro del layout).
      */
     public Map<String, BloqueContenido> bloques(String... claves) {
         Map<String, BloqueContenido> mapa = new HashMap<>();

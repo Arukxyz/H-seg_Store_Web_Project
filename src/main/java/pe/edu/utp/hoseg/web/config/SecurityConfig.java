@@ -79,16 +79,13 @@ public class SecurityConfig {
         volverADondeIba.setDefaultTargetUrl("/");
         http
                 .authenticationManager(gestor(clienteDetailsService, codificadorContrasena))
+                // Lo que exige sesión de cliente se lista aquí. Todo lo demás del portal es
+                // público o no existe (y responde con la página 404, no con el login).
+                // Una ruta nueva que necesite sesión DEBE agregarse a la primera línea.
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/carrito/confirmar", "/compra-exito", "/cuenta/**").hasRole(ClienteAutenticado.ROL)
                         .requestMatchers(HttpMethod.POST, "/tienda/*/resenas").hasRole(ClienteAutenticado.ROL)
-                        .requestMatchers("/", "/tienda/**", "/carrito/**", "/consulta-impacto", "/api/impacto",
-                                "/login", "/registro", "/recuperar", "/restablecer", "/error", "/ejemplo",
-                                // Enlazadas desde el navbar y el footer
-                                "/cafe", "/nosotros", "/contacto", "/terminos", "/politica-rsu",
-                                "/libro-reclamaciones", "/boletin",
-                                "/css/**", "/js/**", "/images/**", "/webjars/**", "/favicon.ico").permitAll()
-                        .anyRequest().authenticated())
+                        .anyRequest().permitAll())
                 .formLogin(form -> form
                         .loginPage("/login")
                         .usernameParameter("email")

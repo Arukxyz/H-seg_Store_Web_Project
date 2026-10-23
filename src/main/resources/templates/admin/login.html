@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 4 · 4.1 Login administrativo (GET /admin/login; el POST lo procesa Spring Security).
+  El formulario DEBE enviar "username" y "password" por POST a /admin/login.
+  Usuarios de la tabla usuario del escritorio, solo rol ADMINISTRADOR; mismo bloqueo que el escritorio.
+  Variantes: ?error · ?bloqueado=5 (minutos) · ?inactivo · ?sinPermiso (es ENCARGADO) · ?salir
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>Panel · HÖSÉG</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/tokens.css}">
+    <link rel="stylesheet" th:href="@{/css/hoseg.css}">
+</head>
+<body>
+<main class="container hs-ancho-form py-5">
+    <h1 class="hs-h2 mb-3">Panel HÖSÉG</h1>
+    <div class="alert alert-danger" th:if="${param.error}">Usuario o contraseña incorrectos.</div>
+    <div class="alert alert-danger" th:if="${param.bloqueado}"
+         th:text="'Cuenta bloqueada. Intenta de nuevo en ' + ${param.bloqueado} + ' minuto(s).'">Bloqueada</div>
+    <div class="alert alert-danger" th:if="${param.inactivo}">El usuario está inactivo. Contacta a un administrador.</div>
+    <div class="alert alert-warning" th:if="${param.sinPermiso}">Tu usuario no tiene acceso al panel web.</div>
+    <div class="alert alert-info" th:if="${param.salir}">Cerraste sesión.</div>
+    <form method="post" th:action="@{/admin/login}">
+        <label class="d-block">Usuario <input class="hs-input" name="username" autocomplete="username" required></label>
+        <label class="d-block mt-2">Contraseña <input class="hs-input" type="password" name="password" autocomplete="current-password" required></label>
+        <button class="hs-btn hs-btn--primario mt-3" type="submit">Ingresar</button>
+    </form>
+</main>
+</body>
+</html>

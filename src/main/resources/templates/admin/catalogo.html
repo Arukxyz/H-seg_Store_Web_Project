@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 4 · 4.3 Catálogo web (GET /admin/catalogo, AdminController).
+  Modelo:
+    productos     List<ProductoAdmin> (codigo, nombre, talla, categoria, tipoCompromiso, stockComercial [solo lectura],
+                  visibleWeb, destacado)
+    destacados    long (modelos destacados ahora) · maxDestacados int (8)
+    vistaPrevia   List<TarjetaProducto>: cómo se verá el carrusel de la Home
+  Interruptores: POST /admin/catalogo/{codigo}/visible?visible=true|false (por talla)
+                 POST /admin/catalogo/{codigo}/destacado?destacado=true|false (aplica al modelo entero)
+  Si ya hay 8 destacados, vuelve con flash "error" (variante "Límite de destacados alcanzado").
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/admin :: pagina(titulo='Catálogo web · HÖSÉG', activa='catalogo', contenido=~{::main})}">
+<body>
+<main class="container-fluid pb-5">
+    <h1 class="h3">Catálogo web</h1>
+    <p th:text="'Destacados en la Home: ' + ${destacados} + ' de ' + ${maxDestacados}">Destacados: 3 de 8</p>
+    <table class="table table-sm">
+        <thead><tr><th>Código</th><th>Producto</th><th>Talla</th><th>Stock</th><th>Visible</th><th>Destacado</th></tr></thead>
+        <tbody>
+        <tr th:each="p : ${productos}">
+            <td th:text="${p.codigo}">HSG-CAS-001</td>
+            <td th:text="${p.nombre}">Casaca</td>
+            <td th:text="${p.talla}">M</td>
+            <td th:text="${p.stockComercial}">25</td>
+            <td>
+                <form method="post" th:action="@{/admin/catalogo/{c}/visible(c=${p.codigo})}">
+                    <input type="hidden" name="visible" th:value="${!p.visibleWeb}">
+                    <button class="btn btn-sm btn-outline-secondary" type="submit" th:text="${p.visibleWeb} ? 'Sí' : 'No'">Sí</button>
+                </form>
+            </td>
+            <td>
+                <form method="post" th:action="@{/admin/catalogo/{c}/destacado(c=${p.codigo})}">
+                    <input type="hidden" name="destacado" th:value="${!p.destacado}">
+                    <button class="btn btn-sm btn-outline-secondary" type="submit" th:text="${p.destacado} ? 'Sí' : 'No'">No</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <h2 class="h5 mt-4">Vista previa del carrusel</h2>
+    <div class="row g-3">
+        <div class="col-6 col-md-3" th:each="t : ${vistaPrevia}">
+            <th:block th:replace="~{fragments/product-card :: card(${t})}"/>
+        </div>
+    </div>
+</main>
+</body>
+</html>

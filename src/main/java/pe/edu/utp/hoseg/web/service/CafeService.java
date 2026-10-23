@@ -69,7 +69,7 @@ public class CafeService {
 
     /** Cafés de especialidad con botón "Comprar en la tienda" (tarjetas del catálogo). */
     public List<TarjetaProducto> cafesEnGrano() {
-        return catalogoService.tarjetas(new FiltroCatalogo(null, CATEGORIA_CAFE, null, null, false, null));
+        return catalogoService.tarjetas(new FiltroCatalogo(null, CATEGORIA_CAFE, null, null, null, null));
     }
 
     /** Contador "árboles sembrados por Höség Café"; 0 si el bloque no existe. */

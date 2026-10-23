@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 1 · 1.4 Carrito (GET /carrito, CarritoController).
+  Modelo (ver docs/contrato-backend.md):
+    items              List<ItemCarrito> (codigoProducto, nombre, talla, precioUnitario, cantidad, subtotal(),
+                       tipoCompromiso, urlImagen)
+    total              BigDecimal
+    impacto            ImpactoCompra (abrigos, arboles, texto "2 abrigos + 1 árbol", tieneImpacto())
+    vacio              boolean
+    problemasPorCodigo Map<codigo, mensaje>: aviso junto a la línea (sin stock, ya no se vende)
+    sePuedeConfirmar   boolean
+  Acciones: POST /carrito/actualizar (codigo, cantidad), POST /carrito/quitar (codigo),
+            GET /carrito/confirmar.
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: pagina(titulo='Carrito · HÖSÉG', activa='carrito',
+                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+<body>
+<main class="hs-main--bajo-nav">
+    <th:block th:replace="~{fragments/avisos :: avisos}"/>
+    <section class="hs-seccion">
+        <div class="container">
+            <h1 class="hs-h2 mb-3">Tu carrito</h1>
+
+            <div th:if="${vacio}">
+                <p>Tu carrito está vacío.</p>
+                <a class="hs-btn hs-btn--primario" th:href="@{/tienda}">Ir a la tienda</a>
+            </div>
+
+            <th:block th:unless="${vacio}">
+                <div class="border-bottom py-2" th:each="i : ${items}">
+                    <strong th:text="${i.nombre}">Casaca</strong> · talla <span th:text="${i.talla}">M</span>
+                    · <span th:text="'S/ ' + ${#numbers.formatDecimal(i.precioUnitario, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</span>
+                    <form class="d-inline" method="post" th:action="@{/carrito/actualizar}">
+                        <input type="hidden" name="codigo" th:value="${i.codigoProducto}">
+                        <button class="hs-btn-redondo" type="submit" name="cantidad" th:value="${i.cantidad - 1}" aria-label="Menos">−</button>
+                        <span th:text="${i.cantidad}">1</span>
+                        <button class="hs-btn-redondo" type="submit" name="cantidad" th:value="${i.cantidad + 1}" aria-label="Más">+</button>
+                    </form>
+                    <span th:text="'S/ ' + ${#numbers.formatDecimal(i.subtotal(), 1, 'COMMA', 2, 'POINT')}">S/ 259.90</span>
+                    <form class="d-inline" method="post" th:action="@{/carrito/quitar}">
+                        <input type="hidden" name="codigo" th:value="${i.codigoProducto}">
+                        <button class="btn btn-link" type="submit">Quitar</button>
+                    </form>
+                    <div class="text-danger" th:if="${problemasPorCodigo[i.codigoProducto] != null}"
+                         th:text="${problemasPorCodigo[i.codigoProducto]}">Solo quedan 2 unidades.</div>
+                </div>
+
+                <p class="mt-3"><strong th:text="'Total: S/ ' + ${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}">Total</strong></p>
+                <p th:if="${impacto.tieneImpacto()}" th:text="'Tu impacto con esta compra: ' + ${impacto.texto}">Tu impacto</p>
+                <a th:if="${sePuedeConfirmar}" class="hs-btn hs-btn--primario" th:href="@{/carrito/confirmar}">Confirmar compra</a>
+                <span th:unless="${sePuedeConfirmar}" class="hs-btn hs-btn--deshabilitado">Revisa tu carrito para continuar</span>
+            </th:block>
+        </div>
+    </section>
+</main>
+</body>
+</html>

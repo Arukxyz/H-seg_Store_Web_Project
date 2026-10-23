@@ -92,6 +92,7 @@ src/main/java/pe/edu/utp/hoseg/web/
 - `docs/diseno/mapeo-figma-thymeleaf.md` — qué componente del export corresponde a cada fragmento Thymeleaf, qué trae y qué no trae el export, y las decisiones pendientes.
 - `src/main/resources/static/css/tokens.css` — paleta, tipografías, radios y animaciones del diseño, ya traducidos a CSS estándar y mapeados a variables de Bootstrap. **Es la fuente de verdad del color en el código**: no escribir colores literales en las plantillas.
 
+- `docs/contrato-backend.md` — **qué datos recibe y qué formularios envía cada pantalla**, por bloque. Las plantillas de `tienda/`, `carrito/`, `cuenta/`, `impacto/`, `institucional/` y `admin/` son esqueletos funcionales: se rediseñan sin cambiar los nombres del modelo. `VistasTest` las renderiza todas.
 - `docs/guia-plantillas.md` — **cómo crear una página nueva** reutilizando `fragments/`, las clases `hs-*` y las rutas que la Home ya enlaza. Con el perfil `dev`, `/ejemplo` muestra la plantilla de partida (`templates/ejemplo-pagina.html`).
 
 Los nombres de componentes de la sección 8 del brief (`Navbar`, `MobileNavPill`, `HeroBanner`, `FeaturedCarousel`, `ProductCard`, `ImpactSteps`, `ImpactCounters`, `ImpactCTA`, `AboutStrip`, `Footer`) se mapean 1:1 a fragmentos Thymeleaf en `templates/fragments/`. Puntos fijos del diseño: responsivo desde 360 px, navegación inferior en óvalo con iconos en móvil, carrusel de destacados con auto-avance, y presencia del triple impacto (badge "1 abrigo" / "1 árbol") en toda la página.

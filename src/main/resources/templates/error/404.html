@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 5 · 3.7 Error 404. Spring Boot la muestra sola para cualquier ruta inexistente
+  y cuando un servicio lanza RecursoNoEncontradoException (producto oculto, pedido ajeno…).
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: pagina(titulo='Página no encontrada · HÖSÉG', activa='',
+                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+<body>
+<main class="hs-main--bajo-nav">
+    <section class="hs-seccion">
+        <div class="container text-center">
+            <p class="hs-kicker">Error 404</p>
+            <h1 class="hs-h2">No encontramos esta página.</h1>
+            <p class="hs-texto-secundario">Puede que el enlace esté mal escrito o que el producto ya no esté a la venta.</p>
+            <a class="hs-btn hs-btn--primario" th:href="@{/}">Ir al inicio</a>
+            <a class="hs-btn hs-btn--secundario" th:href="@{/tienda}">Ver la tienda</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

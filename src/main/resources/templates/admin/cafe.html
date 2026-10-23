@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 4 · 4.4 Höség Café (GET /admin/cafe?pestana=carta|local|arboles, AdminContenidoController).
+  Modelo:
+    pestana   "carta" | "local" | "arboles"
+    carta     List<CafeCarta> (id, nombre, descripcion, categoria, precio, disponible, activo, orden)
+    itemForm  ItemCartaForm (id oculto: null = nuevo; ?item=5 lo carga para editar) → POST /admin/cafe/carta
+    locales   List<CafeLocal> (id, nombre, direccion, horario, telefono, urlMapa, activo)
+    localForm LocalCafeForm (?local=2 lo carga) → POST /admin/cafe/locales
+    arboles   long → POST /admin/cafe/arboles?arboles=5018
+  Desactivar/activar un ítem: POST /admin/cafe/carta/{id}/activo?activo=false|true (baja lógica).
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/admin :: pagina(titulo='Höség Café · HÖSÉG', activa='cafe', contenido=~{::main})}">
+<body>
+<main class="container-fluid pb-5">
+    <h1 class="h3">Höség Café</h1>
+    <nav class="mb-3">
+        <a th:href="@{/admin/cafe(pestana='carta')}" th:classappend="${pestana == 'carta'} ? 'fw-bold'">Carta</a> ·
+        <a th:href="@{/admin/cafe(pestana='local')}" th:classappend="${pestana == 'local'} ? 'fw-bold'">Local</a> ·
+        <a th:href="@{/admin/cafe(pestana='arboles')}" th:classappend="${pestana == 'arboles'} ? 'fw-bold'">Árboles del café</a>
+    </nav>
+
+    <th:block th:if="${pestana == 'carta'}">
+        <table class="table table-sm">
+            <tr th:each="c : ${carta}" th:classappend="${!c.activo} ? 'text-muted'">
+                <td th:text="${c.categoria}">Bebidas</td>
+                <td><a th:href="@{/admin/cafe(pestana='carta', item=${c.id})}" th:text="${c.nombre}">Latte</a></td>
+                <td th:text="'S/ ' + ${#numbers.formatDecimal(c.precio, 1, 'COMMA', 2, 'POINT')}">S/ 9.00</td>
+                <td>
+                    <form method="post" th:action="@{/admin/cafe/carta/{id}/activo(id=${c.id})}">
+                        <input type="hidden" name="activo" th:value="${!c.activo}">
+                        <button class="btn btn-sm btn-outline-secondary" type="submit" th:text="${c.activo} ? 'Desactivar' : 'Activar'">Desactivar</button>
+                    </form>
+                </td>
+            </tr>
+        </table>
+        <form th:object="${itemForm}" method="post" th:action="@{/admin/cafe/carta}" class="hs-ancho-form">
+            <h2 class="h5" th:text="*{id} == null ? 'Nuevo ítem' : 'Editar ítem'">Nuevo ítem</h2>
+            <input type="hidden" th:field="*{id}">
+            <input class="form-control mt-2" th:field="*{nombre}" placeholder="Nombre">
+            <div class="text-danger" th:errors="*{nombre}"></div>
+            <input class="form-control mt-2" th:field="*{categoria}" placeholder="Categoría">
+            <div class="text-danger" th:errors="*{categoria}"></div>
+            <input class="form-control mt-2" th:field="*{descripcion}" placeholder="Descripción">
+            <input class="form-control mt-2" th:field="*{precio}" placeholder="Precio">
+            <div class="text-danger" th:errors="*{precio}"></div>
+            <input class="form-control mt-2" type="number" th:field="*{orden}" placeholder="Orden">
+            <label class="mt-2"><input type="checkbox" th:field="*{disponible}"> Disponible hoy</label>
+            <button class="hs-btn hs-btn--primario mt-2" type="submit">Guardar</button>
+        </form>
+    </th:block>
+
+    <th:block th:if="${pestana == 'local'}">
+        <p th:each="l : ${locales}"><a th:href="@{/admin/cafe(pestana='local', local=${l.id})}" th:text="${l.nombre}">Local</a></p>
+        <form th:object="${localForm}" method="post" th:action="@{/admin/cafe/locales}" class="hs-ancho-form">
+            <input type="hidden" th:field="*{id}">
+            <input class="form-control mt-2" th:field="*{nombre}" placeholder="Nombre">
+            <div class="text-danger" th:errors="*{nombre}"></div>
+            <input class="form-control mt-2" th:field="*{direccion}" placeholder="Dirección">
+            <div class="text-danger" th:errors="*{direccion}"></div>
+            <input class="form-control mt-2" th:field="*{horario}" placeholder="Horario">
+            <input class="form-control mt-2" th:field="*{telefono}" placeholder="Teléfono">
+            <div class="text-danger" th:errors="*{telefono}"></div>
+            <input class="form-control mt-2" th:field="*{urlMapa}" placeholder="https://maps…">
+            <div class="text-danger" th:errors="*{urlMapa}"></div>
+            <label class="mt-2"><input type="checkbox" th:field="*{activo}"> Activo</label>
+            <button class="hs-btn hs-btn--primario mt-2" type="submit">Guardar</button>
+        </form>
+    </th:block>
+
+    <form th:if="${pestana == 'arboles'}" method="post" th:action="@{/admin/cafe/arboles}" class="hs-ancho-form">
+        <label>Árboles sembrados por Höség Café
+            <input class="form-control" type="number" min="0" name="arboles" th:value="${arboles}">
+        </label>
+        <button class="hs-btn hs-btn--primario mt-2" type="submit">Publicar</button>
+    </form>
+</main>
+</body>
+</html>

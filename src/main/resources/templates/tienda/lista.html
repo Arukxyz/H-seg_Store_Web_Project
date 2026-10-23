@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 1 · 1.1 Tienda (GET /tienda, TiendaController).
+  Funcional y sin diseño: el bloque 1 lo reemplaza con su diseño de Figma.
+  Modelo (ver docs/contrato-backend.md):
+    productos   List<TarjetaProducto>  (se pintan con fragments/product-card :: card)
+    total       int                    ("12 productos")
+    filtro      FiltroCatalogo         (q, categoria, coleccion, impacto, disponibles, orden; hayFiltros())
+    categorias, colecciones  List<String>
+    compromisos TipoCompromiso[]       (ABRIGO, ARBOL; etiqueta "1 abrigo"/"1 árbol")
+    ordenes     OrdenCatalogo[]        (etiqueta)
+  Los filtros son un GET: cada campo del form se llama como el parámetro.
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: pagina(titulo='Tienda · HÖSÉG', activa='tienda',
+                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+<body>
+<main class="hs-main--bajo-nav">
+    <th:block th:replace="~{fragments/avisos :: avisos}"/>
+    <section class="hs-seccion">
+        <div class="container">
+            <h1 class="hs-h2 mb-3">Tienda</h1>
+
+            <form class="row g-2 mb-4" method="get" th:action="@{/tienda}">
+                <div class="col-12 col-md-4">
+                    <input class="hs-input" type="search" name="q" th:value="${filtro.q}" placeholder="Buscar">
+                </div>
+                <div class="col-6 col-md-2">
+                    <select class="form-select" name="categoria">
+                        <option value="">Categoría</option>
+                        <option th:each="c : ${categorias}" th:value="${c}" th:text="${c}"
+                                th:selected="${c == filtro.categoria}">Casacas</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <select class="form-select" name="coleccion">
+                        <option value="">Colección</option>
+                        <option th:each="c : ${colecciones}" th:value="${c}" th:text="${c}"
+                                th:selected="${c == filtro.coleccion}">Älpafill</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <select class="form-select" name="impacto">
+                        <option value="">Impacto</option>
+                        <option th:each="t : ${compromisos}" th:value="${t}" th:text="${t.etiqueta}"
+                                th:selected="${t == filtro.impacto}">1 abrigo</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
+                    <select class="form-select" name="orden">
+                        <option th:each="o : ${ordenes}" th:value="${o}" th:text="${o.etiqueta}"
+                                th:selected="${o == filtro.ordenEfectivo()}">Destacados</option>
+                    </select>
+                </div>
+                <div class="col-12 d-flex align-items-center gap-3">
+                    <label><input type="checkbox" name="disponibles" value="true" th:checked="${filtro.soloDisponibles()}"> Solo disponibles</label>
+                    <button class="hs-btn hs-btn--primario" type="submit">Filtrar</button>
+                    <a th:if="${filtro.hayFiltros()}" th:href="@{/tienda}">Limpiar filtros</a>
+                </div>
+            </form>
+
+            <p class="hs-texto-secundario" th:text="${total} + (${total} == 1 ? ' producto' : ' productos')">12 productos</p>
+
+            <p th:if="${productos.isEmpty()}">No encontramos productos con esos filtros.</p>
+            <div class="row g-3">
+                <div class="col-6 col-md-4 col-xl-3" th:each="p : ${productos}">
+                    <th:block th:replace="~{fragments/product-card :: card(${p})}"/>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

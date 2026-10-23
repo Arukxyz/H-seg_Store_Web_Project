@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<!--
+  Mensajes de una sola vez (flash) que dejan los controladores tras un POST:
+    exito        → "Guardamos tus datos.", "Agregado al carrito."…
+    error        → regla de negocio incumplida ("Ya hay 8 modelos destacados…")
+    boletin      → resultado de suscribirse desde el footer
+    boletinError → email inválido en el footer
+  Uso, al inicio del <main>:  <th:block th:replace="~{fragments/avisos :: avisos}"/>
+  Bloque 5 define su diseño final (toast o franja); este es el mínimo funcional.
+-->
+<body>
+<div th:fragment="avisos" class="container pt-3" th:if="${exito != null or error != null or boletin != null or boletinError != null}">
+    <div class="alert alert-success" role="status" th:if="${exito}" th:text="${exito}">Guardado.</div>
+    <div class="alert alert-danger" role="alert" th:if="${error}" th:text="${error}">Error.</div>
+    <div class="alert alert-success" role="status" th:if="${boletin}" th:text="${boletin}" id="boletin">Suscrito.</div>
+    <div class="alert alert-danger" role="alert" th:if="${boletinError}" th:text="${boletinError}">Email inválido.</div>
+</div>
+</body>
+</html>

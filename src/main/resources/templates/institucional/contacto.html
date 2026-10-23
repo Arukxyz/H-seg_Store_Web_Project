@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 3 · 3.5 Contacto (GET/POST /contacto, ContactoController).
+  Modelo:
+    mensajeForm MensajeContactoForm (nombre, email, asunto, mensaje)
+  Variante ?enviado: "Mensaje enviado" (se envía acuse de recibo por correo).
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: pagina(titulo='Contacto · HÖSÉG', activa='',
+                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+<body>
+<main class="hs-main--bajo-nav">
+    <section class="hs-seccion">
+        <div class="container hs-ancho-form">
+            <h1 class="hs-h2 mb-3">Contacto</h1>
+            <div class="alert alert-success" th:if="${param.enviado}">Recibimos tu mensaje. Te responderemos pronto.</div>
+            <form th:object="${mensajeForm}" method="post" th:action="@{/contacto}">
+                <input class="hs-input mt-2" th:field="*{nombre}" placeholder="Nombre">
+                <div class="text-danger" th:errors="*{nombre}"></div>
+                <input class="hs-input mt-2" type="email" th:field="*{email}" placeholder="Email">
+                <div class="text-danger" th:errors="*{email}"></div>
+                <input class="hs-input mt-2" th:field="*{asunto}" placeholder="Asunto">
+                <div class="text-danger" th:errors="*{asunto}"></div>
+                <textarea class="hs-input mt-2" th:field="*{mensaje}" rows="5" placeholder="Mensaje"></textarea>
+                <div class="text-danger" th:errors="*{mensaje}"></div>
+                <button class="hs-btn hs-btn--primario mt-2" type="submit">Enviar</button>
+            </form>
+        </div>
+    </section>
+</main>
+</body>
+</html>

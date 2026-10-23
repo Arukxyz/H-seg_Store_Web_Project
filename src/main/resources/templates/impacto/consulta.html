@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 3 · 3.1 Consulta de impacto (GET /consulta-impacto, ImpactoController).
+  Pública y sin datos personales. Acepta ?boleta=WEB-000110 (también "110") y ?donacion=id (QR de la boleta).
+  También en JSON: GET /api/impacto?boleta=… (404 si no existe), para buscar sin recargar.
+  Modelo:
+    boleta       String buscado (para rellenar el campo)
+    consulta     ConsultaImpacto o null: codigoComprobante, fechaCompra, estadoVenta, porQr,
+                 donaciones List<DonacionVista> (tipo, unidades, producto, estado [etiqueta, paso 0-3],
+                 comunidad, ong, fechaDespacho, fechaEntrega)
+    noEncontrado boolean (variante "Código no encontrado")
+  La línea de tiempo usa EstadoDonacion: En espera de pago → Pendiente de asignar → Lote asignado → Entregada.
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: pagina(titulo='Consulta tu impacto · HÖSÉG', activa='impacto',
+                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+<body>
+<main class="hs-main--bajo-nav">
+    <section class="hs-seccion">
+        <div class="container">
+            <h1 class="hs-h2 mb-3">Consulta tu impacto</h1>
+            <p>Escribe el código de tu boleta (está en la boleta impresa o escanea su QR).</p>
+            <form class="d-flex gap-2 hs-ancho-form mb-4" method="get" th:action="@{${rutaConsulta}}">
+                <input class="hs-input" name="boleta" th:value="${boleta}" placeholder="WEB-000110">
+                <button class="hs-btn hs-btn--primario" type="submit">Consultar</button>
+            </form>
+
+            <p th:if="${noEncontrado}">No encontramos ese código. Revisa tu boleta.</p>
+
+            <th:block th:if="${consulta != null}">
+                <h2 class="h4" th:text="${consulta.codigoComprobante}">WEB-000110</h2>
+                <p th:text="'Compra del ' + ${#temporals.format(consulta.fechaCompra, 'dd/MM/yyyy')} + ' · ' + ${consulta.estadoVenta.etiqueta}">Compra</p>
+                <p th:unless="${consulta.tieneDonaciones()}">Esta compra no generó donaciones.</p>
+                <div class="border-bottom py-2" th:each="d : ${consulta.donaciones}">
+                    <strong th:text="${d.unidades}">1 abrigo</strong> · <span th:text="${d.producto}">Casaca</span>
+                    <ol class="d-flex gap-3 list-unstyled mb-1">
+                        <li th:each="e : ${T(pe.edu.utp.hoseg.web.model.EstadoDonacion).values()}"
+                            th:classappend="${e.paso <= d.estado.paso} ? 'fw-bold' : 'text-muted'"
+                            th:text="${e.etiqueta}">Paso</li>
+                    </ol>
+                    <span th:if="${d.comunidad}" th:text="${d.comunidad} + ' · ' + ${d.ong}">Omacha · Pachamama Raymi</span>
+                    <span th:if="${d.fechaEntrega}" th:text="'· entregado el ' + ${#temporals.format(d.fechaEntrega, 'dd/MM/yyyy')}">fecha</span>
+                </div>
+            </th:block>
+        </div>
+    </section>
+</main>
+</body>
+</html>
