@@ -48,13 +48,14 @@ class VentaServiceTest {
     @Mock private ClienteRepository clienteRepository;
     @Mock private DonacionRepository donacionRepository;
     @Mock private EnvioRepository envioRepository;
+    @Mock private ImpactoService impactoService;
 
     private VentaService ventaService;
 
     @BeforeEach
     void crear() {
         ventaService = new VentaService(ventaRepository, productoRepository, clienteRepository, donacionRepository,
-                envioRepository, "WEB-", "seq_comprobante_web", new BigDecimal("10.00"));
+                envioRepository, impactoService, "WEB-", "seq_comprobante_web", new BigDecimal("10.00"));
     }
 
     @Test

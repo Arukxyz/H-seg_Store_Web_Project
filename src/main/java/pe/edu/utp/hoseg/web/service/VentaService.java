@@ -5,9 +5,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.utp.hoseg.web.dto.CompraRegistrada;
 import pe.edu.utp.hoseg.web.dto.DatosEnvioForm;
+import pe.edu.utp.hoseg.web.dto.DetallePedido;
+import pe.edu.utp.hoseg.web.dto.DonacionVista;
+import pe.edu.utp.hoseg.web.dto.EnvioVista;
 import pe.edu.utp.hoseg.web.dto.ImpactoCompra;
 import pe.edu.utp.hoseg.web.dto.ItemCarrito;
+import pe.edu.utp.hoseg.web.dto.LineaPedido;
 import pe.edu.utp.hoseg.web.dto.ProblemaCarrito;
+import pe.edu.utp.hoseg.web.dto.ResumenPedido;
+import pe.edu.utp.hoseg.web.dto.UnidadesDonadas;
 import pe.edu.utp.hoseg.web.model.Cliente;
 import pe.edu.utp.hoseg.web.model.DetalleVenta;
 import pe.edu.utp.hoseg.web.model.Donacion;
@@ -48,6 +54,7 @@ public class VentaService {
     private final ClienteRepository clienteRepository;
     private final DonacionRepository donacionRepository;
     private final EnvioRepository envioRepository;
+    private final ImpactoService impactoService;
     private final String prefijoComprobante;
     private final String secuenciaComprobante;
     private final BigDecimal costoDelivery;
@@ -57,6 +64,7 @@ public class VentaService {
                         ClienteRepository clienteRepository,
                         DonacionRepository donacionRepository,
                         EnvioRepository envioRepository,
+                        ImpactoService impactoService,
                         @Value("${hoseg.comprobante.prefijo}") String prefijoComprobante,
                         @Value("${hoseg.comprobante.secuencia}") String secuenciaComprobante,
                         @Value("${hoseg.envio.costo-delivery}") BigDecimal costoDelivery) {
@@ -65,9 +73,59 @@ public class VentaService {
         this.clienteRepository = clienteRepository;
         this.donacionRepository = donacionRepository;
         this.envioRepository = envioRepository;
+        this.impactoService = impactoService;
         this.prefijoComprobante = prefijoComprobante;
         this.secuenciaComprobante = secuenciaComprobante;
         this.costoDelivery = costoDelivery;
+    }
+
+    /** "Mis pedidos" (2.5, CU-13), del más reciente al más antiguo. */
+    public List<ResumenPedido> pedidosDe(Integer idCliente) {
+        List<Venta> ventas = ventaRepository.findByClienteIdOrderByFechaDesc(idCliente);
+        if (ventas.isEmpty()) {
+            return List.of();
+        }
+        Map<Integer, Envio> envios = envioRepository.findByVentaIdIn(ventas.stream().map(Venta::getId).toList()).stream()
+                .collect(Collectors.toMap(e -> e.getVenta().getId(), Function.identity()));
+        Map<Integer, List<UnidadesDonadas>> donadas = donacionRepository.delCliente(idCliente).stream()
+                .collect(Collectors.groupingBy(UnidadesDonadas::idVenta));
+        return ventas.stream().map(v -> {
+            Envio envio = envios.get(v.getId());
+            BigDecimal costo = envio == null ? BigDecimal.ZERO : envio.getCosto();
+            return new ResumenPedido(v.getCodigoComprobante(), v.getFecha(), v.getEstado(), v.getTotal(), costo,
+                    v.getTotal().add(costo),
+                    ImpactoService.sumar(donadas.getOrDefault(v.getId(), List.of()), u -> true),
+                    envio == null ? null : envio.getEstado());
+        }).toList();
+    }
+
+    /**
+     * "Detalle de pedido" (2.6, CU-13): líneas, envío y línea de tiempo de cada donación.
+     *
+     * @throws RecursoNoEncontradoException si el código no existe o es de otro cliente
+     */
+    public DetallePedido detallePedido(Integer idCliente, String codigoComprobante) {
+        Venta venta = ventaRepository.findByCodigoComprobanteAndClienteId(codigoComprobante, idCliente)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Pedido inexistente: " + codigoComprobante));
+        List<LineaPedido> lineas = venta.getDetalles().stream()
+                .map(d -> new LineaPedido(d.getProducto().getCodigo(), d.getProducto().getNombre(),
+                        d.getProducto().getTallaMostrada(), d.getCantidad(), d.getPrecioUnitario(), d.getSubtotal(),
+                        d.getProducto().tieneCompromiso() ? d.getProducto().getTipoCompromiso() : null))
+                .toList();
+        EnvioVista envio = envioRepository.findByVentaId(venta.getId()).map(VentaService::aVista).orElse(null);
+        BigDecimal costo = envio == null ? BigDecimal.ZERO : envio.costo();
+        List<DonacionVista> donaciones = impactoService.donacionesDeVenta(venta.getId());
+        long abrigos = donaciones.stream().filter(d -> d.tipo() == TipoCompromiso.ABRIGO).mapToLong(DonacionVista::cantidad).sum();
+        long arboles = donaciones.stream().filter(d -> d.tipo() == TipoCompromiso.ARBOL).mapToLong(DonacionVista::cantidad).sum();
+        return new DetallePedido(venta.getCodigoComprobante(), venta.getFecha(), venta.getEstado(), lineas,
+                venta.getTotal(), envio, venta.getTotal().add(costo), donaciones,
+                new ImpactoCompra(abrigos, arboles), venta.getEstado() == EstadoVenta.PAGADO);
+    }
+
+    private static EnvioVista aVista(Envio e) {
+        return new EnvioVista(e.getTipo(), e.getEstado(), e.getNombreReceptor(), e.getTelefonoReceptor(),
+                e.getDireccion(), e.getReferencia(), e.getDistrito(), e.getProvincia(), e.getDepartamento(),
+                e.getCosto(), e.getCourier(), e.getCodigoSeguimiento(), e.getFechaDespacho(), e.getFechaEntrega());
     }
 
     /**

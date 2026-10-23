@@ -6,11 +6,18 @@ import org.springframework.data.repository.query.Param;
 import pe.edu.utp.hoseg.web.model.EstadoVenta;
 import pe.edu.utp.hoseg.web.model.Venta;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface VentaRepository extends JpaRepository<Venta, Integer> {
 
     Optional<Venta> findByCodigoComprobante(String codigoComprobante);
+
+    /** "Mis pedidos": del más reciente al más antiguo. */
+    List<Venta> findByClienteIdOrderByFechaDesc(Integer idCliente);
+
+    /** Un pedido solo si es del cliente: el de otro se trata como inexistente. */
+    Optional<Venta> findByCodigoComprobanteAndClienteId(String codigoComprobante, Integer idCliente);
 
     /** Ventas en el estado dado que generaron al menos una donación. */
     @Query("""
