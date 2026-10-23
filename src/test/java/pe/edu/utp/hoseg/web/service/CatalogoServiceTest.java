@@ -50,15 +50,15 @@ class CatalogoServiceTest {
         cafe.setCategoria("Café");
         when(productoRepository.findByActivoTrueAndVisibleWebTrueOrderByCodigoAsc()).thenReturn(List.of(casaca, gorro, cafe));
 
-        assertThat(nombres(new FiltroCatalogo("ALPAFILL", null, null, null, false, null)))
+        assertThat(nombres(new FiltroCatalogo("ALPAFILL", null, null, null, null, null)))
                 .containsExactly("Casaca Älpafill Cusco");
-        assertThat(nombres(new FiltroCatalogo(null, null, null, TipoCompromiso.ARBOL, false, null)))
+        assertThat(nombres(new FiltroCatalogo(null, null, null, TipoCompromiso.ARBOL, null, null)))
                 .containsExactly("Gorro de lana Layo", "Café Bourbon");
         assertThat(nombres(new FiltroCatalogo(null, null, null, TipoCompromiso.ARBOL, true, null)))
                 .containsExactly("Café Bourbon");                                  // el gorro está agotado
-        assertThat(nombres(new FiltroCatalogo(null, "café", null, null, false, null)))
+        assertThat(nombres(new FiltroCatalogo(null, "café", null, null, null, null)))
                 .containsExactly("Café Bourbon");
-        assertThat(nombres(new FiltroCatalogo(null, null, null, null, false, OrdenCatalogo.PRECIO_ASC)))
+        assertThat(nombres(new FiltroCatalogo(null, null, null, null, null, OrdenCatalogo.PRECIO_ASC)))
                 .containsExactly("Café Bourbon", "Gorro de lana Layo", "Casaca Älpafill Cusco");
     }
 
