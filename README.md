@@ -10,13 +10,13 @@ Java 21 + Spring Boot 3 (Web, Thymeleaf, Data JPA, Validation, Security) + Boots
 
 | Sistema | Hace | No hace |
 |---|---|---|
-| **Web (este repo)** | Catálogo, registro/login de clientes, carrito, confirmar compra (`venta` + `detalle_venta` + `donacion` PENDIENTE), consulta pública de impacto | Descontar stock, confirmar/anular pedidos, armar lotes |
+| **Web (este repo)** | Catálogo, registro/login de clientes, carrito, confirmar compra (`venta` + `detalle_venta` + `donacion` EN_ESPERA + `envio`), reseñas, consulta pública de impacto, Höség Café, contacto, reclamaciones y panel `/admin` | Descontar stock, confirmar/anular pedidos, armar lotes, cobrar en línea |
 | **Escritorio** | Confirmar pedidos (mueve `stock_comercial` → `stock_comprometido`), lotes, despacho, reportes, boleta PDF con QR | Crear ventas |
 
 ## Requisitos
 
 - JDK 21, Maven 3.9+
-- La base de Supabase con los scripts `01`..`06` del repositorio del escritorio ejecutados (`06_web_clientes.sql` es el que agrega lo que necesita la web).
+- La base de Supabase con los scripts `01`..`09` del repositorio del escritorio ejecutados (`06`, `08` y `09` son los que agregan lo que necesita la web).
 
 ## Configuración
 
