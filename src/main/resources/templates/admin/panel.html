@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 4 · 4.2 Panel (GET /admin/panel?desde=AAAA-MM-DD&hasta=AAAA-MM-DD, AdminController).
+  Solo consulta: sin botones de confirmar ni anular (eso es del escritorio).
+  Modelo:
+    desde, hasta LocalDate (por defecto, del 1 del mes a hoy, hora de Lima)
+    indicadores  IndicadoresPanel (pedidosHoy, pendientesDePago, montoVendido, impactoGenerado [ImpactoCompra],
+                 mensajesNuevos, reclamosSinResponder)
+    pedidos      List<PedidoAdmin> (codigoComprobante, cliente, fecha, total, costoEnvio, estado, tipoEnvio, estadoEnvio)
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/admin :: pagina(titulo='Panel · HÖSÉG', activa='panel', contenido=~{::main})}">
+<body>
+<main class="container-fluid pb-5">
+    <h1 class="h3">Panel</h1>
+    <form class="d-flex gap-2 align-items-end mb-3" method="get" th:action="@{/admin/panel}">
+        <label>Desde <input class="form-control" type="date" name="desde" th:value="${desde}"></label>
+        <label>Hasta <input class="form-control" type="date" name="hasta" th:value="${hasta}"></label>
+        <button class="hs-btn hs-btn--primario" type="submit">Filtrar</button>
+    </form>
+    <ul>
+        <li th:text="'Pedidos web de hoy: ' + ${indicadores.pedidosHoy}">Pedidos de hoy</li>
+        <li th:text="'Pendientes de pago: ' + ${indicadores.pendientesDePago}">Pendientes</li>
+        <li th:text="'Monto vendido: S/ ' + ${#numbers.formatDecimal(indicadores.montoVendido, 1, 'COMMA', 2, 'POINT')}">Monto</li>
+        <li th:text="'Impacto generado: ' + (${indicadores.impactoGenerado.tieneImpacto()} ? ${indicadores.impactoGenerado.texto} : 'ninguno')">Impacto</li>
+        <li th:text="'Mensajes nuevos: ' + ${indicadores.mensajesNuevos} + ' · Reclamos sin responder: ' + ${indicadores.reclamosSinResponder}">Mensajes</li>
+    </ul>
+    <table class="table table-sm">
+        <thead><tr><th>Código</th><th>Cliente</th><th>Fecha</th><th>Total</th><th>Estado</th><th>Envío</th></tr></thead>
+        <tbody>
+        <tr th:if="${pedidos.isEmpty()}"><td colspan="6">Sin pedidos en el periodo.</td></tr>
+        <tr th:each="p : ${pedidos}">
+            <td th:text="${p.codigoComprobante}">WEB-000110</td>
+            <td th:text="${p.cliente}">Ana Torres</td>
+            <td th:text="${#temporals.format(p.fecha, 'dd/MM/yyyy HH:mm')}">23/10/2026</td>
+            <td th:text="'S/ ' + ${#numbers.formatDecimal(p.total, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</td>
+            <td th:text="${p.estado.etiqueta}">Pendiente</td>
+            <td th:text="${p.tipoEnvio != null} ? ${p.tipoEnvio.etiqueta} + ' · ' + ${p.estadoEnvio.etiqueta} : '—'">Delivery</td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>

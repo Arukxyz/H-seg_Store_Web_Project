@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 3 · 3.6 Libro de Reclamaciones (GET/POST /libro-reclamaciones, ContactoController).
+  Modelo:
+    reclamoForm    ReclamoForm (tipo, nombre, tipoDoc, numDoc, domicilio, email, telefono, tipoBien,
+                   montoReclamado, descripcionBien, detalle, pedidoConsumidor, codigoComprobante opcional;
+                   global documentoValido). "codigoComprobante" recibe error si el pedido no existe.
+    tiposReclamo   TipoReclamo[] (RECLAMO, QUEJA) · tiposDocumento TipoDocumento[] · tiposBien TipoBien[]
+  Variante ?registrado: muestra numeroHoja (flash, "LR-000001") y se envía constancia por correo.
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: pagina(titulo='Libro de Reclamaciones · HÖSÉG', activa='',
+                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+<body>
+<main class="hs-main--bajo-nav">
+    <section class="hs-seccion">
+        <div class="container hs-ancho-form">
+            <h1 class="hs-h2 mb-3">Libro de Reclamaciones</h1>
+            <div class="alert alert-success" th:if="${param.registrado}">
+                Registramos tu hoja <strong th:text="${numeroHoja}">LR-000001</strong>. Te enviamos la constancia por correo.
+            </div>
+            <form th:unless="${param.registrado}" th:object="${reclamoForm}" method="post" th:action="@{/libro-reclamaciones}">
+                <fieldset>
+                    <legend class="h6">Tipo</legend>
+                    <label th:each="t : ${tiposReclamo}" class="me-3"><input type="radio" th:field="*{tipo}" th:value="${t}"> <span th:text="${t}">RECLAMO</span></label>
+                    <div class="text-danger" th:errors="*{tipo}"></div>
+                </fieldset>
+                <input class="hs-input mt-2" th:field="*{nombre}" placeholder="Nombre completo">
+                <div class="text-danger" th:errors="*{nombre}"></div>
+                <select class="form-select mt-2" th:field="*{tipoDoc}">
+                    <option value="">Tipo de documento</option>
+                    <option th:each="t : ${tiposDocumento}" th:value="${t}" th:text="${t.etiqueta}">DNI</option>
+                </select>
+                <div class="text-danger" th:errors="*{tipoDoc}"></div>
+                <input class="hs-input mt-2" th:field="*{numDoc}" placeholder="Número de documento">
+                <div class="text-danger" th:errors="*{numDoc}"></div>
+                <div class="text-danger" th:errors="*{documentoValido}"></div>
+                <input class="hs-input mt-2" th:field="*{domicilio}" placeholder="Domicilio">
+                <div class="text-danger" th:errors="*{domicilio}"></div>
+                <input class="hs-input mt-2" type="email" th:field="*{email}" placeholder="Email">
+                <div class="text-danger" th:errors="*{email}"></div>
+                <input class="hs-input mt-2" th:field="*{telefono}" placeholder="Teléfono (opcional)">
+                <div class="text-danger" th:errors="*{telefono}"></div>
+                <fieldset class="mt-2">
+                    <legend class="h6">Sobre</legend>
+                    <label th:each="b : ${tiposBien}" class="me-3"><input type="radio" th:field="*{tipoBien}" th:value="${b}"> <span th:text="${b}">PRODUCTO</span></label>
+                    <div class="text-danger" th:errors="*{tipoBien}"></div>
+                </fieldset>
+                <input class="hs-input mt-2" th:field="*{descripcionBien}" placeholder="Producto o servicio">
+                <div class="text-danger" th:errors="*{descripcionBien}"></div>
+                <input class="hs-input mt-2" th:field="*{montoReclamado}" placeholder="Monto reclamado (opcional)">
+                <div class="text-danger" th:errors="*{montoReclamado}"></div>
+                <input class="hs-input mt-2" th:field="*{codigoComprobante}" placeholder="Código de pedido (opcional)">
+                <div class="text-danger" th:errors="*{codigoComprobante}"></div>
+                <textarea class="hs-input mt-2" th:field="*{detalle}" rows="4" placeholder="Detalle"></textarea>
+                <div class="text-danger" th:errors="*{detalle}"></div>
+                <textarea class="hs-input mt-2" th:field="*{pedidoConsumidor}" rows="3" placeholder="Pedido del consumidor"></textarea>
+                <div class="text-danger" th:errors="*{pedidoConsumidor}"></div>
+                <button class="hs-btn hs-btn--primario mt-2" type="submit">Registrar</button>
+            </form>
+        </div>
+    </section>
+</main>
+</body>
+</html>

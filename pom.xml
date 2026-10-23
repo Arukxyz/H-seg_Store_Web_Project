@@ -61,6 +61,13 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+        <!-- Correos (bienvenida, pedido registrado, recuperar contraseña). Sin spring.mail.host
+             no se envían: CorreoService los escribe en el log. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
         <!-- Login de clientes: BCrypt para cliente.password_hash y protección de /carrito/confirmar -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

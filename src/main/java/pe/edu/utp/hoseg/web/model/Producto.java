@@ -69,6 +69,10 @@ public class Producto {
     @Column(nullable = false)
     private boolean activo;
 
+    /** Carrusel de la Home (08). Lo marca el panel web por modelo, máximo 8 modelos. */
+    @Column(nullable = false)
+    private boolean destacado;
+
     /** Lo asigna la base (DEFAULT now()); el escritorio es quien da de alta productos. */
     @Column(name = "creado_en", nullable = false, insertable = false, updatable = false)
     private OffsetDateTime creadoEn;
@@ -80,6 +84,11 @@ public class Producto {
 
     public boolean estaDisponible() {
         return stockComercial > 0;
+    }
+
+    /** "¡Quedan pocas unidades!": stock comercial al nivel del mínimo o por debajo. */
+    public boolean quedanPocas() {
+        return estaDisponible() && stockComercial <= stockMinimo;
     }
 
     /** Talla mostrada al cliente: la semilla usa NULL y "Única" indistintamente. */
@@ -119,5 +128,7 @@ public class Producto {
     public void setVisibleWeb(boolean visibleWeb) { this.visibleWeb = visibleWeb; }
     public boolean isActivo() { return activo; }
     public void setActivo(boolean activo) { this.activo = activo; }
+    public boolean isDestacado() { return destacado; }
+    public void setDestacado(boolean destacado) { this.destacado = destacado; }
     public OffsetDateTime getCreadoEn() { return creadoEn; }
 }

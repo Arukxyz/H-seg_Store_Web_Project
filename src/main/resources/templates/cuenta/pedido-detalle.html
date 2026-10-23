@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 2 · 2.6 Detalle de pedido (GET /cuenta/pedidos/{codigo}, CuentaController).
+  Modelo:
+    pedido  DetallePedido: codigoComprobante, fecha, estado, totalProductos, totalAPagar, impacto, puedeResenar,
+            lineas List<LineaPedido> (codigoProducto, nombre, talla, cantidad, precioUnitario, subtotal, tipoCompromiso),
+            envio EnvioVista o null (tipo, estado, nombreReceptor, direccion, distrito…, costo, courier,
+                  codigoSeguimiento, fechaDespacho, fechaEntrega),
+            donaciones List<DonacionVista> (tipo, unidades "2 abrigos", producto, estado [etiqueta, paso 0-3],
+                  comunidad, ong, fechaEntrega) ← misma línea de tiempo que la consulta pública (bloque 3).
+  "Reseñar" lleva a /tienda/{codigoProducto}#resenas.
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: pagina(titulo=${pedido.codigoComprobante} + ' · HÖSÉG', activa='cuenta',
+                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+<body>
+<main class="hs-main--bajo-nav">
+    <section class="hs-seccion">
+        <div class="container">
+            <a th:href="@{/cuenta}">← Mis pedidos</a>
+            <h1 class="hs-h2" th:text="${pedido.codigoComprobante}">WEB-000110</h1>
+            <p th:text="${#temporals.format(pedido.fecha, 'dd/MM/yyyy HH:mm')} + ' · ' + ${pedido.estado.etiqueta}">Fecha · Estado</p>
+
+            <div class="border-bottom py-2" th:each="l : ${pedido.lineas}">
+                <span th:text="${l.cantidad} + ' × ' + ${l.nombre} + ' (' + ${l.talla} + ')'">1 × Casaca (M)</span>
+                · <span th:text="'S/ ' + ${#numbers.formatDecimal(l.subtotal, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</span>
+                <a th:if="${pedido.puedeResenar}" th:href="@{/tienda/{c}(c=${l.codigoProducto})} + '#resenas'">Reseñar</a>
+            </div>
+            <p class="mt-2" th:text="'Total: S/ ' + ${#numbers.formatDecimal(pedido.totalAPagar, 1, 'COMMA', 2, 'POINT')}">Total</p>
+
+            <section th:if="${pedido.envio != null}" class="mt-4">
+                <h2 class="h5">Envío</h2>
+                <p th:text="${pedido.envio.tipo.etiqueta} + ' · ' + ${pedido.envio.estado.etiqueta}">Delivery · Preparando</p>
+                <p th:if="${pedido.envio.direccion}" th:text="${pedido.envio.direccion} + ', ' + ${pedido.envio.distrito}">Dirección</p>
+                <p th:if="${pedido.envio.codigoSeguimiento}" th:text="${pedido.envio.courier} + ' · ' + ${pedido.envio.codigoSeguimiento}">Courier</p>
+            </section>
+
+            <section class="mt-4" th:unless="${pedido.donaciones.isEmpty()}">
+                <h2 class="h5" th:text="'Tu impacto: ' + ${pedido.impacto.texto}">Tu impacto</h2>
+                <div class="border-bottom py-2" th:each="d : ${pedido.donaciones}">
+                    <strong th:text="${d.unidades}">1 abrigo</strong> · <span th:text="${d.producto}">Casaca</span>
+                    · <span th:text="${d.estado.etiqueta}">Pendiente de asignar</span>
+                    <span th:if="${d.comunidad}" th:text="'· ' + ${d.comunidad} + ' (' + ${d.ong} + ')'">Omacha</span>
+                    <span th:if="${d.fechaEntrega}" th:text="'· entregado el ' + ${#temporals.format(d.fechaEntrega, 'dd/MM/yyyy')}">fecha</span>
+                </div>
+            </section>
+        </div>
+    </section>
+</main>
+</body>
+</html>

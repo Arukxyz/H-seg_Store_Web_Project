@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 3 · 3.2 Höség Café (GET /cafe, InstitucionalController).
+  Modelo:
+    arboles      long: contador "árboles sembrados por Höség Café" (lo edita el panel)
+    carta        List<CategoriaCarta> (categoria, items[nombre, descripcion, precio, disponible])
+    locales      List<LocalCafe> (nombre, direccion, horario, telefono, urlMapa)
+    cafesEnGrano List<TarjetaProducto>: café en grano de la tienda (badge 1 árbol, enlaza al detalle)
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: pagina(titulo='Höség Café · HÖSÉG', activa='cafe',
+                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+<body>
+<main class="hs-main--bajo-nav">
+    <section class="hs-seccion">
+        <div class="container">
+            <h1 class="hs-h2">Por cada café, sembramos un árbol en Cusco</h1>
+            <p th:text="${#numbers.formatInteger(arboles, 1, 'COMMA')} + ' árboles sembrados'">5,018 árboles sembrados</p>
+
+            <h2 class="h4 mt-4">La carta</h2>
+            <p th:if="${carta.isEmpty()}">Pronto publicaremos la carta.</p>
+            <div th:each="c : ${carta}" class="mb-3">
+                <h3 class="h6" th:text="${c.categoria}">Bebidas calientes</h3>
+                <p class="mb-1" th:each="i : ${c.items}">
+                    <span th:text="${i.nombre}">Latte</span>
+                    <span th:text="'S/ ' + ${#numbers.formatDecimal(i.precio, 1, 'COMMA', 2, 'POINT')}">S/ 9.00</span>
+                    <small th:unless="${i.disponible}">(agotado hoy)</small>
+                </p>
+            </div>
+
+            <h2 class="h4 mt-4">Cafés de especialidad</h2>
+            <div class="row g-3">
+                <div class="col-6 col-md-3" th:each="p : ${cafesEnGrano}">
+                    <th:block th:replace="~{fragments/product-card :: card(${p})}"/>
+                </div>
+            </div>
+
+            <h2 class="h4 mt-4">Visítanos</h2>
+            <p th:each="l : ${locales}">
+                <strong th:text="${l.nombre}">Höség Café Cusco</strong><br>
+                <span th:text="${l.direccion}">Calle Palacio 110 int. 2</span><br>
+                <span th:text="${l.horario}">Lunes a domingo</span>
+                <a th:if="${l.urlMapa}" th:href="${l.urlMapa}" target="_blank" rel="noopener">Ver mapa</a>
+            </p>
+        </div>
+    </section>
+</main>
+</body>
+</html>

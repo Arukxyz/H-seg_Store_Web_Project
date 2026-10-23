@@ -3,11 +3,9 @@ package pe.edu.utp.hoseg.web.controller;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import pe.edu.utp.hoseg.web.config.SecurityConfig;
 import pe.edu.utp.hoseg.web.service.CarritoService;
 import pe.edu.utp.hoseg.web.service.CatalogoService;
 
@@ -23,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /** La página de ejemplo usa el layout base: si compila aquí, una página copiada de ella también. */
 @WebMvcTest(EjemploController.class)
-@Import(SecurityConfig.class)
+@ConSeguridadDelPortal
 @ActiveProfiles("dev")
 class EjemploControllerTest {
 

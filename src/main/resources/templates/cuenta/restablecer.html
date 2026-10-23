@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 2 · 2.4 Nueva contraseña (GET/POST /restablecer?token=…, AuthController).
+  Modelo:
+    vencido         boolean: el enlace venció o ya se usó (variante "Enlace vencido")
+    restablecerForm RestablecerContrasenaForm (token oculto, nueva, confirmacion; global contrasenasCoinciden)
+  Éxito: redirige a /login?restablecida.
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: pagina(titulo='Nueva contraseña · HÖSÉG', activa='cuenta',
+                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+<body>
+<main class="hs-main--bajo-nav">
+    <section class="hs-seccion">
+        <div class="container hs-ancho-form">
+            <h1 class="hs-h2 mb-3">Nueva contraseña</h1>
+            <div th:if="${vencido}">
+                <p>El enlace venció o ya se usó.</p>
+                <a class="hs-btn hs-btn--primario" th:href="@{/recuperar}">Pedir otro enlace</a>
+            </div>
+            <form th:unless="${vencido}" th:object="${restablecerForm}" method="post" th:action="@{/restablecer}">
+                <input type="hidden" th:field="*{token}">
+                <input class="hs-input mt-2" type="password" th:field="*{nueva}" placeholder="Contraseña nueva" autocomplete="new-password">
+                <div class="text-danger" th:errors="*{nueva}"></div>
+                <input class="hs-input mt-2" type="password" th:field="*{confirmacion}" placeholder="Repítela" autocomplete="new-password">
+                <div class="text-danger" th:errors="*{confirmacion}"></div>
+                <div class="text-danger" th:errors="*{contrasenasCoinciden}"></div>
+                <button class="hs-btn hs-btn--primario mt-3" type="submit">Guardar</button>
+            </form>
+        </div>
+    </section>
+</main>
+</body>
+</html>

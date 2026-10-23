@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 2 · 2.5 y 2.7 Mi cuenta (GET /cuenta?seccion=pedidos|datos, CuentaController).
+  Modelo:
+    seccion        "pedidos" | "datos" (pestaña activa)
+    nombre         nombre del cliente ("Hola, Ana")
+    impacto        ImpactoCliente: generado, entregado, enEsperaDePago (cada uno ImpactoCompra con texto)
+    pedidos        List<ResumenPedido> (codigoComprobante, fecha, estado [etiqueta], totalProductos,
+                   costoEnvio, totalAPagar, impacto, estadoEnvio [etiqueta, puede ser null])
+    datosForm      DatosClienteForm (email solo lectura, nombre, apellido, telefono, direccion) → POST /cuenta/datos
+    contrasenaForm CambioContrasenaForm (actual, nueva, confirmacion) → POST /cuenta/contrasena
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: pagina(titulo='Mi cuenta · HÖSÉG', activa='cuenta',
+                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+<body>
+<main class="hs-main--bajo-nav">
+    <th:block th:replace="~{fragments/avisos :: avisos}"/>
+    <section class="hs-seccion">
+        <div class="container">
+            <h1 class="hs-h2" th:text="'Hola, ' + ${nombre}">Hola, Ana</h1>
+            <nav class="mb-4">
+                <a th:href="@{/cuenta}" th:classappend="${seccion == 'pedidos'} ? 'fw-bold'">Pedidos e impacto</a> ·
+                <a th:href="@{/cuenta(seccion='datos')}" th:classappend="${seccion == 'datos'} ? 'fw-bold'">Mis datos</a>
+            </nav>
+
+            <th:block th:if="${seccion == 'pedidos'}">
+                <h2 class="h4">Tu impacto</h2>
+                <p th:text="${impacto.generado.tieneImpacto()} ? 'Tus compras generaron ' + ${impacto.generado.texto} + '.' : 'Aún no tienes compras pagadas.'">Impacto</p>
+                <p th:if="${impacto.entregado.tieneImpacto()}" th:text="'Ya llegaron: ' + ${impacto.entregado.texto} + '.'">Entregado</p>
+                <p th:if="${impacto.enEsperaDePago.tieneImpacto()}" th:text="'En espera de pago: ' + ${impacto.enEsperaDePago.texto} + '.'">En espera</p>
+
+                <h2 class="h4 mt-4">Tus pedidos</h2>
+                <p th:if="${pedidos.isEmpty()}">Todavía no tienes pedidos. <a th:href="@{/tienda}">Ir a la tienda</a></p>
+                <div class="border-bottom py-2" th:each="p : ${pedidos}">
+                    <a th:href="@{/cuenta/pedidos/{c}(c=${p.codigoComprobante})}" th:text="${p.codigoComprobante}">WEB-000110</a>
+                    · <span th:text="${#temporals.format(p.fecha, 'dd/MM/yyyy')}">23/10/2026</span>
+                    · <span th:text="'S/ ' + ${#numbers.formatDecimal(p.totalAPagar, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</span>
+                    · <span class="hs-chip hs-chip--pequeno" th:text="${p.estado.etiqueta}">Pendiente</span>
+                    <span th:if="${p.estadoEnvio != null}" th:text="'· Envío: ' + ${p.estadoEnvio.etiqueta}">Envío</span>
+                </div>
+            </th:block>
+
+            <th:block th:if="${seccion == 'datos'}">
+                <form th:object="${datosForm}" method="post" th:action="@{/cuenta/datos}" class="hs-ancho-form">
+                    <h2 class="h4">Mis datos</h2>
+                    <p>Email: <strong th:text="*{email}">ana@correo.pe</strong></p>
+                    <input class="hs-input mt-2" th:field="*{nombre}" placeholder="Nombre">
+                    <div class="text-danger" th:errors="*{nombre}"></div>
+                    <input class="hs-input mt-2" th:field="*{apellido}" placeholder="Apellido">
+                    <div class="text-danger" th:errors="*{apellido}"></div>
+                    <input class="hs-input mt-2" th:field="*{telefono}" placeholder="Celular">
+                    <div class="text-danger" th:errors="*{telefono}"></div>
+                    <input class="hs-input mt-2" th:field="*{direccion}" placeholder="Dirección">
+                    <div class="text-danger" th:errors="*{direccion}"></div>
+                    <button class="hs-btn hs-btn--primario mt-2" type="submit">Guardar</button>
+                </form>
+
+                <form th:object="${contrasenaForm}" method="post" th:action="@{/cuenta/contrasena}" class="hs-ancho-form mt-5">
+                    <h2 class="h4">Cambiar contraseña</h2>
+                    <input class="hs-input mt-2" type="password" th:field="*{actual}" placeholder="Contraseña actual" autocomplete="current-password">
+                    <div class="text-danger" th:errors="*{actual}"></div>
+                    <input class="hs-input mt-2" type="password" th:field="*{nueva}" placeholder="Contraseña nueva" autocomplete="new-password">
+                    <div class="text-danger" th:errors="*{nueva}"></div>
+                    <input class="hs-input mt-2" type="password" th:field="*{confirmacion}" placeholder="Repítela" autocomplete="new-password">
+                    <div class="text-danger" th:errors="*{confirmacion}"></div>
+                    <div class="text-danger" th:errors="*{contrasenasCoinciden}"></div>
+                    <button class="hs-btn hs-btn--secundario mt-2" type="submit">Cambiar contraseña</button>
+                </form>
+            </th:block>
+        </div>
+    </section>
+</main>
+</body>
+</html>

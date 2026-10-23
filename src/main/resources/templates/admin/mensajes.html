@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 4 · 4.6 Mensajes (GET /admin/mensajes?pestana=bandeja|reclamaciones|suscriptores, AdminMensajesController).
+  Modelo:
+    pestana       "bandeja" | "reclamaciones" | "suscriptores"
+    estado        EstadoMensaje o null (filtro ?estado=NUEVO|ATENDIDO de la bandeja)
+    mensajes      List<MensajeAdmin> (id, nombre, email, asunto, mensaje, estado, creadoEn, atendidoEn, atendidoPor)
+    reclamos      List<ReclamoAdmin> (id, numeroHoja, tipo, nombre, …, detalle, pedidoConsumidor, estado, respuesta)
+    respuestaForm RespuestaReclamoForm (respuesta) → POST /admin/reclamaciones/{id}/respuesta (se envía por correo)
+    reclamoConError Integer: hoja cuyo formulario volvió con error (si existe)
+    suscriptores  List<SuscriptorBoletin> (email, suscritoEn)
+  Acciones: POST /admin/mensajes/{id}/atendido · GET /admin/suscriptores.csv (Exportar CSV)
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/admin :: pagina(titulo='Mensajes · HÖSÉG', activa='mensajes', contenido=~{::main})}">
+<body>
+<main class="container-fluid pb-5">
+    <h1 class="h3">Mensajes</h1>
+    <nav class="mb-3">
+        <a th:href="@{/admin/mensajes}" th:classappend="${pestana == 'bandeja'} ? 'fw-bold'">Bandeja</a> ·
+        <a th:href="@{/admin/mensajes(pestana='reclamaciones')}" th:classappend="${pestana == 'reclamaciones'} ? 'fw-bold'">Reclamaciones</a> ·
+        <a th:href="@{/admin/mensajes(pestana='suscriptores')}" th:classappend="${pestana == 'suscriptores'} ? 'fw-bold'">Suscriptores</a>
+    </nav>
+
+    <th:block th:if="${pestana == 'bandeja'}">
+        <p th:if="${mensajes.isEmpty()}">No hay mensajes.</p>
+        <article class="border-bottom py-2" th:each="m : ${mensajes}">
+            <strong th:text="${m.asunto}">Asunto</strong> · <span th:text="${m.nombre} + ' <' + ${m.email} + '>'">Ana</span>
+            · <span th:text="${m.estado}">NUEVO</span>
+            <p class="mb-1" th:text="${m.mensaje}">Mensaje</p>
+            <form th:if="${m.estado.name() == 'NUEVO'}" method="post" th:action="@{/admin/mensajes/{id}/atendido(id=${m.id})}">
+                <button class="btn btn-sm btn-outline-secondary" type="submit">Marcar atendido</button>
+            </form>
+            <small th:if="${m.atendidoPor}" th:text="'Atendido por ' + ${m.atendidoPor}">Atendido</small>
+        </article>
+    </th:block>
+
+    <th:block th:if="${pestana == 'reclamaciones'}">
+        <p th:if="${reclamos.isEmpty()}">No hay hojas registradas.</p>
+        <article class="border-bottom py-2" th:each="r : ${reclamos}">
+            <strong th:text="${r.numeroHoja}">LR-000001</strong> · <span th:text="${r.tipo}">RECLAMO</span>
+            · <span th:text="${r.nombre}">Ana</span> · <span th:text="${r.estado}">REGISTRADO</span>
+            <p class="mb-1" th:text="${r.detalle}">Detalle</p>
+            <p class="mb-1" th:text="'Pide: ' + ${r.pedidoConsumidor}">Pedido</p>
+            <p th:if="${r.respuesta}" th:text="'Respuesta: ' + ${r.respuesta}">Respuesta</p>
+            <form th:if="${r.estado.name() == 'REGISTRADO'}" th:object="${respuestaForm}" method="post"
+                  th:action="@{/admin/reclamaciones/{id}/respuesta(id=${r.id})}">
+                <textarea class="form-control" th:field="*{respuesta}" rows="3"></textarea>
+                <div class="text-danger" th:if="${reclamoConError == r.id}" th:errors="*{respuesta}"></div>
+                <button class="hs-btn hs-btn--primario mt-1" type="submit">Responder</button>
+            </form>
+        </article>
+    </th:block>
+
+    <th:block th:if="${pestana == 'suscriptores'}">
+        <a class="hs-btn hs-btn--secundario mb-3" th:href="@{/admin/suscriptores.csv}">Exportar CSV</a>
+        <p th:each="s : ${suscriptores}" th:text="${s.email} + ' · ' + ${#temporals.format(s.suscritoEn, 'dd/MM/yyyy')}">ana@correo.pe</p>
+    </th:block>
+</main>
+</body>
+</html>

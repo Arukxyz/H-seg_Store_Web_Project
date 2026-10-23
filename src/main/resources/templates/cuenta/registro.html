@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 2 · 2.2 Registro (GET/POST /registro, AuthController).
+  Modelo:
+    registroForm   RegistroClienteForm (nombre, apellido, tipoDoc, numDoc, email, telefono, direccion,
+                   contrasena, confirmacion, aceptaTerminos). Errores globales: documentoValido, contrasenasCoinciden.
+                   "email" y "numDoc" también reciben errores de negocio (ya registrado).
+    tiposDocumento TipoDocumento[] (DNI, CE, PASAPORTE, RUC; etiqueta)
+  Éxito: redirige a /login?registrado.
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: pagina(titulo='Crear cuenta · HÖSÉG', activa='cuenta',
+                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+<body>
+<main class="hs-main--bajo-nav">
+    <section class="hs-seccion">
+        <div class="container hs-ancho-form">
+            <h1 class="hs-h2 mb-3">Crear cuenta</h1>
+            <form th:object="${registroForm}" method="post" th:action="@{/registro}">
+                <input class="hs-input mt-2" th:field="*{nombre}" placeholder="Nombre">
+                <div class="text-danger" th:errors="*{nombre}"></div>
+                <input class="hs-input mt-2" th:field="*{apellido}" placeholder="Apellido">
+                <div class="text-danger" th:errors="*{apellido}"></div>
+                <select class="form-select mt-2" th:field="*{tipoDoc}">
+                    <option value="">Tipo de documento</option>
+                    <option th:each="t : ${tiposDocumento}" th:value="${t}" th:text="${t.etiqueta}">DNI</option>
+                </select>
+                <div class="text-danger" th:errors="*{tipoDoc}"></div>
+                <input class="hs-input mt-2" th:field="*{numDoc}" placeholder="Número de documento">
+                <div class="text-danger" th:errors="*{numDoc}"></div>
+                <div class="text-danger" th:errors="*{documentoValido}"></div>
+                <input class="hs-input mt-2" type="email" th:field="*{email}" placeholder="Email">
+                <div class="text-danger" th:errors="*{email}"></div>
+                <input class="hs-input mt-2" th:field="*{telefono}" placeholder="Celular (opcional)">
+                <div class="text-danger" th:errors="*{telefono}"></div>
+                <input class="hs-input mt-2" th:field="*{direccion}" placeholder="Dirección (opcional)">
+                <div class="text-danger" th:errors="*{direccion}"></div>
+                <input class="hs-input mt-2" type="password" th:field="*{contrasena}" placeholder="Contraseña" autocomplete="new-password">
+                <div class="text-danger" th:errors="*{contrasena}"></div>
+                <input class="hs-input mt-2" type="password" th:field="*{confirmacion}" placeholder="Repite la contraseña" autocomplete="new-password">
+                <div class="text-danger" th:errors="*{confirmacion}"></div>
+                <div class="text-danger" th:errors="*{contrasenasCoinciden}"></div>
+                <label class="d-block mt-2"><input type="checkbox" th:field="*{aceptaTerminos}">
+                    Acepto los <a th:href="@{/terminos}">términos</a> y la política de privacidad</label>
+                <div class="text-danger" th:errors="*{aceptaTerminos}"></div>
+                <button class="hs-btn hs-btn--primario mt-3" type="submit">Crear cuenta</button>
+            </form>
+        </div>
+    </section>
+</main>
+</body>
+</html>

@@ -2,6 +2,8 @@ package pe.edu.utp.hoseg.web.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,6 +17,7 @@ import java.time.OffsetDateTime;
  * personal interno). apellido, direccion y password_hash los agrega
  * 06_web_clientes.sql; password_hash guarda BCrypt y queda NULL en los
  * clientes históricos de la semilla, que aún no pueden iniciar sesión.
+ * terminos_aceptados_en, intentos_fallidos y bloqueado_hasta los agrega 08.
  */
 @Entity
 @Table(name = "cliente")
@@ -27,11 +30,12 @@ public class Cliente {
     @Column(nullable = false, length = 150)
     private String nombre;
 
-    @Column(length = 100)
+    @Column(nullable = false, length = 100)
     private String apellido;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "tipo_doc", length = 10)
-    private String tipoDoc;
+    private TipoDocumento tipoDoc;
 
     @Column(name = "num_doc", length = 20)
     private String numDoc;
@@ -51,6 +55,17 @@ public class Cliente {
     @Column(name = "creado_en", nullable = false)
     private OffsetDateTime creadoEn;
 
+    /** NULL en los compradores históricos: aceptan al registrarse. */
+    @Column(name = "terminos_aceptados_en")
+    private OffsetDateTime terminosAceptadosEn;
+
+    /** Lo incrementa y reinicia Postgres (ClienteRepository), nunca Java. */
+    @Column(name = "intentos_fallidos", nullable = false, insertable = false, updatable = false)
+    private int intentosFallidos;
+
+    @Column(name = "bloqueado_hasta", insertable = false, updatable = false)
+    private OffsetDateTime bloqueadoHasta;
+
     @PrePersist
     void alCrear() {
         if (creadoEn == null) {
@@ -62,13 +77,22 @@ public class Cliente {
         return passwordHash != null;
     }
 
+    public String getNombreCompleto() {
+        return nombre + " " + apellido;
+    }
+
+    /** "María G.": cómo firma sus reseñas, sin exponer el apellido completo. */
+    public String getNombrePublico() {
+        return nombre.split("\\s+")[0] + " " + apellido.charAt(0) + ".";
+    }
+
     public Integer getId() { return id; }
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
     public String getApellido() { return apellido; }
     public void setApellido(String apellido) { this.apellido = apellido; }
-    public String getTipoDoc() { return tipoDoc; }
-    public void setTipoDoc(String tipoDoc) { this.tipoDoc = tipoDoc; }
+    public TipoDocumento getTipoDoc() { return tipoDoc; }
+    public void setTipoDoc(TipoDocumento tipoDoc) { this.tipoDoc = tipoDoc; }
     public String getNumDoc() { return numDoc; }
     public void setNumDoc(String numDoc) { this.numDoc = numDoc; }
     public String getEmail() { return email; }
@@ -80,4 +104,8 @@ public class Cliente {
     public String getPasswordHash() { return passwordHash; }
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
     public OffsetDateTime getCreadoEn() { return creadoEn; }
+    public OffsetDateTime getTerminosAceptadosEn() { return terminosAceptadosEn; }
+    public void setTerminosAceptadosEn(OffsetDateTime terminosAceptadosEn) { this.terminosAceptadosEn = terminosAceptadosEn; }
+    public int getIntentosFallidos() { return intentosFallidos; }
+    public OffsetDateTime getBloqueadoHasta() { return bloqueadoHasta; }
 }

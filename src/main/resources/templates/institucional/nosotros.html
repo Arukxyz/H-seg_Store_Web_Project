@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 3 · 3.3 Nosotros (GET /nosotros, InstitucionalController).
+  Modelo:
+    bloques     Map<clave, BloqueContenido>: bloques['nosotros.historia'] (titulo, cuerpo, imagenUrl);
+                puede faltar → usar el texto por defecto con ?: (Elvis)
+    impacto     ResumenImpacto (abrigosEntregados, arbolesPlantados, comunidadesAlcanzadas, pedidosConImpacto)
+    comunidades List<String>
+    ongs        List<String>
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: pagina(titulo='Nosotros · HÖSÉG', activa='nosotros',
+                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+<body>
+<main class="hs-main--bajo-nav">
+    <section class="hs-seccion">
+        <div class="container">
+            <h1 class="hs-h2" th:text="${bloques['nosotros.historia']?.titulo ?: 'Ropa que calienta en los dos sentidos.'}">Ropa que calienta en los dos sentidos.</h1>
+            <p th:text="${bloques['nosotros.historia']?.cuerpo ?: 'HÖSÉG nació en Perú con una pregunta simple.'}">Historia</p>
+
+            <h2 class="h4 mt-4">Nuestro impacto</h2>
+            <p th:text="${impacto.abrigosEntregados} + ' abrigos entregados · ' + ${impacto.arbolesPlantados} + ' árboles plantados · '
+                        + ${impacto.comunidadesAlcanzadas} + ' comunidades'">Cifras</p>
+
+            <h2 class="h4 mt-4">Comunidades beneficiadas</h2>
+            <span class="hs-chip me-1" th:each="c : ${comunidades}" th:text="${c}">Omacha</span>
+
+            <h2 class="h4 mt-4">ONG aliada</h2>
+            <p th:each="o : ${ongs}" th:text="${o}">Pachamama Raymi</p>
+        </div>
+    </section>
+</main>
+</body>
+</html>

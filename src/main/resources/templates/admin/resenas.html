@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 4 · 4.7 Reseñas (GET /admin/resenas?estado=PUBLICADA|OCULTA, AdminController).
+  Modelo:
+    estado   EstadoResena o null (filtro) · estados EstadoResena[]
+    resenas  List<ResenaModeracion> (id, producto, talla, codigoComprobante, calificacion, titulo, comentario,
+             cliente, emailCliente, fecha, estado, moderadaPor)
+  Acciones: POST /admin/resenas/{id}/ocultar · POST /admin/resenas/{id}/publicar
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/admin :: pagina(titulo='Reseñas · HÖSÉG', activa='resenas', contenido=~{::main})}">
+<body>
+<main class="container-fluid pb-5">
+    <h1 class="h3">Reseñas</h1>
+    <nav class="mb-3">
+        <a th:href="@{/admin/resenas}" th:classappend="${estado == null} ? 'fw-bold'">Todas</a>
+        <th:block th:each="e : ${estados}"> · <a th:href="@{/admin/resenas(estado=${e})}" th:text="${e}"
+                   th:classappend="${e == estado} ? 'fw-bold'">PUBLICADA</a></th:block>
+    </nav>
+    <p th:if="${resenas.isEmpty()}">No hay reseñas.</p>
+    <article class="border-bottom py-2" th:each="r : ${resenas}">
+        <strong th:text="${r.producto} + ' (' + ${r.talla} + ')'">Casaca (M)</strong>
+        · <span th:text="${#strings.repeat('★', r.calificacion)}">★★★★</span>
+        · <span th:text="${r.cliente}">Ana Torres</span> · <span th:text="${r.estado}">PUBLICADA</span>
+        <p class="mb-1" th:text="${r.comentario}">Comentario</p>
+        <form method="post" th:action="${r.estado.name() == 'PUBLICADA'} ? @{/admin/resenas/{id}/ocultar(id=${r.id})} : @{/admin/resenas/{id}/publicar(id=${r.id})}">
+            <button class="btn btn-sm btn-outline-secondary" type="submit"
+                    th:text="${r.estado.name() == 'PUBLICADA'} ? 'Ocultar' : 'Volver a publicar'">Ocultar</button>
+        </form>
+    </article>
+</main>
+</body>
+</html>

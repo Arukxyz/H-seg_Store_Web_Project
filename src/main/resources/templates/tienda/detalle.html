@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 1 · 1.2 Detalle de producto (GET /tienda/{codigo}, TiendaController).
+  Modelo (ver docs/contrato-backend.md):
+    producto        DetalleProducto (nombre, categoria, coleccion, descripcion, urlImagen, precioDesde,
+                    tipoCompromiso, variantes[codigo, talla, precio, disponible, maximo, quedanPocas],
+                    disponible, sinTallas, codigoElegido, relacionados List<TarjetaProducto>)
+    resumenResenas  ResumenResenas (promedio, total, estrellas, tieneResenas())
+    resenas         List<ResenaVista> (calificacion, titulo, comentario, autor, talla, fecha, editada)
+    resenaForm      ResenaForm — SOLO existe si el cliente puede reseñar (compró y pagó este modelo)
+    yaReseno        boolean (el formulario edita su reseña)
+  Agregar al carrito: POST /carrito/agregar con codigo (la talla elegida) y cantidad.
+  Reseñar: POST /tienda/{codigo}/resenas con calificacion (1-5), titulo, comentario.
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: pagina(titulo=${producto.nombre} + ' · HÖSÉG', activa='tienda',
+                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+<body>
+<main class="hs-main--bajo-nav">
+    <th:block th:replace="~{fragments/avisos :: avisos}"/>
+    <section class="hs-seccion">
+        <div class="container">
+            <p class="hs-kicker" th:text="${producto.coleccion}">Älpafill</p>
+            <h1 class="hs-h2" th:text="${producto.nombre}">Casaca Älpafill Cusco</h1>
+            <p>
+                <strong th:text="'S/ ' + ${#numbers.formatDecimal(producto.precioDesde, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</strong>
+                <span th:if="${resumenResenas.tieneResenas()}"
+                      th:text="'★ ' + ${#numbers.formatDecimal(resumenResenas.promedio, 1, 1)} + ' (' + ${resumenResenas.total} + ' reseñas)'">★ 4.5 (12 reseñas)</span>
+            </p>
+            <th:block th:if="${producto.tipoCompromiso != null}">
+                <th:block th:replace="~{fragments/product-card :: badge(${producto.tipoCompromiso})}"/>
+            </th:block>
+            <p class="mt-3" th:text="${producto.descripcion}">Descripción</p>
+
+            <form method="post" th:action="@{/carrito/agregar}" class="d-flex flex-wrap gap-2 align-items-end mb-4"
+                  th:if="${producto.disponible}">
+                <fieldset th:unless="${producto.sinTallas}">
+                    <legend class="h6">Talla</legend>
+                    <label th:each="v : ${producto.variantes}" class="me-2">
+                        <input type="radio" name="codigo" th:value="${v.codigo}" th:disabled="${!v.disponible}"
+                               th:checked="${v.codigo == producto.codigoElegido and v.disponible}" required>
+                        <span th:text="${v.talla}" th:classappend="${!v.disponible} ? 'text-decoration-line-through'">M</span>
+                        <small th:if="${v.quedanPocas}">¡Quedan pocas!</small>
+                    </label>
+                </fieldset>
+                <input th:if="${producto.sinTallas}" type="hidden" name="codigo" th:value="${producto.variantes[0].codigo}">
+                <label>Cantidad <input class="hs-input" type="number" name="cantidad" value="1" min="1" style="width:6rem"></label>
+                <button class="hs-btn hs-btn--primario" type="submit">Agregar al carrito</button>
+            </form>
+            <p th:unless="${producto.disponible}"><strong>Agotado</strong></p>
+
+            <section id="resenas" class="mt-5">
+                <h2 class="h4">Reseñas</h2>
+                <p th:unless="${resumenResenas.tieneResenas()}">Este producto aún no tiene reseñas.</p>
+                <article th:each="r : ${resenas}" class="border-bottom py-2">
+                    <strong th:text="${#strings.repeat('★', r.calificacion)}">★★★★★</strong>
+                    <strong th:if="${r.titulo}" th:text="${r.titulo}">Título</strong>
+                    <p class="mb-1" th:text="${r.comentario}">Comentario</p>
+                    <small th:text="${r.autor} + ' · talla ' + ${r.talla} + ' · ' + ${#temporals.format(r.fecha, 'dd/MM/yyyy')} + (${r.editada} ? ' · editada' : '') + ' · Compra verificada'">María G.</small>
+                </article>
+
+                <form th:if="${resenaForm != null}" th:object="${resenaForm}" method="post"
+                      th:action="@{/tienda/{c}/resenas(c=${producto.codigoElegido})}" class="mt-4 hs-ancho-form">
+                    <h3 class="h5" th:text="${yaReseno} ? 'Editar mi reseña' : 'Escribe tu reseña'">Escribe tu reseña</h3>
+                    <label>Estrellas
+                        <select class="form-select" th:field="*{calificacion}">
+                            <option th:each="n : ${#numbers.sequence(5, 1)}" th:value="${n}" th:text="${n}">5</option>
+                        </select>
+                    </label>
+                    <div class="text-danger" th:errors="*{calificacion}"></div>
+                    <input class="hs-input mt-2" th:field="*{titulo}" placeholder="Título (opcional)">
+                    <div class="text-danger" th:errors="*{titulo}"></div>
+                    <textarea class="hs-input mt-2" th:field="*{comentario}" rows="3" placeholder="¿Qué te pareció?"></textarea>
+                    <div class="text-danger" th:errors="*{comentario}"></div>
+                    <button class="hs-btn hs-btn--primario mt-2" type="submit">Publicar</button>
+                </form>
+            </section>
+
+            <section class="mt-5" th:unless="${producto.relacionados.isEmpty()}">
+                <h2 class="h4">También te puede gustar</h2>
+                <div class="row g-3">
+                    <div class="col-6 col-md-3" th:each="p : ${producto.relacionados}">
+                        <th:block th:replace="~{fragments/product-card :: card(${p})}"/>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</main>
+</body>
+</html>

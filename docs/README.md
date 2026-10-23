@@ -25,6 +25,7 @@ El sistema está formado por dos aplicaciones que comparten una base de datos Po
 | [brief-diseno-home.md](brief-diseno-home.md) | Brief de diseño de la página principal: público, requisitos, estructura y sistema visual |
 | [diseno/mapeo-figma-thymeleaf.md](diseno/mapeo-figma-thymeleaf.md) | Del prototipo de Figma a las plantillas Thymeleaf: correspondencia de componentes y decisiones tomadas |
 | [guia-plantillas.md](guia-plantillas.md) | Cómo crear una página nueva: fragmentos, clases CSS, rutas y servicios disponibles |
+| [contrato-backend.md](contrato-backend.md) | **Para diseñar una pantalla:** ruta, plantilla, datos que recibe y formularios que envía cada página, por bloque |
 | [prototipo/reparto-prototipo-figma.md](prototipo/reparto-prototipo-figma.md) | Reparto del prototipo del resto de pantallas entre el equipo |
 
 ### Módulo de escritorio ([`Hoseg_Store`](https://github.com/Arukxyz/Hoseg_Store))
@@ -33,7 +34,7 @@ El sistema está formado por dos aplicaciones que comparten una base de datos Po
 | [README.md](https://github.com/Arukxyz/Hoseg_Store/blob/main/README.md) | Requisitos, scripts de base de datos, configuración, ejecución y archivos que genera |
 | [SEGITD-HOSEG.md](https://github.com/Arukxyz/Hoseg_Store/blob/main/SEGITD-HOSEG.md) | Especificación: requisitos RF/RNF, esquema, autenticación, pantallas, reglas de negocio y flujo de demostración |
 | [GUIA_PRUEBAS_SISTEMA.md](https://github.com/Arukxyz/Hoseg_Store/blob/main/GUIA_PRUEBAS_SISTEMA.md) | Guía de pruebas del sistema |
-| [`src/main/resources/sql/`](https://github.com/Arukxyz/Hoseg_Store/tree/main/src/main/resources/sql) | **Esquema de la base de datos** (`01_schema.sql`) y scripts de datos y migración `02`..`06` |
+| [`src/main/resources/sql/`](https://github.com/Arukxyz/Hoseg_Store/tree/main/src/main/resources/sql) | **Esquema de la base de datos** (`01_schema.sql`) y scripts de datos y migración `02`..`09` |
 
 ## Convenciones de la documentación
 

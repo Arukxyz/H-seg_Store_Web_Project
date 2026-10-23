@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 3 · 3.4 Página legal (GET /terminos y /politica-rsu, InstitucionalController).
+  Una sola plantilla para ambas. Modelo:
+    bloque           BloqueContenido o null (titulo, cuerpo, actualizadoEn) — lo edita el panel (4.5)
+    tituloPorDefecto String, por si el bloque no tiene título
+  El cuerpo es texto plano: th:text lo escapa (no se interpreta HTML guardado en la base).
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: pagina(titulo=${bloque?.titulo ?: tituloPorDefecto} + ' · HÖSÉG', activa='',
+                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+<body>
+<main class="hs-main--bajo-nav">
+    <section class="hs-seccion">
+        <div class="container hs-ancho-texto">
+            <h1 class="hs-h2" th:text="${bloque?.titulo ?: tituloPorDefecto}">Términos y condiciones</h1>
+            <p th:if="${bloque?.actualizadoEn}" class="hs-texto-secundario"
+               th:text="'Actualizado el ' + ${#temporals.format(bloque.actualizadoEn, 'dd/MM/yyyy')}">Actualizado</p>
+            <div style="white-space: pre-line" th:text="${bloque?.cuerpo ?: 'Contenido en preparación.'}">Texto</div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 4 · 4.5 Contenido (GET /admin/contenido?clave=…, AdminContenidoController).
+  Modelo:
+    bloques       List<BloqueContenido> (clave, titulo, cuerpo, imagenUrl, actualizadoEn)
+    clave         String o null: bloque abierto en el editor
+    contenidoForm ContenidoForm (titulo, cuerpo, imagenUrl [/images/… o https://…]) — solo si hay clave
+  Guardar: POST /admin/contenido/{clave}. Las claves las fija el código; aquí no se crean bloques.
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/admin :: pagina(titulo='Contenido · HÖSÉG', activa='contenido', contenido=~{::main})}">
+<body>
+<main class="container-fluid pb-5">
+    <h1 class="h3">Contenido</h1>
+    <ul>
+        <li th:each="b : ${bloques}">
+            <a th:href="@{/admin/contenido(clave=${b.clave})}" th:text="${b.clave}">home.banner</a>
+            <span th:text="${b.titulo}">Título</span>
+        </li>
+    </ul>
+    <form th:if="${clave != null}" th:object="${contenidoForm}" method="post"
+          th:action="@{/admin/contenido/{c}(c=${clave})}" class="hs-ancho-form">
+        <h2 class="h5" th:text="${clave}">home.banner</h2>
+        <input class="form-control mt-2" th:field="*{titulo}" placeholder="Título">
+        <div class="text-danger" th:errors="*{titulo}"></div>
+        <textarea class="form-control mt-2" th:field="*{cuerpo}" rows="8" placeholder="Texto"></textarea>
+        <div class="text-danger" th:errors="*{cuerpo}"></div>
+        <input class="form-control mt-2" th:field="*{imagenUrl}" placeholder="/images/banner.jpg">
+        <div class="text-danger" th:errors="*{imagenUrl}"></div>
+        <button class="hs-btn hs-btn--primario mt-2" type="submit">Publicar</button>
+    </form>
+</main>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 5 · Error genérico (500, 403…). Spring Boot la usa para todo error sin
+  plantilla propia. No muestra detalles técnicos: quedan en el log del servidor.
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: pagina(titulo='Algo salió mal · HÖSÉG', activa='',
+                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+<body>
+<main class="hs-main--bajo-nav">
+    <section class="hs-seccion">
+        <div class="container text-center">
+            <p class="hs-kicker" th:text="'Error ' + ${status}">Error</p>
+            <h1 class="hs-h2">Algo salió mal.</h1>
+            <p class="hs-texto-secundario">Inténtalo de nuevo en unos minutos.</p>
+            <a class="hs-btn hs-btn--primario" th:href="@{/}">Ir al inicio</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

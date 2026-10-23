@@ -33,11 +33,13 @@ Cada bloque es un flujo completo, así que cada uno puede diseñar sin esperar a
 
 ### Datos: siempre los reales del sistema
 - Productos: *Casaca Älpafill Cusco* (S/ 259.90, tallas M · L · XL, 1 abrigo), *Chaleco Älpafill* (S/ 219.90, S, 1 abrigo), *Gorro de lana Layo* (S/ 49.90, única, 1 árbol), *Bufanda Paucartambo* (S/ 39.90, única, 1 árbol), *Chullo andino*, *Mochila artesanal Höség*.
-- Cafés en grano (se agregarán al catálogo): *Café Bourbon · Yesica Llanqui* y *Café Typica · Eulogia Kehuarucho*, 250 g, S/ 40.00, 1 árbol.
+- Cafés en grano (ya en el catálogo): *Café Bourbon · Yesica Llanqui* y *Café Typica · Eulogia Kehuarucho*, 250 g, S/ 40.00, 1 árbol.
 - Comunidades beneficiadas: **Omacha, Ccatca, Marcapata, Paucartambo, Layo**. ONG aliada: **Pachamama Raymi**.
 - Código de boleta: **`WEB-000110`**. Precios siempre con formato `S/ 259.90`.
-- Estados de un pedido: **Pendiente · Pagado · Anulado**. Estados de una donación: **Pendiente de asignar → Lote asignado → Entregada**.
-- No inventen campos que el sistema no tiene (colores de prenda, reseñas con estrellas, puntos de fidelidad, cuotas, cupones). Si creen que algo hace falta, avísenlo al coordinador antes de diseñarlo.
+- Estados de un pedido: **Pendiente · Pagado · Anulado**. Estados de una donación: **Pendiente de asignar → Lote asignado → Entregada**. Estados del envío: **Pendiente · Preparando · En camino · Entregado · Cancelado**.
+- **Reseñas:** de 1 a 5 estrellas, solo de quien compró el producto (sello "Compra verificada"), una por modelo.
+- **"Fidelidad"** es el impacto acumulado del cliente (abrigos y árboles que generaron sus compras), no un sistema de puntos.
+- No inventen campos que el sistema no tiene (colores de prenda, puntos de fidelidad, cuotas, cupones, pago con tarjeta). Si creen que algo hace falta, avísenlo al coordinador antes de diseñarlo.
 
 ### Estados que siempre hay que diseñar
 Además de la pantalla "normal": **vacío** (sin resultados, carrito vacío), **error de formulario** (mensaje debajo de cada campo) y **éxito** (confirmación). Cada bloque indica cuáles le tocan.
@@ -75,10 +77,10 @@ Esto es lo que el prototipo tiene que **hacer visible**, porque es el valor de n
 | # | Pantalla | Ruta | Qué debe mostrar | Variantes |
 |---|---|---|---|---|
 | 1.1 | Tienda | `/tienda` | Buscador; filtros por **categoría** (Casacas, Accesorios, Café), **colección** (Älpafill, Comunidad, Urbana) e **impacto** (abrigo / árbol), y "solo disponibles"; orden por precio; grilla de tarjetas de producto (las de la Home); contador "12 productos" | Default · Filtro aplicado · Sin resultados · Móvil con filtros en panel desplegable |
-| 1.2 | Detalle de producto | `/tienda/{codigo}` | Galería, colección, nombre, precio; **selector de tallas en chips** (talla agotada tachada y deshabilitada); cantidad; "Agregar al carrito"; **bloque de impacto exacto**: "Esta compra abriga a 1 niño en Cusco" (se multiplica con la cantidad); aviso de pocas unidades; acordeones Descripción / Cuidados; 4 productos relacionados | Default · Producto agotado · Producto de café (badge árbol, sin tallas) |
+| 1.2 | Detalle de producto | `/tienda/{codigo}` | Galería, colección, nombre, precio; **selector de tallas en chips** (talla agotada tachada y deshabilitada); cantidad; "Agregar al carrito"; **bloque de impacto exacto**: "Esta compra abriga a 1 niño en Cusco" (se multiplica con la cantidad); aviso de pocas unidades; acordeones Descripción / Cuidados; **reseñas**: promedio en estrellas y cantidad junto al precio, lista de reseñas (estrellas, título, comentario, nombre e inicial del apellido, fecha, sello "Compra verificada") y formulario "Escribe tu reseña" (estrellas 1-5, título opcional, comentario), que solo aparece a quien compró el producto y no lo reseñó; 4 productos relacionados | Default · Producto agotado · Producto de café (badge árbol, sin tallas) · Sin reseñas · Con formulario de reseña |
 | 1.3 | Guía de tallas | Modal sobre 1.2 | Tabla S · M · L · XL con pecho, largo y manga en cm, y cómo medirse | — |
 | 1.4 | Carrito | `/carrito` | Líneas con imagen, nombre, talla, precio, cantidad (− / +), subtotal y quitar; resumen con total; **"Tu impacto con esta compra: 2 abrigos + 1 árbol"**; botón "Confirmar compra". En móvil, cada línea es una tarjeta y el resumen queda fijo encima del óvalo | Con productos · **Vacío** · Una línea supera el stock (mensaje en esa línea) |
-| 1.5 | Confirmar compra | `/carrito/confirmar` | Resumen del pedido, datos de envío del cliente (ya cargados de su cuenta, editables), impacto total y botón final. Si no inició sesión: aviso "Inicia sesión para confirmar; tu carrito se conserva" con enlace al login del bloque 2 | Con sesión · Sin sesión |
+| 1.5 | Confirmar compra | `/carrito/confirmar` | Resumen del pedido; **entrega**: "Recojo en tienda" (gratis, Höség Café Cusco) o "Delivery" con los datos de envío del cliente (ya cargados de su cuenta, editables: receptor, teléfono, dirección, referencia, distrito, provincia, departamento) y su costo; total = productos + envío; impacto total y botón final. Si no inició sesión: aviso "Inicia sesión para confirmar; tu carrito se conserva" con enlace al login del bloque 2 | Con sesión · Sin sesión |
 | 1.6 | Compra registrada | `/compra-exito` | Código **WEB-000110** grande con botón copiar; mensaje "Tu pedido quedó registrado y está pendiente de confirmación de pago"; resumen del impacto generado; botones "Ver mi pedido" y "Sigue tu impacto" | — |
 
 **Ojo:** el sistema **no cobra en línea**; el pedido queda *Pendiente* hasta que se confirma el pago. En 1.5 y 1.6 dejen un bloque "Instrucciones de pago" con texto de ejemplo; el equipo definirá el medio (Yape, transferencia).
@@ -97,7 +99,7 @@ Esto es lo que el prototipo tiene que **hacer visible**, porque es el valor de n
 | 2.3 | Recuperar contraseña | `/recuperar` | Campo email y botón; luego "Si el correo está registrado, te enviamos un enlace" (el mensaje es el mismo exista o no el correo) | Formulario · Enviado |
 | 2.4 | Nueva contraseña | `/restablecer` | Nueva contraseña y confirmación | Default · Enlace vencido |
 | 2.5 | Mi cuenta · Pedidos | `/cuenta` | Saludo; **"Tu impacto": abrigos y árboles generados por tus compras**; lista de pedidos con código, fecha, total y estado (chip Pendiente / Pagado / Anulado) | Con pedidos · Sin pedidos |
-| 2.6 | Detalle de pedido | `/cuenta/pedidos/{codigo}` | Productos, total y estado del pedido; por cada donación: tipo, cantidad y **línea de tiempo** Pendiente de asignar → Lote asignado → Entregada, con la comunidad cuando ya tiene lote | Pedido reciente (todo pendiente) · Pedido entregado |
+| 2.6 | Detalle de pedido | `/cuenta/pedidos/{codigo}` | Productos, total y estado del pedido; **seguimiento del envío** (Pendiente → Preparando → En camino → Entregado, con courier y código de seguimiento si los hay; o "Listo para recoger"); por cada donación: tipo, cantidad y **línea de tiempo** Pendiente de asignar → Lote asignado → Entregada, con la comunidad cuando ya tiene lote; en pedidos pagados, botón **"Reseñar"** por producto (lleva al formulario de 1.2) | Pedido reciente (todo pendiente) · Pedido entregado |
 | 2.7 | Mi cuenta · Mis datos | `/cuenta` (pestaña) | Formulario con sus datos (el email se ve pero no se edita) y bloque "Cambiar contraseña" | Default · Guardado |
 
 Diseñen también la **barra de navegación con sesión iniciada** (nombre o inicial del cliente en vez de "Ingresar", y menú con Mi cuenta / Cerrar sesión).
@@ -136,7 +138,8 @@ Estructura común: menú lateral (Panel, Catálogo web, Höség Café, Contenido
 | 4.3 | Catálogo web | `/admin/catalogo` | Tabla de productos (código, nombre, talla, stock en solo lectura) con interruptores **"Visible en la web"** y **"Destacado en la Home"** (máximo 8); vista previa del carrusel | Default · Límite de destacados alcanzado |
 | 4.4 | Höség Café | `/admin/cafe` | Pestañas: **Carta** (lista con agregar, editar y desactivar; formulario con nombre, categoría, precio, disponible), **Local** (dirección, horario, enlace al mapa) y **Árboles del café** (cifra publicada) | Lista · Formulario de edición |
 | 4.5 | Contenido | `/admin/contenido` | Lista de bloques editables (banner de la Home, textos de Nosotros, políticas) y editor con título, texto, imagen y vista previa | Lista · Editando |
-| 4.6 | Mensajes y suscriptores | `/admin/mensajes` | Bandeja de mensajes de contacto con estado Nuevo / Atendido y detalle; pestaña Suscriptores con "Exportar CSV" | Bandeja · Detalle · Suscriptores |
+| 4.6 | Mensajes y suscriptores | `/admin/mensajes` | Bandeja de mensajes de contacto con estado Nuevo / Atendido y detalle; pestaña **Reclamaciones** (hojas LR-nnnnnn con formulario de respuesta); pestaña Suscriptores con "Exportar CSV" | Bandeja · Detalle · Reclamaciones · Suscriptores |
+| 4.7 | Reseñas | `/admin/resenas` | Tabla de reseñas (producto, estrellas, comentario, cliente, fecha, estado Publicada / Oculta) con filtro por estado y botón "Ocultar" / "Volver a publicar" | Default · Reseña oculta |
 
 **Si les sobra tiempo:** los 3 correos que envía el portal, a 600 px de ancho: *Bienvenida*, *Pedido registrado* (con código y enlace a la consulta de impacto) y *Recuperar contraseña*.
 

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 4 · Layout del panel /admin: menú lateral (Panel, Catálogo web, Höség Café,
+  Contenido, Mensajes, Reseñas) y barra superior con el nombre del usuario y "Cerrar sesión".
+  Misma paleta que la tienda (tokens.css), más sobria. Bloque 4 le da el diseño final.
+
+  Uso (en el <html> de cada página del panel):
+    th:replace="~{layout/admin :: pagina(titulo='Panel · HÖSÉG', activa='panel', contenido=~{::main})}"
+    activa → panel | catalogo | cafe | contenido | mensajes | resenas
+  El usuario en sesión es ${#authentication.principal} (AdministradorAutenticado: nombre, username).
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:fragment="pagina(titulo, activa, contenido)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title th:text="${titulo}">Panel · HÖSÉG</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.min.css}">
+    <link rel="stylesheet" th:href="@{/css/tokens.css}">
+    <link rel="stylesheet" th:href="@{/css/hoseg.css}">
+</head>
+<body>
+<div class="d-flex min-vh-100">
+    <nav class="p-3 border-end" style="min-width: 220px" aria-label="Panel">
+        <a class="hs-logo d-block mb-4" th:href="@{/admin/panel}">HÖSÉG</a>
+        <ul class="list-unstyled d-flex flex-column gap-2">
+            <li><a th:href="@{/admin/panel}" th:classappend="${activa == 'panel'} ? 'fw-bold'">Panel</a></li>
+            <li><a th:href="@{/admin/catalogo}" th:classappend="${activa == 'catalogo'} ? 'fw-bold'">Catálogo web</a></li>
+            <li><a th:href="@{/admin/cafe}" th:classappend="${activa == 'cafe'} ? 'fw-bold'">Höség Café</a></li>
+            <li><a th:href="@{/admin/contenido}" th:classappend="${activa == 'contenido'} ? 'fw-bold'">Contenido</a></li>
+            <li><a th:href="@{/admin/mensajes}" th:classappend="${activa == 'mensajes'} ? 'fw-bold'">Mensajes</a></li>
+            <li><a th:href="@{/admin/resenas}" th:classappend="${activa == 'resenas'} ? 'fw-bold'">Reseñas</a></li>
+        </ul>
+    </nav>
+    <div class="flex-grow-1">
+        <header class="d-flex justify-content-end align-items-center gap-3 p-3 border-bottom">
+            <span th:text="${#authentication.principal.nombre}">Administrador</span>
+            <form th:action="@{/admin/logout}" method="post" class="m-0">
+                <button class="hs-btn hs-btn--secundario" type="submit">Cerrar sesión</button>
+            </form>
+        </header>
+        <div class="container-fluid pt-3">
+            <div class="alert alert-success" role="status" th:if="${exito}" th:text="${exito}">Guardado.</div>
+            <div class="alert alert-danger" role="alert" th:if="${error}" th:text="${error}">Error.</div>
+        </div>
+        <th:block th:replace="${contenido}"/>
+    </div>
+</div>
+<script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}" defer></script>
+</body>
+</html>
