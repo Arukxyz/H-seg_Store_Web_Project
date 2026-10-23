@@ -3,7 +3,6 @@ package pe.edu.utp.hoseg.web.config;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class Sha256ConSaltPasswordEncoderTest {
 
@@ -29,8 +28,15 @@ class Sha256ConSaltPasswordEncoderTest {
         assertThat(codificador.matches("bc", null)).isFalse();
     }
 
+    /** Spring Security llama a encode() en el primer login (protección contra ataques de tiempo). */
     @Test
-    void noCreaContrasenas() {
-        assertThatThrownBy(() -> codificador.encode("x")).isInstanceOf(UnsupportedOperationException.class);
+    void encodeGeneraUnHashVerificableConSaltAleatorio() {
+        String a = codificador.encode("Admin#2026");
+        String b = codificador.encode("Admin#2026");
+
+        assertThat(a).matches("^[0-9a-f]{32}:[0-9a-f]{64}$");   // mismo formato que salt + password_hash del escritorio
+        assertThat(a).isNotEqualTo(b);
+        assertThat(codificador.matches("Admin#2026", a)).isTrue();
+        assertThat(codificador.matches("otra", a)).isFalse();
     }
 }

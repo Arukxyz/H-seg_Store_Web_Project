@@ -6,8 +6,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import pe.edu.utp.hoseg.web.config.AdministradorAutenticado;
 import pe.edu.utp.hoseg.web.config.ClienteAutenticado;
+import pe.edu.utp.hoseg.web.config.Sha256ConSaltPasswordEncoder;
 import pe.edu.utp.hoseg.web.dto.*;
 import pe.edu.utp.hoseg.web.model.EstadoDonacion;
 import pe.edu.utp.hoseg.web.model.EstadoEnvio;
@@ -31,6 +34,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -58,6 +62,10 @@ class VistasTest {
     private static final OffsetDateTime AHORA = OffsetDateTime.parse("2026-10-23T10:00:00-05:00");
 
     @Autowired private MockMvc mvc;
+
+    // Simulados por @ConSeguridadDelPortal
+    @Autowired private UsuarioDetailsService usuarioDetailsService;
+    @Autowired private ClienteDetailsService clienteDetailsService;
 
     @MockitoBean private CatalogoService catalogoService;
     @MockitoBean private ResenaService resenaService;
@@ -329,6 +337,34 @@ class VistasTest {
                 null, "No me gustó", "Ana Torres", "ana@correo.pe", AHORA, EstadoResena.PUBLICADA, null)));
         mvc.perform(get("/admin/resenas").with(admin)).andExpect(status().isOk())
                 .andExpect(content().string(containsString("Ocultar")));
+    }
+
+    /** El login real del formulario: Spring Security usa el codificador también para usuarios inexistentes. */
+    @Test
+    void loginRealDelPanelConElHashDelEscritorio() throws Exception {
+        String guardada = new Sha256ConSaltPasswordEncoder().encode("Admin#2026");
+        when(usuarioDetailsService.loadUserByUsername("admin")).thenReturn(new AdministradorAutenticado(
+                1, "Admin Höség", "admin", guardada, RolUsuario.ADMINISTRADOR, true, false));
+        when(usuarioDetailsService.loadUserByUsername("nadie")).thenThrow(new UsernameNotFoundException("x"));
+
+        mvc.perform(formLogin("/admin/login").user("admin").password("Admin#2026"))
+                .andExpect(redirectedUrl("/admin/panel"));
+        mvc.perform(formLogin("/admin/login").user("admin").password("mala"))
+                .andExpect(redirectedUrl("/admin/login?error"));
+        mvc.perform(formLogin("/admin/login").user("nadie").password("x"))
+                .andExpect(redirectedUrl("/admin/login?error"));
+    }
+
+    @Test
+    void loginRealDeClienteConBcrypt() throws Exception {
+        String hash = new BCryptPasswordEncoder(4).encode("Abrigo2026");
+        when(clienteDetailsService.loadUserByUsername("ana@correo.pe"))
+                .thenReturn(new ClienteAutenticado(7, "Ana", "ana@correo.pe", hash, false));
+
+        mvc.perform(formLogin("/login").userParameter("email").user("ana@correo.pe").password("Abrigo2026"))
+                .andExpect(redirectedUrl("/"));
+        mvc.perform(formLogin("/login").userParameter("email").user("ana@correo.pe").password("mala"))
+                .andExpect(redirectedUrl("/login?error"));
     }
 
     @Test
