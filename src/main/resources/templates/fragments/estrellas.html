@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<!--
+  Estrellas de solo lectura, de 0 a 5 y con medias (ResumenResenas.estrellas o la calificación de una reseña).
+  Uso: <th:block th:replace="~{fragments/estrellas :: estrellas(${resumenResenas.estrellas})}"/>
+-->
+<body>
+<span class="hs-estrellas" role="img" th:fragment="estrellas(valor)" th:attr="aria-label=${valor} + ' de 5 estrellas'">
+    <i th:each="n : ${#numbers.sequence(1, 5)}" aria-hidden="true"
+       th:class="${valor >= n} ? 'bi bi-star-fill' : (${valor >= n - 0.5} ? 'bi bi-star-half' : 'bi bi-star')"></i>
+</span>
+</body>
+</html>

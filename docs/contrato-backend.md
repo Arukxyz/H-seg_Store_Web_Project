@@ -16,6 +16,7 @@ Cada plantilla ya existe como **esqueleto funcional**: muestra todos los datos y
 - **No llamen `contenido`, `titulo`, `activa`, `estilos` ni `scripts` a nada del modelo:** son parámetros del layout y lo taparían.
 - **Avisos tras un POST:** `<th:block th:replace="~{fragments/avisos :: avisos}"/>` al inicio del `<main>`. Muestra los flash `exito` y `error` (el resultado del boletín lo muestra el propio footer).
 - **Formularios:** siempre `th:action="@{...}"` (agrega el token CSRF) y `th:field="*{campo}"`; el error de cada campo va en `th:errors="*{campo}"`. Algunos formularios tienen errores "globales" con nombre propio (por ejemplo `*{contrasenasCoinciden}`), indicados en cada sección.
+- **Fragmentos del bloque 1 reutilizables:** `fragments/estrellas :: estrellas(valor)` (0 a 5 con medias) y `fragments/pago :: instrucciones(codigo)` (cómo pagar; datos de Yape y cuenta **por definir**).
 - **Formatos:** precio `'S/ ' + ${#numbers.formatDecimal(x, 1, 'COMMA', 2, 'POINT')}` → `S/ 259.90`; fecha `${#temporals.format(f, 'dd/MM/yyyy')}`.
 - **Estados con texto listo:** `estado.etiqueta` en `EstadoVenta` (Pendiente, Pagado, Anulado), `EstadoDonacion` (En espera de pago → Pendiente de asignar → Lote asignado → Entregada, con `paso` de 0 a 3), `EstadoEnvio` y `TipoEnvio`. `TipoCompromiso.etiqueta` da "1 abrigo" / "1 árbol".
 - **Impacto:** `ImpactoCompra.texto` ya viene armado: "2 abrigos + 1 árbol".
@@ -39,6 +40,7 @@ Modelo: `productos` (List<TarjetaProducto>, se pintan con `fragments/product-car
 
 **`/tienda/{codigo}`**: el código de cualquier talla abre el modelo completo.
 - `producto` (DetalleProducto): `nombre`, `categoria`, `coleccion`, `descripcion`, `urlImagen`, `precioDesde`, `tipoCompromiso`, `disponible`, `sinTallas` (café y accesorios: sin selector), `codigoElegido`, `relacionados`.
+  - `varianteInicial()`: la talla que la página muestra elegida (la de la URL si está disponible, si no la primera disponible).
   - `variantes` (una por talla): `codigo`, `talla`, `precio`, `disponible`, `maximo` (stock, para limitar la cantidad), `quedanPocas`.
 - `resumenResenas`: `promedio`, `total`, `estrellas` (redondeado a medio punto) y `tieneResenas()`.
 - `resenas`: `calificacion`, `titulo`, `comentario`, `autor` ("María G."), `talla`, `fecha`, `editada`.

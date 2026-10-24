@@ -27,4 +27,14 @@ public record DetalleProducto(
         boolean disponible,
         boolean sinTallas,
         List<TarjetaProducto> relacionados) {
+
+    /**
+     * Talla que la página muestra elegida: la de la URL si está disponible, si
+     * no la primera disponible; si todo está agotado, la primera (sin compra).
+     */
+    public VarianteProducto varianteInicial() {
+        return variantes.stream().filter(v -> v.codigo().equals(codigoElegido) && v.disponible()).findFirst()
+                .or(() -> variantes.stream().filter(VarianteProducto::disponible).findFirst())
+                .orElse(variantes.get(0));
+    }
 }

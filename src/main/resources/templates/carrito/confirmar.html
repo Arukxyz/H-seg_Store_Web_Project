@@ -1,58 +1,156 @@
 <!DOCTYPE html>
 <!--
-  ESQUELETO · Bloque 1 · 1.5 Confirmar compra (GET/POST /carrito/confirmar, CarritoController).
-  Exige sesión de cliente: sin sesión, Spring Security lleva a /login (con aviso desdeCompra).
-  Modelo: lo mismo que el carrito (items, total, impacto, problemasPorCodigo, sePuedeConfirmar) y además
-    envioForm     DatosEnvioForm, precargado con la cuenta (tipo, nombreReceptor, telefonoReceptor, direccion,
-                  referencia, distrito, provincia, departamento). Error global: direccionCompleta.
-    tiposEnvio    TipoEnvio[] (RECOJO_TIENDA, DELIVERY; etiqueta)
-    costoDelivery BigDecimal (el recojo es gratis)
-    localesRecojo List<LocalCafe> (dónde recoger)
-  El total a pagar es total + envío; el costo lo calcula el servidor. Incluye "Instrucciones de pago".
+  Bloque 1 · 1.5 Confirmar compra (GET/POST /carrito/confirmar, CarritoController). Exige sesión de cliente.
+  Contrato: docs/contrato-backend.md. Modelo: lo del carrito (items, total, impacto, problemasPorCodigo,
+  sePuedeConfirmar) y envioForm (DatosEnvioForm, precargado con la cuenta), tiposEnvio, costoDelivery,
+  localesRecojo. Error global del formulario: direccionCompleta.
+  El costo del envío y el total que valen los calcula el servidor; tienda.js solo los muestra al
+  cambiar la opción. La web no cobra: el bloque de pago explica cómo pagar.
 -->
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: pagina(titulo='Confirmar compra · HÖSÉG', activa='carrito',
-                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+                                          transparente=false, contenido=~{::main}, estilos=~{::link}, scripts=~{::script})}">
+<head>
+    <link rel="stylesheet" th:href="@{/css/tienda.css}">
+</head>
 <body>
-<main class="hs-main--bajo-nav">
+<main class="hs-main--bajo-nav hs-pagina">
     <th:block th:replace="~{fragments/avisos :: avisos}"/>
-    <section class="hs-seccion">
+
+    <header class="hs-pagina-cabecera">
         <div class="container">
-            <h1 class="hs-h2 mb-3">Confirmar compra</h1>
-
-            <ul>
-                <li th:each="i : ${items}" th:text="${i.cantidad} + ' × ' + ${i.nombre} + ' (' + ${i.talla} + ')'">1 × Casaca (M)</li>
-            </ul>
-            <p th:text="'Productos: S/ ' + ${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}">Productos</p>
-            <p th:if="${impacto.tieneImpacto()}" th:text="'Generas ' + ${impacto.texto}">Impacto</p>
-
-            <form th:object="${envioForm}" method="post" th:action="@{/carrito/confirmar}" class="hs-ancho-form">
-                <fieldset>
-                    <legend class="h5">Entrega</legend>
-                    <label th:each="t : ${tiposEnvio}" class="me-3">
-                        <input type="radio" th:field="*{tipo}" th:value="${t}">
-                        <span th:text="${t.etiqueta}">Recojo en tienda</span>
-                        <small th:if="${t.name() == 'DELIVERY'}" th:text="'(S/ ' + ${#numbers.formatDecimal(costoDelivery, 1, 'COMMA', 2, 'POINT')} + ')'">(S/ 10.00)</small>
-                    </label>
-                    <p class="hs-texto-secundario" th:each="l : ${localesRecojo}" th:text="'Recojo: ' + ${l.nombre} + ', ' + ${l.direccion}">Recojo</p>
-                </fieldset>
-
-                <input class="hs-input mt-2" th:field="*{nombreReceptor}" placeholder="Quién recibe">
-                <div class="text-danger" th:errors="*{nombreReceptor}"></div>
-                <input class="hs-input mt-2" th:field="*{telefonoReceptor}" placeholder="Celular">
-                <div class="text-danger" th:errors="*{telefonoReceptor}"></div>
-                <input class="hs-input mt-2" th:field="*{direccion}" placeholder="Dirección (delivery)">
-                <input class="hs-input mt-2" th:field="*{referencia}" placeholder="Referencia">
-                <input class="hs-input mt-2" th:field="*{distrito}" placeholder="Distrito">
-                <input class="hs-input mt-2" th:field="*{provincia}" placeholder="Provincia">
-                <input class="hs-input mt-2" th:field="*{departamento}" placeholder="Departamento">
-                <div class="text-danger" th:errors="*{direccionCompleta}"></div>
-
-                <p class="mt-3"><strong>Instrucciones de pago:</strong> texto de ejemplo; el equipo define el medio (Yape, transferencia).</p>
-                <button class="hs-btn hs-btn--primario" type="submit" th:disabled="${!sePuedeConfirmar}">Confirmar compra</button>
-            </form>
+            <nav aria-label="Ruta">
+                <ol class="hs-migas">
+                    <li><a th:href="@{/carrito}">Carrito</a></li>
+                    <li aria-current="page">Confirmar compra</li>
+                </ol>
+            </nav>
+            <h1 class="hs-pagina-cabecera__titulo">Confirmar compra</h1>
         </div>
-    </section>
+    </header>
+
+    <div class="container">
+        <form id="form-confirmar" th:object="${envioForm}" method="post" th:action="@{/carrito/confirmar}" data-confirmar novalidate>
+            <div class="row g-4 g-lg-5">
+                <div class="col-12 col-lg-7">
+                    <!-- Paso 1: entrega -->
+                    <section class="mb-5" aria-labelledby="paso-entrega">
+                        <h2 class="hs-paso" id="paso-entrega"><span class="hs-paso__numero">1</span> Entrega</h2>
+
+                        <fieldset class="hs-entrega mb-4">
+                            <legend class="visually-hidden">Cómo quieres recibir tu pedido</legend>
+                            <label class="hs-entrega__opcion" th:each="t : ${tiposEnvio}">
+                                <input type="radio" th:field="*{tipo}" th:value="${t}">
+                                <span class="hs-entrega__tarjeta">
+                                    <i class="bi hs-entrega__icono" aria-hidden="true"
+                                       th:classappend="${t.name() == 'DELIVERY'} ? 'bi-truck' : 'bi-shop'"></i>
+                                    <span class="flex-grow-1">
+                                        <span class="hs-entrega__titulo">
+                                            <span th:text="${t.etiqueta}">Recojo en tienda</span>
+                                            <span th:text="${t.name() == 'DELIVERY'} ? 'S/ ' + ${#numbers.formatDecimal(costoDelivery, 1, 'COMMA', 2, 'POINT')} : 'Gratis'">Gratis</span>
+                                        </span>
+                                        <span class="hs-entrega__texto d-block" th:if="${t.name() == 'DELIVERY'}">Te lo llevamos a la dirección que indiques.</span>
+                                        <span class="hs-entrega__texto d-block" th:if="${t.name() == 'RECOJO_TIENDA'}"
+                                              th:each="l : ${localesRecojo}" th:text="${l.nombre} + ' · ' + ${l.direccion} + (${l.horario} != null ? ' · ' + ${l.horario} : '')">
+                                            Höség Café Cusco · Calle Palacio 110 int. 2</span>
+                                    </span>
+                                </span>
+                            </label>
+                        </fieldset>
+
+                        <div class="row g-3">
+                            <div class="col-12 col-sm-7">
+                                <label class="hs-label" for="nombreReceptor">Quién recibe</label>
+                                <input class="hs-input" th:field="*{nombreReceptor}" th:errorclass="is-invalid" autocomplete="name">
+                                <p class="hs-campo-error" th:if="${#fields.hasErrors('nombreReceptor')}" th:errors="*{nombreReceptor}">Indica quién recibe.</p>
+                            </div>
+                            <div class="col-12 col-sm-5">
+                                <label class="hs-label" for="telefonoReceptor">Celular</label>
+                                <input class="hs-input" type="tel" th:field="*{telefonoReceptor}" th:errorclass="is-invalid"
+                                       autocomplete="tel" placeholder="987 654 321">
+                                <p class="hs-campo-error" th:if="${#fields.hasErrors('telefonoReceptor')}" th:errors="*{telefonoReceptor}">Celular inválido.</p>
+                            </div>
+                        </div>
+
+                        <!-- Solo para delivery (tienda.js lo oculta con recojo; sin JS siempre visible) -->
+                        <div class="row g-3 mt-1" data-campos-delivery>
+                            <div class="col-12">
+                                <label class="hs-label" for="direccion">Dirección</label>
+                                <input class="hs-input" th:field="*{direccion}" autocomplete="street-address"
+                                       th:classappend="${#fields.hasErrors('direccionCompleta')} ? 'is-invalid'">
+                            </div>
+                            <div class="col-12">
+                                <label class="hs-label" for="referencia">Referencia <span class="hs-texto-secundario">(opcional)</span></label>
+                                <input class="hs-input" th:field="*{referencia}" placeholder="Frente al parque, puerta verde…">
+                            </div>
+                            <div class="col-12 col-sm-4">
+                                <label class="hs-label" for="distrito">Distrito</label>
+                                <input class="hs-input" th:field="*{distrito}"
+                                       th:classappend="${#fields.hasErrors('direccionCompleta')} ? 'is-invalid'">
+                            </div>
+                            <div class="col-6 col-sm-4">
+                                <label class="hs-label" for="provincia">Provincia</label>
+                                <input class="hs-input" th:field="*{provincia}">
+                            </div>
+                            <div class="col-6 col-sm-4">
+                                <label class="hs-label" for="departamento">Departamento</label>
+                                <input class="hs-input" th:field="*{departamento}">
+                            </div>
+                        </div>
+                        <p class="hs-campo-error" th:if="${#fields.hasErrors('direccionCompleta')}" th:errors="*{direccionCompleta}" role="alert">
+                            Para delivery indica la dirección y el distrito.</p>
+                    </section>
+
+                    <!-- Paso 2: pago -->
+                    <section aria-labelledby="paso-pago">
+                        <h2 class="hs-paso" id="paso-pago"><span class="hs-paso__numero">2</span> Pago</h2>
+                        <th:block th:replace="~{fragments/pago :: instrucciones(null)}"/>
+                    </section>
+                </div>
+
+                <!-- Resumen -->
+                <aside class="col-12 col-lg-5">
+                    <div class="hs-resumen">
+                        <h2 class="h5 mb-3">Tu pedido</h2>
+                        <div class="hs-mini-linea" th:each="i : ${items}">
+                            <span th:text="${i.cantidad} + ' × ' + ${i.nombre} + ' (' + ${i.talla} + ')'">1 × Casaca (M)</span>
+                            <span class="text-nowrap" th:text="'S/ ' + ${#numbers.formatDecimal(i.subtotal(), 1, 'COMMA', 2, 'POINT')}">S/ 259.90</span>
+                        </div>
+                        <div class="hs-resumen__fila mt-3">
+                            <span>Productos</span>
+                            <span th:text="'S/ ' + ${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</span>
+                        </div>
+                        <div class="hs-resumen__fila">
+                            <span>Envío</span>
+                            <span data-envio th:text="*{esDelivery()} ? 'S/ ' + ${#numbers.formatDecimal(costoDelivery, 1, 'COMMA', 2, 'POINT')} : 'Gratis'">Gratis</span>
+                        </div>
+                        <div class="hs-resumen__total mb-3">
+                            <span>Total a pagar</span>
+                            <span data-total-pagar th:attr="data-productos=${total},data-costo-delivery=${costoDelivery}"
+                                  th:text="'S/ ' + ${#numbers.formatDecimal(envioForm.esDelivery() ? total.add(costoDelivery) : total, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</span>
+                        </div>
+
+                        <div class="hs-impacto-caja mb-3" th:if="${impacto.tieneImpacto()}"
+                             th:classappend="${impacto.abrigos == 0} ? 'hs-impacto-caja--arbol'">
+                            <span class="hs-impacto-caja__icono">
+                                <i class="bi" th:classappend="${impacto.abrigos > 0} ? 'bi-gift-fill' : 'bi-tree-fill'" aria-hidden="true"></i>
+                            </span>
+                            <span>Con esta compra generas <strong th:text="${impacto.texto}">1 abrigo</strong>.</span>
+                        </div>
+
+                        <button class="hs-btn hs-btn--primario w-100" type="submit" th:disabled="${!sePuedeConfirmar}">
+                            <i class="bi bi-lock" aria-hidden="true"></i> Confirmar compra
+                        </button>
+                        <p class="hs-texto-secundario text-center mt-2 mb-0">
+                            Tu pedido queda pendiente hasta que confirmemos el pago. No cobramos en línea.
+                        </p>
+                        <p class="text-center mt-2 mb-0"><a class="hs-enlace" th:href="@{/carrito}">Volver al carrito</a></p>
+                    </div>
+                </aside>
+            </div>
+        </form>
+    </div>
 </main>
+<script th:src="@{/js/tienda.js}" defer></script>
 </body>
 </html>

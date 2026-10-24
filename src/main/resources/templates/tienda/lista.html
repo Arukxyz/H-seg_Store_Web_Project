@@ -1,74 +1,143 @@
 <!DOCTYPE html>
 <!--
-  ESQUELETO · Bloque 1 · 1.1 Tienda (GET /tienda, TiendaController).
-  Funcional y sin diseño: el bloque 1 lo reemplaza con su diseño de Figma.
-  Modelo (ver docs/contrato-backend.md):
-    productos   List<TarjetaProducto>  (se pintan con fragments/product-card :: card)
-    total       int                    ("12 productos")
-    filtro      FiltroCatalogo         (q, categoria, coleccion, impacto, disponibles, orden; hayFiltros())
-    categorias, colecciones  List<String>
-    compromisos TipoCompromiso[]       (ABRIGO, ARBOL; etiqueta "1 abrigo"/"1 árbol")
-    ordenes     OrdenCatalogo[]        (etiqueta)
-  Los filtros son un GET: cada campo del form se llama como el parámetro.
+  Bloque 1 · 1.1 Tienda (GET /tienda, TiendaController). Contrato: docs/contrato-backend.md.
+  Modelo: productos (List<TarjetaProducto>), total, filtro (FiltroCatalogo), categorias, colecciones,
+          compromisos (TipoCompromiso[]), ordenes (OrdenCatalogo[]).
+  Los filtros son un GET con los mismos nombres que FiltroCatalogo: q, categoria, coleccion, impacto,
+  disponibles, orden. Con JavaScript se aplican al cambiar (tienda.js); sin él, con "Aplicar".
+  En móvil los filtros van en un panel desplegable.
 -->
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: pagina(titulo='Tienda · HÖSÉG', activa='tienda',
-                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+                                          transparente=false, contenido=~{::main}, estilos=~{::link}, scripts=~{::script})}">
+<head>
+    <link rel="stylesheet" th:href="@{/css/tienda.css}">
+</head>
 <body>
-<main class="hs-main--bajo-nav">
+<main class="hs-main--bajo-nav hs-pagina">
     <th:block th:replace="~{fragments/avisos :: avisos}"/>
-    <section class="hs-seccion">
-        <div class="container">
-            <h1 class="hs-h2 mb-3">Tienda</h1>
 
-            <form class="row g-2 mb-4" method="get" th:action="@{/tienda}">
-                <div class="col-12 col-md-4">
-                    <input class="hs-input" type="search" name="q" th:value="${filtro.q}" placeholder="Buscar">
+    <header class="hs-pagina-cabecera">
+        <div class="container">
+            <p class="hs-kicker">Tienda</p>
+            <h1 class="hs-pagina-cabecera__titulo">Ropa que abriga dos veces.</h1>
+            <p class="hs-texto-secundario mt-2 mb-0 hs-ancho-texto">
+                Cada casaca abriga a un niño en Cusco y cada accesorio o café siembra un árbol.
+            </p>
+        </div>
+    </header>
+
+    <div class="container">
+        <form method="get" th:action="@{/tienda}" data-autoenviar>
+            <div class="row g-2 mb-4">
+                <div class="col-12 col-md">
+                    <label class="visually-hidden" for="buscar">Buscar productos</label>
+                    <div class="hs-busqueda">
+                        <i class="bi bi-search" aria-hidden="true"></i>
+                        <input class="hs-input" id="buscar" type="search" name="q" th:value="${filtro.q}"
+                               placeholder="Buscar casacas, chullos, café…" autocomplete="off">
+                    </div>
                 </div>
-                <div class="col-6 col-md-2">
-                    <select class="form-select" name="categoria">
-                        <option value="">Categoría</option>
-                        <option th:each="c : ${categorias}" th:value="${c}" th:text="${c}"
-                                th:selected="${c == filtro.categoria}">Casacas</option>
-                    </select>
-                </div>
-                <div class="col-6 col-md-2">
-                    <select class="form-select" name="coleccion">
-                        <option value="">Colección</option>
-                        <option th:each="c : ${colecciones}" th:value="${c}" th:text="${c}"
-                                th:selected="${c == filtro.coleccion}">Älpafill</option>
-                    </select>
-                </div>
-                <div class="col-6 col-md-2">
-                    <select class="form-select" name="impacto">
-                        <option value="">Impacto</option>
-                        <option th:each="t : ${compromisos}" th:value="${t}" th:text="${t.etiqueta}"
-                                th:selected="${t == filtro.impacto}">1 abrigo</option>
-                    </select>
-                </div>
-                <div class="col-6 col-md-2">
-                    <select class="form-select" name="orden">
+                <div class="col-8 col-md-auto">
+                    <label class="visually-hidden" for="orden">Ordenar por</label>
+                    <select class="hs-select" id="orden" name="orden">
                         <option th:each="o : ${ordenes}" th:value="${o}" th:text="${o.etiqueta}"
                                 th:selected="${o == filtro.ordenEfectivo()}">Destacados</option>
                     </select>
                 </div>
-                <div class="col-12 d-flex align-items-center gap-3">
-                    <label><input type="checkbox" name="disponibles" value="true" th:checked="${filtro.soloDisponibles()}"> Solo disponibles</label>
-                    <button class="hs-btn hs-btn--primario" type="submit">Filtrar</button>
-                    <a th:if="${filtro.hayFiltros()}" th:href="@{/tienda}">Limpiar filtros</a>
-                </div>
-            </form>
-
-            <p class="hs-texto-secundario" th:text="${total} + (${total} == 1 ? ' producto' : ' productos')">12 productos</p>
-
-            <p th:if="${productos.isEmpty()}">No encontramos productos con esos filtros.</p>
-            <div class="row g-3">
-                <div class="col-6 col-md-4 col-xl-3" th:each="p : ${productos}">
-                    <th:block th:replace="~{fragments/product-card :: card(${p})}"/>
+                <div class="col-4 d-lg-none">
+                    <button class="hs-btn hs-btn--secundario w-100" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#panel-filtros" aria-expanded="false" aria-controls="panel-filtros">
+                        <i class="bi bi-sliders" aria-hidden="true"></i> Filtros
+                    </button>
                 </div>
             </div>
-        </div>
-    </section>
+
+            <div class="row g-4">
+                <!-- Filtros: columna lateral en escritorio, panel desplegable en móvil -->
+                <aside class="col-12 col-lg-3">
+                    <div class="collapse d-lg-block" id="panel-filtros">
+                        <div class="hs-filtros">
+                            <fieldset>
+                                <legend class="hs-filtros__titulo">Categoría</legend>
+                                <div class="hs-filtros__opciones">
+                                    <label class="hs-opcion">
+                                        <input type="radio" name="categoria" value="" th:checked="${#strings.isEmpty(filtro.categoria)}">
+                                        <span>Todas</span>
+                                    </label>
+                                    <label class="hs-opcion" th:each="c : ${categorias}">
+                                        <input type="radio" name="categoria" th:value="${c}" th:checked="${c == filtro.categoria}">
+                                        <span th:text="${c}">Casacas</span>
+                                    </label>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <legend class="hs-filtros__titulo">Colección</legend>
+                                <div class="hs-filtros__opciones">
+                                    <label class="hs-opcion">
+                                        <input type="radio" name="coleccion" value="" th:checked="${#strings.isEmpty(filtro.coleccion)}">
+                                        <span>Todas</span>
+                                    </label>
+                                    <label class="hs-opcion" th:each="c : ${colecciones}">
+                                        <input type="radio" name="coleccion" th:value="${c}" th:checked="${c == filtro.coleccion}">
+                                        <span th:text="${c}">Älpafill</span>
+                                    </label>
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <legend class="hs-filtros__titulo">Tu impacto</legend>
+                                <div class="hs-filtros__opciones">
+                                    <label class="hs-opcion">
+                                        <input type="radio" name="impacto" value="" th:checked="${filtro.impacto == null}">
+                                        <span>Todos</span>
+                                    </label>
+                                    <label class="hs-opcion" th:each="t : ${compromisos}">
+                                        <input type="radio" name="impacto" th:value="${t}" th:checked="${t == filtro.impacto}">
+                                        <span><i class="bi" th:classappend="${t.icono}" aria-hidden="true"></i>
+                                              <th:block th:text="${t.etiqueta}">1 abrigo</th:block></span>
+                                    </label>
+                                </div>
+                            </fieldset>
+
+                            <label class="hs-opcion">
+                                <input type="checkbox" name="disponibles" value="true" th:checked="${filtro.soloDisponibles()}">
+                                <span><i class="bi bi-check2" aria-hidden="true"></i> Solo disponibles</span>
+                            </label>
+
+                            <button class="hs-btn hs-btn--primario w-100" type="submit" data-solo-sin-js>Aplicar</button>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Resultados -->
+                <section class="col-12 col-lg-9" aria-labelledby="titulo-resultados">
+                    <h2 class="visually-hidden" id="titulo-resultados">Productos</h2>
+                    <div class="hs-tienda__resumen">
+                        <span th:text="${total} + (${total} == 1 ? ' producto' : ' productos')">12 productos</span>
+                        <a class="hs-enlace" th:if="${filtro.hayFiltros()}" th:href="@{/tienda}">
+                            <i class="bi bi-x-circle" aria-hidden="true"></i> Limpiar filtros
+                        </a>
+                    </div>
+
+                    <div class="hs-vacio" th:if="${productos.isEmpty()}">
+                        <span class="hs-vacio__icono"><i class="bi bi-search" aria-hidden="true"></i></span>
+                        <h3 class="h5">No encontramos productos con esos filtros.</h3>
+                        <p class="hs-texto-secundario">Prueba con otra búsqueda o quita algún filtro.</p>
+                        <a class="hs-btn hs-btn--secundario" th:href="@{/tienda}">Ver todo el catálogo</a>
+                    </div>
+
+                    <div class="row g-3 g-md-4">
+                        <div class="col-6 col-md-4" th:each="p : ${productos}">
+                            <th:block th:replace="~{fragments/product-card :: card(${p})}"/>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </form>
+    </div>
 </main>
+<script th:src="@{/js/tienda.js}" defer></script>
 </body>
 </html>

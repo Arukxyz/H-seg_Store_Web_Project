@@ -1,58 +1,130 @@
 <!DOCTYPE html>
 <!--
-  ESQUELETO · Bloque 1 · 1.4 Carrito (GET /carrito, CarritoController).
-  Modelo (ver docs/contrato-backend.md):
-    items              List<ItemCarrito> (codigoProducto, nombre, talla, precioUnitario, cantidad, subtotal(),
-                       tipoCompromiso, urlImagen)
-    total              BigDecimal
-    impacto            ImpactoCompra (abrigos, arboles, texto "2 abrigos + 1 árbol", tieneImpacto())
-    vacio              boolean
-    problemasPorCodigo Map<codigo, mensaje>: aviso junto a la línea (sin stock, ya no se vende)
-    sePuedeConfirmar   boolean
-  Acciones: POST /carrito/actualizar (codigo, cantidad), POST /carrito/quitar (codigo),
-            GET /carrito/confirmar.
+  Bloque 1 · 1.4 Carrito (GET /carrito, CarritoController). Contrato: docs/contrato-backend.md.
+  Modelo: items (List<ItemCarrito>), total, impacto (ImpactoCompra), vacio,
+          problemasPorCodigo (Map<codigo, mensaje>), sePuedeConfirmar.
+  Acciones: POST /carrito/actualizar (codigo, cantidad; 0 quita) · POST /carrito/quitar (codigo).
+  En móvil cada línea es una tarjeta y el total queda fijo encima del óvalo de navegación.
 -->
-<html lang="es" xmlns:th="http://www.thymeleaf.org"
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       th:replace="~{layout/base :: pagina(titulo='Carrito · HÖSÉG', activa='carrito',
-                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+                                          transparente=false, contenido=~{::main}, estilos=~{::link}, scripts=~{})}">
+<head>
+    <link rel="stylesheet" th:href="@{/css/tienda.css}">
+</head>
 <body>
-<main class="hs-main--bajo-nav">
+<main class="hs-main--bajo-nav hs-pagina" th:classappend="${!vacio} ? 'hs-pagina--con-barra'">
     <th:block th:replace="~{fragments/avisos :: avisos}"/>
-    <section class="hs-seccion">
+
+    <header class="hs-pagina-cabecera">
         <div class="container">
-            <h1 class="hs-h2 mb-3">Tu carrito</h1>
-
-            <div th:if="${vacio}">
-                <p>Tu carrito está vacío.</p>
-                <a class="hs-btn hs-btn--primario" th:href="@{/tienda}">Ir a la tienda</a>
-            </div>
-
-            <th:block th:unless="${vacio}">
-                <div class="border-bottom py-2" th:each="i : ${items}">
-                    <strong th:text="${i.nombre}">Casaca</strong> · talla <span th:text="${i.talla}">M</span>
-                    · <span th:text="'S/ ' + ${#numbers.formatDecimal(i.precioUnitario, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</span>
-                    <form class="d-inline" method="post" th:action="@{/carrito/actualizar}">
-                        <input type="hidden" name="codigo" th:value="${i.codigoProducto}">
-                        <button class="hs-btn-redondo" type="submit" name="cantidad" th:value="${i.cantidad - 1}" aria-label="Menos">−</button>
-                        <span th:text="${i.cantidad}">1</span>
-                        <button class="hs-btn-redondo" type="submit" name="cantidad" th:value="${i.cantidad + 1}" aria-label="Más">+</button>
-                    </form>
-                    <span th:text="'S/ ' + ${#numbers.formatDecimal(i.subtotal(), 1, 'COMMA', 2, 'POINT')}">S/ 259.90</span>
-                    <form class="d-inline" method="post" th:action="@{/carrito/quitar}">
-                        <input type="hidden" name="codigo" th:value="${i.codigoProducto}">
-                        <button class="btn btn-link" type="submit">Quitar</button>
-                    </form>
-                    <div class="text-danger" th:if="${problemasPorCodigo[i.codigoProducto] != null}"
-                         th:text="${problemasPorCodigo[i.codigoProducto]}">Solo quedan 2 unidades.</div>
-                </div>
-
-                <p class="mt-3"><strong th:text="'Total: S/ ' + ${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}">Total</strong></p>
-                <p th:if="${impacto.tieneImpacto()}" th:text="'Tu impacto con esta compra: ' + ${impacto.texto}">Tu impacto</p>
-                <a th:if="${sePuedeConfirmar}" class="hs-btn hs-btn--primario" th:href="@{/carrito/confirmar}">Confirmar compra</a>
-                <span th:unless="${sePuedeConfirmar}" class="hs-btn hs-btn--deshabilitado">Revisa tu carrito para continuar</span>
-            </th:block>
+            <p class="hs-kicker">Carrito</p>
+            <h1 class="hs-pagina-cabecera__titulo">Tu carrito</h1>
         </div>
-    </section>
+    </header>
+
+    <div class="container">
+        <!-- Vacío -->
+        <div class="hs-vacio" th:if="${vacio}">
+            <span class="hs-vacio__icono"><i class="bi bi-bag" aria-hidden="true"></i></span>
+            <h2 class="h5">Tu carrito está vacío.</h2>
+            <p class="hs-texto-secundario">Cada prenda que elijas abriga a alguien más en Cusco.</p>
+            <a class="hs-btn hs-btn--primario" th:href="@{/tienda}">Ir a la tienda</a>
+        </div>
+
+        <div class="row g-4" th:unless="${vacio}">
+            <!-- Líneas -->
+            <section class="col-12 col-lg-8" aria-label="Productos del carrito">
+                <article class="hs-linea" th:each="i : ${items}"
+                         th:classappend="${problemasPorCodigo[i.codigoProducto] != null} ? 'hs-linea--problema'">
+                    <a class="hs-linea__imagen" th:href="@{/tienda/{c}(c=${i.codigoProducto})}" tabindex="-1" aria-hidden="true">
+                        <img th:if="${i.urlImagen != null}" th:src="${i.urlImagen}" alt="">
+                        <i th:unless="${i.urlImagen != null}" class="bi" th:classappend="${i.tipoCompromiso?.icono ?: 'bi-bag'}"></i>
+                    </a>
+                    <div>
+                        <div class="d-flex justify-content-between gap-2">
+                            <div>
+                                <a class="hs-linea__nombre" th:href="@{/tienda/{c}(c=${i.codigoProducto})}" th:text="${i.nombre}">Casaca Älpafill Cusco</a>
+                                <p class="hs-linea__detalle mb-1">
+                                    <th:block th:unless="${i.talla == 'Única'}">Talla <span th:text="${i.talla}">M</span> · </th:block>
+                                    <span th:text="'S/ ' + ${#numbers.formatDecimal(i.precioUnitario, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</span> c/u
+                                </p>
+                                <th:block th:if="${i.tipoCompromiso != null}">
+                                    <th:block th:replace="~{fragments/product-card :: badge(${i.tipoCompromiso})}"/>
+                                </th:block>
+                            </div>
+                            <form method="post" th:action="@{/carrito/quitar}">
+                                <input type="hidden" name="codigo" th:value="${i.codigoProducto}">
+                                <button class="hs-linea__quitar" type="submit" th:attr="aria-label='Quitar ' + ${i.nombre}">
+                                    <i class="bi bi-trash3" aria-hidden="true"></i> <span class="d-none d-sm-inline">Quitar</span>
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="hs-linea__acciones">
+                            <!-- − / + : cada botón envía la cantidad nueva; 0 quita la línea -->
+                            <form method="post" th:action="@{/carrito/actualizar}" class="hs-cantidad hs-cantidad--pequena">
+                                <input type="hidden" name="codigo" th:value="${i.codigoProducto}">
+                                <button type="submit" name="cantidad" th:value="${i.cantidad - 1}"
+                                        th:attr="aria-label=${i.cantidad == 1} ? 'Quitar ' + ${i.nombre} : 'Una unidad menos'">−</button>
+                                <output th:text="${i.cantidad}" aria-live="polite">1</output>
+                                <button type="submit" name="cantidad" th:value="${i.cantidad + 1}" aria-label="Una unidad más">+</button>
+                            </form>
+                            <span class="hs-linea__subtotal" th:text="'S/ ' + ${#numbers.formatDecimal(i.subtotal(), 1, 'COMMA', 2, 'POINT')}">S/ 259.90</span>
+                        </div>
+
+                        <p class="hs-linea__problema mb-0" th:if="${problemasPorCodigo[i.codigoProducto] != null}" role="alert">
+                            <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                            <span th:text="${problemasPorCodigo[i.codigoProducto]}">Solo quedan 2 unidades.</span>
+                        </p>
+                    </div>
+                </article>
+                <a class="hs-enlace-flecha mt-4" th:href="@{/tienda}"><i class="bi bi-arrow-left" aria-hidden="true"></i> Seguir comprando</a>
+            </section>
+
+            <!-- Resumen -->
+            <aside class="col-12 col-lg-4">
+                <div class="hs-resumen">
+                    <h2 class="h5 mb-3">Resumen</h2>
+                    <div class="hs-resumen__fila">
+                        <span>Productos</span>
+                        <span th:text="'S/ ' + ${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</span>
+                    </div>
+                    <div class="hs-resumen__fila hs-texto-secundario">
+                        <span>Envío</span><span>Se elige al confirmar</span>
+                    </div>
+                    <div class="hs-resumen__total mb-3">
+                        <span>Total</span>
+                        <span th:text="'S/ ' + ${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</span>
+                    </div>
+
+                    <div class="hs-impacto-caja mb-3" th:if="${impacto.tieneImpacto()}"
+                         th:classappend="${impacto.abrigos == 0} ? 'hs-impacto-caja--arbol'">
+                        <span class="hs-impacto-caja__icono">
+                            <i class="bi" th:classappend="${impacto.abrigos > 0} ? 'bi-gift-fill' : 'bi-tree-fill'" aria-hidden="true"></i>
+                        </span>
+                        <span>Tu impacto con esta compra: <strong th:text="${impacto.texto}">2 abrigos + 1 árbol</strong></span>
+                    </div>
+
+                    <a th:if="${sePuedeConfirmar}" class="hs-btn hs-btn--primario w-100" th:href="@{/carrito/confirmar}">Confirmar compra</a>
+                    <span th:unless="${sePuedeConfirmar}" class="hs-btn hs-btn--deshabilitado w-100">Revisa los productos marcados</span>
+                    <p class="hs-texto-secundario text-center mt-2 mb-0" sec:authorize="isAnonymous()">
+                        Te pediremos iniciar sesión; tu carrito se conserva.
+                    </p>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Móvil: total y botón fijos encima del óvalo -->
+    <div class="hs-barra-movil" th:unless="${vacio}">
+        <div>
+            <span class="hs-texto-secundario d-block small">Total</span>
+            <span class="hs-barra-movil__total" th:text="'S/ ' + ${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</span>
+        </div>
+        <a th:if="${sePuedeConfirmar}" class="hs-btn hs-btn--primario" th:href="@{/carrito/confirmar}">Confirmar</a>
+        <span th:unless="${sePuedeConfirmar}" class="hs-btn hs-btn--deshabilitado">Revisa tu carrito</span>
+    </div>
 </main>
 </body>
 </html>
