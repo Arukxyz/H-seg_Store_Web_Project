@@ -14,7 +14,7 @@ Cada plantilla ya existe como **esqueleto funcional**: muestra todos los datos y
 
 - **Layout:** toda página pública usa `layout/base` (ver `docs/guia-plantillas.md`); las del panel usan `layout/admin`.
 - **No llamen `contenido`, `titulo`, `activa`, `estilos` ni `scripts` a nada del modelo:** son parámetros del layout y lo taparían.
-- **Avisos tras un POST:** `<th:block th:replace="~{fragments/avisos :: avisos}"/>` al inicio del `<main>`. Muestra los flash `exito`, `error`, `boletin` y `boletinError`.
+- **Avisos tras un POST:** `<th:block th:replace="~{fragments/avisos :: avisos}"/>` al inicio del `<main>`. Muestra los flash `exito` y `error` (el resultado del boletín lo muestra el propio footer).
 - **Formularios:** siempre `th:action="@{...}"` (agrega el token CSRF) y `th:field="*{campo}"`; el error de cada campo va en `th:errors="*{campo}"`. Algunos formularios tienen errores "globales" con nombre propio (por ejemplo `*{contrasenasCoinciden}`), indicados en cada sección.
 - **Formatos:** precio `'S/ ' + ${#numbers.formatDecimal(x, 1, 'COMMA', 2, 'POINT')}` → `S/ 259.90`; fecha `${#temporals.format(f, 'dd/MM/yyyy')}`.
 - **Estados con texto listo:** `estado.etiqueta` en `EstadoVenta` (Pendiente, Pagado, Anulado), `EstadoDonacion` (En espera de pago → Pendiente de asignar → Lote asignado → Entregada, con `paso` de 0 a 3), `EstadoEnvio` y `TipoEnvio`. `TipoCompromiso.etiqueta` da "1 abrigo" / "1 árbol".
@@ -188,4 +188,6 @@ Se entra con los usuarios **ADMINISTRADOR** del escritorio (tabla `usuario`), co
 - **Errores:** `error/404.html` (ruta inexistente o recurso que no existe: producto oculto, pedido ajeno) y `error.html` (cualquier otro error; recibe `status`). Spring Boot los usa solos.
 - **Avisos:** `fragments/avisos.html` define cómo se ven los flash (franja o toast).
 - **Navbar con sesión:** ya usa `sec:authorize`. Para el nombre del cliente está `${#authentication.principal.nombre}`, y para el avatar, `getInicial()`.
-- **Boletín del footer:** ya envía a `POST /boletin`; falta mostrar `boletin` y `boletinError` cerca del formulario (ancla `#boletin`).
+- **Boletín del footer:** ya envía a `POST /boletin` y muestra `boletin` o `boletinError` sobre el formulario (`.hs-footer__aviso`, ancla `#boletin`).
+- **Navbar:** tres estados ya resueltos: visitante (Ingresar), cliente (menú con su inicial) y personal del panel (enlace "Panel"); el óvalo móvil lleva a cuenta, panel o login según el caso.
+- **Home** (coordinador): título y bajada del banner salen del bloque `home.banner` y "Quiénes somos" de `nosotros.historia`, editables en el panel (4.5); si faltan, la plantilla usa su texto. Imágenes por defecto: `static/images/hero-cusco.jpg` y `comunidad-cusco.jpg`; si el panel pone una `imagenUrl`, se usa esa.

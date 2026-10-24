@@ -3,7 +3,11 @@ package pe.edu.utp.hoseg.web.controller;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.security.test.context.support.WithMockUser;
+import pe.edu.utp.hoseg.web.config.AdministradorAutenticado;
+import pe.edu.utp.hoseg.web.config.ClienteAutenticado;
+import pe.edu.utp.hoseg.web.dto.BloqueContenido;
+import pe.edu.utp.hoseg.web.model.RolUsuario;
+import pe.edu.utp.hoseg.web.service.ContenidoService;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import pe.edu.utp.hoseg.web.dto.ResumenImpacto;
@@ -15,11 +19,13 @@ import pe.edu.utp.hoseg.web.service.ImpactoService;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -40,6 +46,9 @@ class HomeControllerTest {
 
     @MockitoBean
     private CarritoService carritoService;
+
+    @MockitoBean
+    private ContenidoService contenidoService;
 
     @Test
     void laHomeEsPublicaYMuestraDestacadosImpactoYComunidades() throws Exception {
@@ -121,22 +130,54 @@ class HomeControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "maria.gutierrez@example.com")
-    void conSesionElNavbarMuestraLaInicialYElMenuDeCuenta() throws Exception {
-        when(catalogoService.destacados(anyInt())).thenReturn(List.of());
-        when(impactoService.resumen()).thenReturn(new ResumenImpacto(0, 0, 0, 0));
-        when(impactoService.nombresComunidades()).thenReturn(List.of());
-        when(carritoService.totalUnidades()).thenReturn(0);
+    void conSesionDeClienteElNavbarMuestraSuInicialYElMenuDeCuenta() throws Exception {
+        homeVacia();
 
-        mvc.perform(get("/"))
+        mvc.perform(get("/").with(user(new ClienteAutenticado(7, "María Fernanda", "maria@example.com", "x", false))))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("hs-avatar\" aria-hidden=\"true\">M<")))
-                .andExpect(content().string(containsString("maria.gutierrez@example.com")))
+                .andExpect(content().string(containsString("María Fernanda")))
                 .andExpect(content().string(containsString("href=\"/cuenta?seccion=datos\"")))
                 .andExpect(content().string(containsString("action=\"/logout\"")))
                 .andExpect(content().string(containsString("Cerrar sesión")))
                 .andExpect(content().string(containsString("href=\"/cuenta\" data-seccion=\"cuenta\"")))
                 .andExpect(content().string(not(containsString("Ingresar"))));
+    }
+
+    /** El personal del panel no tiene cuenta de cliente: ve "Panel", no "Mis pedidos" (que le daría 403). */
+    @Test
+    void conSesionDelPanelElNavbarLlevaAlPanelYNoALaCuentaDeCliente() throws Exception {
+        homeVacia();
+
+        mvc.perform(get("/").with(user(new AdministradorAutenticado(1, "Admin", "admin", "s:h",
+                        RolUsuario.ADMINISTRADOR, true, false))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("href=\"/admin/panel\"")))
+                .andExpect(content().string(not(containsString("Mis pedidos e impacto"))))
+                .andExpect(content().string(not(containsString("Ingresar"))));
+    }
+
+    @Test
+    void elBannerYQuienesSomosSalenDelPanelConTextoPorDefecto() throws Exception {
+        homeVacia();
+        when(contenidoService.bloques("home.banner", "nosotros.historia")).thenReturn(Map.of(
+                "home.banner", new BloqueContenido("home.banner", "Campaña de invierno", "Abriga Cusco este julio.",
+                        "/images/campana.jpg", null)));
+
+        mvc.perform(get("/"))
+                .andExpect(content().string(containsString("Campaña de invierno")))
+                .andExpect(content().string(containsString("Abriga Cusco este julio.")))
+                .andExpect(content().string(containsString("src=\"/images/campana.jpg\"")))
+                // Sin bloque 'nosotros.historia': texto e imagen por defecto
+                .andExpect(content().string(containsString("Ropa que calienta en los dos sentidos.")))
+                .andExpect(content().string(containsString("src=\"/images/comunidad-cusco.jpg\"")))
+                .andExpect(content().string(containsString("href=\"/nosotros\"")));
+    }
+
+    private void homeVacia() {
+        when(catalogoService.destacados(anyInt())).thenReturn(List.of());
+        when(impactoService.resumen()).thenReturn(new ResumenImpacto(0, 0, 0, 0));
+        when(impactoService.nombresComunidades()).thenReturn(List.of());
     }
 
     @Test

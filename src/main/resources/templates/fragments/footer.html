@@ -55,12 +55,17 @@
                 </ul>
             </div>
 
-            <!-- Boletín Changemaker (CU-09). Es POST: th:action añade el token CSRF. -->
-            <div class="col-12 col-lg-4">
+            <!-- Boletín Changemaker (CU-09). Es POST: th:action añade el token CSRF.
+                 BoletinController vuelve a la misma página con el ancla #boletin y el
+                 resultado en el flash "boletin" (o "boletinError" si el email no es válido). -->
+            <div class="col-12 col-lg-4" id="boletin">
                 <p class="hs-footer__titulo">Boletín Changemaker</p>
                 <p class="hs-footer__lema mb-3">
                     Campañas, lanzamientos y el informe de lo que tus compras lograron en Cusco.
                 </p>
+                <p class="hs-footer__aviso" role="status" th:if="${boletin}" th:text="${boletin}">¡Listo!</p>
+                <p class="hs-footer__aviso hs-footer__aviso--error" role="alert" th:if="${boletinError}"
+                   th:text="${boletinError}">Revisa el formato del email.</p>
                 <form class="hs-footer__boletin" th:action="@{/boletin}" method="post">
                     <label class="visually-hidden" for="boletin-email">Tu correo electrónico</label>
                     <input class="hs-footer__boletin-campo" id="boletin-email" type="email" name="email"

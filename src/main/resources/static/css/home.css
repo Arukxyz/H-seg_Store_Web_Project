@@ -10,6 +10,8 @@
     min-height: 100vh;
     min-height: 100svh;
     overflow: hidden;
+    /* Si la foto no carga (se oculta con onerror), el texto claro sigue legible */
+    background: var(--hs-bark);
 }
 
 .hs-hero__imagen {

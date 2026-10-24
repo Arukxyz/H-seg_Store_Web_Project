@@ -21,7 +21,7 @@ public class AtributosGlobales {
             new EnlaceNavegacion("tienda", "Tienda", "/tienda", "bi-bag"),
             new EnlaceNavegacion("cafe", "Café", "/cafe", "bi-cup-hot"),
             new EnlaceNavegacion("impacto", "Impacto", "/#impacto", "bi-activity"),
-            new EnlaceNavegacion("nosotros", "Nosotros", "/#nosotros", null));
+            new EnlaceNavegacion("nosotros", "Nosotros", "/nosotros", null));
 
     private final CarritoService carritoService;
     private final String rutaConsulta;
