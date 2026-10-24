@@ -254,3 +254,36 @@
     height: 100%;
     object-fit: cover;
 }
+
+/* ── Créditos de las fotos por defecto (licencias CC BY, docs/creditos-imagenes.md) ── */
+.hs-credito-foto {
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    color: var(--hs-muted);
+}
+
+.hs-credito-foto a {
+    color: inherit;
+    text-decoration: underline;
+}
+
+/* Sobre la foto del hero: claro y semitransparente. En móvil va arriba,
+   bajo la barra, porque abajo lo taparía el óvalo de navegación. */
+.hs-credito-foto--hero {
+    position: absolute;
+    z-index: 2;
+    top: 4.5rem;
+    right: 1rem;
+    margin: 0;
+    max-width: 18rem;
+    text-align: right;
+    color: var(--hs-cream);
+    opacity: 0.75;
+}
+
+@media (min-width: 768px) {
+    .hs-credito-foto--hero {
+        top: auto;
+        bottom: 1rem;
+    }
+}

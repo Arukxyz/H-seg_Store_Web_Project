@@ -26,6 +26,7 @@ El sistema está formado por dos aplicaciones que comparten una base de datos Po
 | [diseno/mapeo-figma-thymeleaf.md](diseno/mapeo-figma-thymeleaf.md) | Del prototipo de Figma a las plantillas Thymeleaf: correspondencia de componentes y decisiones tomadas |
 | [guia-plantillas.md](guia-plantillas.md) | Cómo crear una página nueva: fragmentos, clases CSS, rutas y servicios disponibles |
 | [contrato-backend.md](contrato-backend.md) | **Para diseñar una pantalla:** ruta, plantilla, datos que recibe y formularios que envía cada página, por bloque |
+| [creditos-imagenes.md](creditos-imagenes.md) | Fotos de terceros que usa el portal: origen, autor, licencia y cómo agregar otras |
 | [prototipo/reparto-prototipo-figma.md](prototipo/reparto-prototipo-figma.md) | Reparto del prototipo del resto de pantallas entre el equipo |
 
 ### Módulo de escritorio ([`Hoseg_Store`](https://github.com/Arukxyz/Hoseg_Store))

@@ -19,6 +19,12 @@
              onerror="this.hidden = true"
              alt="Paisaje altoandino de Cusco">
         <div class="hs-hero__velo" aria-hidden="true"></div>
+        <!-- Atribución que exige la licencia CC BY de la foto por defecto (docs/creditos-imagenes.md).
+             Si el panel pone otra imagen, desaparece: el crédito es solo de esta foto. -->
+        <p class="hs-credito-foto hs-credito-foto--hero" th:if="${bloques['home.banner']?.imagenUrl == null}">
+            Foto: <a href="https://commons.wikimedia.org/wiki/File:Ausangate_Landscape.jpg" target="_blank" rel="noopener">Ausangate Landscape</a>,
+            Petr Meissner, <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener license">CC BY 2.0</a>
+        </p>
 
         <div class="container hs-hero__contenido">
             <div class="hs-hero__texto">
@@ -166,8 +172,12 @@
                     <div class="hs-about__imagen">
                         <img th:src="@{${bloques['nosotros.historia']?.imagenUrl ?: '/images/comunidad-cusco.jpg'}}"
                              onerror="this.hidden = true"
-                             alt="Comunidad altoandina de Cusco" loading="lazy">
+                             alt="Alpacas en los Andes de Cusco" loading="lazy">
                     </div>
+                    <p class="hs-credito-foto mt-2 mb-0" th:if="${bloques['nosotros.historia']?.imagenUrl == null}">
+                        Foto: <a href="https://commons.wikimedia.org/wiki/File:Alpacas_in_the_mountains.jpg" target="_blank" rel="noopener">Alpacas in the mountains</a>,
+                        Havardtl, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener license">CC BY 4.0</a>
+                    </p>
                 </div>
                 <div class="col-12 col-md-6 d-flex flex-column gap-4">
                     <p class="hs-kicker mb-0">Quiénes somos</p>
