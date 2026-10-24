@@ -87,6 +87,16 @@ public class AdminMensajesController {
                 .body(boletinService.csvActivos().getBytes(StandardCharsets.UTF_8));
     }
 
+    /** "Exportar Excel" de suscriptores activos (Apache POI). */
+    @GetMapping("/admin/suscriptores.xlsx")
+    public ResponseEntity<byte[]> suscriptoresExcel() {
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.attachment().filename("suscriptores-hoseg.xlsx").build().toString())
+                .body(boletinService.exportarExcelActivos());
+    }
+
     private void preparar(String pestana, EstadoMensaje estado, Model model) {
         model.addAttribute("pestana", pestana);
         model.addAttribute("estado", estado);

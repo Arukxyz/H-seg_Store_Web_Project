@@ -31,6 +31,11 @@
              tests no arrancan si Maven corre con un JDK más nuevo que el 21 del proyecto. -->
         <argLine>-Dnet.bytebuddy.experimental=true</argLine>
         <thymeleaf-extras-springsecurity.version>3.1.3.RELEASE</thymeleaf-extras-springsecurity.version>
+
+        <!-- Librerías de apoyo (Guava y POI no las gestiona Spring Boot: llevan versión propia) -->
+        <guava.version>33.4.0-jre</guava.version>
+        <commons-lang3.version>3.17.0</commons-lang3.version>
+        <poi.version>5.3.0</poi.version>
     </properties>
 
     <dependencies>
@@ -93,6 +98,32 @@
         <dependency>
             <groupId>org.webjars</groupId>
             <artifactId>webjars-locator-lite</artifactId>
+        </dependency>
+
+        <!-- Librerías de apoyo a la codificación -->
+        <!-- Google Guava: caché acotada con el conteo de fallos de login por IP (BloqueoAccesoService) -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+        <!-- Apache Commons Lang3: limpieza de texto de una sola línea (SaneamientoTexto) -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+        </dependency>
+        <!-- Apache POI: exportación de suscriptores a Excel (BoletinService.exportarExcelActivos) -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>${poi.version}</version>
+        </dependency>
+        <!-- Logback vía SLF4J: ya llega con spring-boot-starter-web; se declara para que quede explícito.
+             Se configura en src/main/resources/logback-spring.xml -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-logging</artifactId>
         </dependency>
 
         <!-- Recarga en desarrollo -->

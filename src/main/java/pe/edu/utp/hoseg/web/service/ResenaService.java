@@ -17,6 +17,7 @@ import pe.edu.utp.hoseg.web.repository.DetalleVentaRepository;
 import pe.edu.utp.hoseg.web.repository.ProductoRepository;
 import pe.edu.utp.hoseg.web.repository.ResenaRepository;
 import pe.edu.utp.hoseg.web.repository.UsuarioRepository;
+import pe.edu.utp.hoseg.web.util.SaneamientoTexto;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -120,7 +121,9 @@ public class ResenaService {
             resena.setActualizadoEn(OffsetDateTime.now());
         }
         resena.setCalificacion(form.getCalificacion());
-        resena.setTitulo(limpio(form.getTitulo()));
+        // título es de una sola línea y se muestra en la ficha pública del producto:
+        // se normaliza con SaneamientoTexto (Apache Commons Lang3).
+        resena.setTitulo(SaneamientoTexto.normalizarLinea(form.getTitulo()));
         resena.setComentario(form.getComentario().trim());
         resenaRepository.save(resena);
     }
@@ -166,9 +169,5 @@ public class ResenaService {
                 r.getCreadoEn(),
                 r.getEstado(),
                 r.getUsuarioModera() == null ? null : r.getUsuarioModera().getNombre());
-    }
-
-    private static String limpio(String valor) {
-        return valor == null || valor.isBlank() ? null : valor.trim();
     }
 }
