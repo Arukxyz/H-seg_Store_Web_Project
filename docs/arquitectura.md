@@ -28,10 +28,11 @@ flowchart LR
 | Framework | Spring Boot 3.4: Web, Data JPA, Validation, Security | Swing con tema FlatLaf |
 | Vistas | Thymeleaf + Bootstrap 5 | JFrames |
 | Acceso a datos | Spring Data JPA (Hibernate), `ddl-auto=validate` | JDBC con pool HikariCP |
-| Archivos que genera | — | Excel (Apache POI), PDF y QR (PDFBox + ZXing), respaldos CSV |
+| Librerías de apoyo | Guava (alerta de fallos de login por IP), Apache POI, Commons Lang3 (saneamiento de texto), Logback | FlatLaf, HikariCP, Apache POI, PDFBox, ZXing |
+| Archivos que genera | Suscriptores del boletín en Excel (Apache POI) y CSV; logs `hoseg-web.log` y `auditoria.log` | Excel (Apache POI), PDF y QR (PDFBox + ZXing), respaldos CSV |
 | Contraseñas | Clientes: BCrypt | Personal: SHA-256 con salt |
 | Base de datos | PostgreSQL en Supabase, **la misma para ambos**, por el *Session pooler* (puerto 5432) | ← |
-| Dueño del esquema | No; solo valida | **Sí**: scripts `01`..`06` en `src/main/resources/sql/` |
+| Dueño del esquema | No; solo valida | **Sí**: scripts `01`..`09` en `src/main/resources/sql/` |
 
 ## 3. Arquitectura en capas
 
@@ -65,9 +66,10 @@ flowchart TB
 | `config` | `SecurityConfig` (dos logins: clientes con BCrypt y panel `/admin` con la tabla `usuario`; bloqueo por intentos), `Sha256ConSaltPasswordEncoder`, `ClienteAutenticado`, `AdministradorAutenticado`, `WebConfig` (locale es-PE) |
 | `model` | Una entidad por tabla que usa la web (incluidas `Envio`, `Resena`, `TokenRecuperacion`, `ContenidoWeb`, `CafeCarta`, `CafeLocal`, `MensajeContacto`, `SuscriptorBoletin`, `LibroReclamacion` y `Usuario` de solo lectura) y los enums de estado con su etiqueta |
 | `repository` | Un repositorio por entidad. Sumas, conteos, secuencias y bloqueo se calculan en Postgres |
-| `service` | Un servicio por área: `CatalogoService`, `CarritoService`, `VentaService`, `ResenaService`, `ClienteService`, `RecuperacionService`, `ImpactoService`, `CafeService`, `ContenidoService`, `ContactoService`, `BoletinService`, `ReclamacionService`, `PanelAdminService`, y `CorreoService`/`NotificacionService` para los correos |
+| `service` | Un servicio por área: `CatalogoService`, `CarritoService`, `VentaService`, `ResenaService`, `ClienteService`, `RecuperacionService`, `ImpactoService`, `CafeService`, `ContenidoService`, `ContactoService`, `BoletinService`, `ReclamacionService`, `PanelAdminService`, `CorreoService`/`NotificacionService` para los correos, y para la seguridad `ClienteDetailsService`, `UsuarioDetailsService` (cargan a quien inicia sesión) y `BloqueoAccesoService` (bloqueo por cuenta y alerta por IP) |
 | `dto` | Formularios validados (`*Form`) y vistas de solo lectura que reciben las plantillas (contrato en [contrato-backend.md](contrato-backend.md)) |
-| `controller` | Uno por grupo de pantallas (tienda, carrito, cuenta, impacto, institucional, contacto y tres del panel), `AtributosGlobales` (datos comunes) y `EjemploController` (solo en desarrollo) |
+| `controller` | Uno por grupo de pantallas (Home, tienda, carrito, acceso, cuenta, impacto, institucional, contacto y tres del panel), `AtributosGlobales` (datos comunes) y `EjemploController` (solo en desarrollo) |
+| `util` | `SaneamientoTexto`: deja en un renglón el texto libre de los formularios públicos antes de guardarlo (Commons Lang3) |
 
 ## 4. Base de datos compartida
 
@@ -278,9 +280,10 @@ Son las que evitan que un sistema corrompa los datos del otro.
 | | Portal web | Escritorio |
 |---|---|---|
 | Autenticación | Spring Security con dos formularios: clientes (`/login`, **BCrypt** en `cliente.password_hash`) y panel (`/admin/login`, tabla `usuario` con **SHA-256 + salt**, igual que el escritorio) | Usuario y contraseña con **SHA-256 + salt** en `usuario` |
-| Protección de fuerza bruta | Bloqueo de 5 minutos tras 3 intentos fallidos, para clientes y personal, con el reloj de Postgres | Bloqueo temporal tras 3 intentos fallidos, con el reloj del servidor |
+| Protección de fuerza bruta | Bloqueo de 5 minutos tras 3 intentos fallidos, para clientes y personal, con el reloj de Postgres. Además, 10 fallos desde una misma IP en 15 minutos dejan una alerta en el log (contador en memoria con Guava; no bloquea) | Bloqueo temporal tras 3 intentos fallidos, con el reloj del servidor |
+| Auditoría | `logs/auditoria.log` (Logback, 90 días): bloqueos de cuenta y alertas por IP, sin contraseñas, hashes ni correos | Bitácora `movimiento_inventario` |
 | Autorización | Rutas públicas (catálogo, Home, consulta, Café), de cliente (`/carrito/confirmar`, `/cuenta/**`, reseñas) y de administrador (`/admin/**`, solo rol `ADMINISTRADOR`) | Módulos habilitados según el rol |
-| Formularios | Token CSRF en todo `POST`; validación en DTOs (`@NotBlank`, `@Email`, `@Size`) | Validación centralizada en `util.Validador` |
+| Formularios | Token CSRF en todo `POST`; validación en DTOs (`@NotBlank`, `@Email`, `@Size`); los campos de una línea pasan por `SaneamientoTexto`, que quita saltos de línea para que nadie inyecte cabeceras en el asunto de un correo | Validación centralizada en `util.Validador` |
 | Clientes históricos | Los cargados por la semilla no tienen contraseña: deben registrarse con su mismo email | — |
 
 **Credenciales fuera del repositorio.** Ninguna contraseña de base de datos se versiona. Web: variables de entorno `DB_URL`, `DB_USER`, `DB_PASSWORD` o `application-local.properties`. Escritorio: las mismas variables o `config.properties`. Ambos archivos están en `.gitignore`.
@@ -302,4 +305,4 @@ Las instrucciones detalladas están en el `README.md` de cada repositorio.
 | Sistema | Implementado | En desarrollo |
 |---|---|---|
 | Escritorio | RF-01 a RF-08: login con bloqueo, roles, catálogo e inventario dual, pedidos web, lotes y despacho, reportes Excel, proveedores, usuarios, boleta PDF con QR, respaldos | — |
-| Portal web | Backend completo de los 5 bloques: catálogo con filtros, detalle con reseñas, carrito y checkout con envío, registro, login con bloqueo, recuperación de contraseña, mi cuenta y pedidos, consulta de impacto (boleta y QR), café, contenido editable, contacto, boletín, Libro de Reclamaciones y panel `/admin`. Página principal con datos reales y plantillas esqueleto funcionales de todas las pantallas | Diseño de las pantallas de cada bloque sobre los esqueletos ([contrato-backend.md](contrato-backend.md)) |
+| Portal web | Backend completo de los 5 bloques: catálogo con filtros, detalle con reseñas, carrito y checkout con envío, registro, login con bloqueo, recuperación de contraseña, mi cuenta y pedidos, consulta de impacto (boleta y QR), café, contenido editable, contacto, boletín, Libro de Reclamaciones, panel `/admin` con exportación a Excel, y log de auditoría. Pantallas diseñadas: página principal, tienda, detalle, carrito y compra, consulta de impacto, Café, Nosotros y legales | Diseño, sobre sus plantillas esqueleto, de las pantallas de acceso y cuenta de clientes, contacto, Libro de Reclamaciones y panel `/admin` ([contrato-backend.md](contrato-backend.md)) |
