@@ -1,28 +1,72 @@
 <!DOCTYPE html>
 <!--
-  ESQUELETO · Bloque 1 · 1.6 Compra registrada (GET /compra-exito, justo después de confirmar).
-  Modelo:
-    compra  CompraRegistrada (codigoComprobante, totalProductos, costoEnvio, totalAPagar, tipoEnvio,
-            impacto ImpactoCompra)
+  Bloque 1 · 1.6 Compra registrada (GET /compra-exito, justo después de confirmar; CarritoController).
+  Modelo: compra (CompraRegistrada: codigoComprobante, totalProductos, costoEnvio, totalAPagar, tipoEnvio, impacto).
+  El botón "Copiar" usa el portapapeles del navegador (tienda.js); sin él, el código se puede seleccionar.
 -->
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: pagina(titulo='Compra registrada · HÖSÉG', activa='carrito',
-                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+                                          transparente=false, contenido=~{::main}, estilos=~{::link}, scripts=~{::script})}">
+<head>
+    <link rel="stylesheet" th:href="@{/css/tienda.css}">
+</head>
 <body>
-<main class="hs-main--bajo-nav">
+<main class="hs-main--bajo-nav hs-pagina">
     <section class="hs-seccion">
-        <div class="container text-center">
-            <p class="hs-kicker">Compra registrada</p>
-            <h1 class="hs-h2" th:text="${compra.codigoComprobante}">WEB-000110</h1>
-            <p>Tu pedido quedó registrado y está pendiente de confirmación de pago.</p>
-            <p th:text="'Total a pagar: S/ ' + ${#numbers.formatDecimal(compra.totalAPagar, 1, 'COMMA', 2, 'POINT')}
-                        + ' (envío S/ ' + ${#numbers.formatDecimal(compra.costoEnvio, 1, 'COMMA', 2, 'POINT')} + ')'">Total</p>
-            <p th:if="${compra.impacto.tieneImpacto()}" th:text="'Con esta compra generas ' + ${compra.impacto.texto} + '.'">Impacto</p>
-            <p><strong>Instrucciones de pago:</strong> texto de ejemplo.</p>
-            <a class="hs-btn hs-btn--primario" th:href="@{/cuenta/pedidos/{c}(c=${compra.codigoComprobante})}">Ver mi pedido</a>
-            <a class="hs-btn hs-btn--secundario" th:href="@{${rutaConsulta}(boleta=${compra.codigoComprobante})}">Sigue tu impacto</a>
+        <div class="container hs-ancho-md">
+            <div class="text-center mb-5">
+                <span class="hs-exito__icono"><i class="bi bi-check2" aria-hidden="true"></i></span>
+                <p class="hs-kicker">Compra registrada</p>
+                <h1 class="hs-pagina-cabecera__titulo mb-3">¡Gracias! Tu pedido quedó registrado.</h1>
+                <p class="hs-texto-secundario mb-4">
+                    Está pendiente de confirmación de pago. Guarda este código: con él sigues tu pedido y tu impacto.
+                </p>
+                <div class="hs-exito__codigo">
+                    <span th:text="${compra.codigoComprobante}">WEB-000110</span>
+                    <button class="hs-btn hs-btn--secundario" type="button" th:attr="data-copiar=${compra.codigoComprobante}">
+                        <i class="bi bi-copy" aria-hidden="true"></i> <span data-copiar-texto>Copiar</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-12 col-md-6">
+                    <div class="hs-resumen h-100">
+                        <h2 class="h5 mb-3">Resumen</h2>
+                        <div class="hs-resumen__fila">
+                            <span>Productos</span>
+                            <span th:text="'S/ ' + ${#numbers.formatDecimal(compra.totalProductos, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</span>
+                        </div>
+                        <div class="hs-resumen__fila">
+                            <span th:text="${compra.tipoEnvio.etiqueta}">Recojo en tienda</span>
+                            <span th:text="${compra.costoEnvio.signum() == 0} ? 'Gratis' : 'S/ ' + ${#numbers.formatDecimal(compra.costoEnvio, 1, 'COMMA', 2, 'POINT')}">Gratis</span>
+                        </div>
+                        <div class="hs-resumen__total mb-3">
+                            <span>Total a pagar</span>
+                            <span th:text="'S/ ' + ${#numbers.formatDecimal(compra.totalAPagar, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</span>
+                        </div>
+                        <div class="hs-impacto-caja" th:if="${compra.impacto.tieneImpacto()}"
+                             th:classappend="${compra.impacto.abrigos == 0} ? 'hs-impacto-caja--arbol'">
+                            <span class="hs-impacto-caja__icono">
+                                <i class="bi" th:classappend="${compra.impacto.abrigos > 0} ? 'bi-gift-fill' : 'bi-tree-fill'" aria-hidden="true"></i>
+                            </span>
+                            <span>Con esta compra generas <strong th:text="${compra.impacto.texto}">1 abrigo</strong>
+                                  para una comunidad de Cusco.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <th:block th:replace="~{fragments/pago :: instrucciones(${compra.codigoComprobante})}"/>
+                </div>
+            </div>
+
+            <div class="d-flex flex-column flex-sm-row justify-content-center gap-3 mt-5">
+                <a class="hs-btn hs-btn--primario" th:href="@{/cuenta/pedidos/{c}(c=${compra.codigoComprobante})}">Ver mi pedido</a>
+                <a class="hs-btn hs-btn--secundario" th:href="@{${rutaConsulta}(boleta=${compra.codigoComprobante})}">Sigue tu impacto</a>
+            </div>
         </div>
     </section>
 </main>
+<script th:src="@{/js/tienda.js}" defer></script>
 </body>
 </html>

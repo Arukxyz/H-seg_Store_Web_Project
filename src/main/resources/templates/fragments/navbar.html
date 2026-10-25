@@ -29,20 +29,25 @@
         </ul>
 
         <div class="hs-nav__acciones">
-            <a class="hs-nav__cuenta d-none d-md-inline-flex" th:href="@{/login}" sec:authorize="!isAuthenticated()">
+            <!--/* Tres casos: visitante (enlace al login), cliente (menú de su cuenta) y personal
+                 con sesión en el panel (enlace al panel; no tiene cuenta de cliente). */-->
+            <a class="hs-nav__cuenta d-none d-md-inline-flex" th:href="@{/login}" sec:authorize="isAnonymous()">
                 <i class="bi bi-person hs-icono" aria-hidden="true"></i>
                 <span class="d-none d-lg-inline">Ingresar</span>
             </a>
-            <!-- Con sesión: inicial del cliente y menú con su cuenta y la salida.
+            <a class="hs-nav__cuenta d-none d-md-inline-flex" th:href="@{/admin/panel}" sec:authorize="hasRole('ADMINISTRADOR')">
+                <i class="bi bi-speedometer2 hs-icono" aria-hidden="true"></i>
+                <span class="d-none d-lg-inline">Panel</span>
+            </a>
+            <!-- Cliente: inicial de su nombre y menú con su cuenta y la salida.
                  Cerrar sesión es POST: th:action añade el token CSRF. -->
-            <div class="dropdown d-none d-md-block" sec:authorize="isAuthenticated()">
+            <div class="dropdown d-none d-md-block" sec:authorize="hasRole('CLIENTE')">
                 <button class="hs-nav__cuenta hs-nav__usuario" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <span class="hs-avatar" aria-hidden="true"
-                          th:text="${#strings.toUpperCase(#strings.substring(#authentication.name, 0, 1))}">M</span>
+                    <span class="hs-avatar" aria-hidden="true" th:text="${#authentication.principal.inicial}">M</span>
                     <span class="d-none d-lg-inline">Mi cuenta</span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end hs-menu-cuenta">
-                    <li class="hs-menu-cuenta__quien" sec:authentication="name">cliente@correo.com</li>
+                    <li class="hs-menu-cuenta__quien" th:text="${#authentication.principal.nombre}">Ana</li>
                     <li><a class="dropdown-item" th:href="@{/cuenta}">Mis pedidos e impacto</a></li>
                     <li><a class="dropdown-item" th:href="@{/cuenta(seccion='datos')}">Mis datos</a></li>
                     <li><hr class="dropdown-divider"></li>
@@ -77,9 +82,9 @@
                 <i class="bi hs-icono" th:classappend="${e.icono}" aria-hidden="true"></i>
                 <span th:text="${e.etiqueta}">Inicio</span>
             </a>
-            <!-- Con sesión lleva a la cuenta; sin sesión, al login -->
+            <!-- Cliente con sesión: su cuenta; personal del panel: el panel; visitante: el login -->
             <a class="hs-pill__item" th:classappend="${activa == 'cuenta'} ? 'is-active'"
-               th:href="${#authorization.expression('isAuthenticated()')} ? @{/cuenta} : @{/login}" data-seccion="cuenta">
+               th:href="${#authorization.expression('hasRole(''CLIENTE'')')} ? @{/cuenta} : (${#authorization.expression('hasRole(''ADMINISTRADOR'')')} ? @{/admin/panel} : @{/login})" data-seccion="cuenta">
                 <i class="bi bi-person hs-icono" aria-hidden="true"></i>
                 <span>Cuenta</span>
             </a>

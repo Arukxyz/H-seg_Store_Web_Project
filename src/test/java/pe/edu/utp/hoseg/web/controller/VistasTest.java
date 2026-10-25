@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -105,6 +106,31 @@ class VistasTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Escribe tu reseña")))
                 .andExpect(content().string(containsString("María G.")));
+    }
+
+    @Test
+    void detalleParaUnVisitanteConLaTallaDeLaUrlElegidaYAvisoDeResena() throws Exception {
+        when(catalogoService.detalle("HSG-CAS-001")).thenReturn(detalle());
+        when(resenaService.resumen(anyString())).thenReturn(new ResumenResenas(null, 0));
+
+        mvc.perform(get("/tienda/HSG-CAS-001"))
+                .andExpect(status().isOk())
+                // M disponible y elegida; L agotada y deshabilitada
+                .andExpect(content().string(containsString("value=\"HSG-CAS-001\" data-precio=\"259.90\" data-maximo=\"3\" data-pocas=\"true\" checked")))
+                .andExpect(content().string(containsString("data-maximo=\"0\" data-pocas=\"false\" disabled=\"disabled\"")))
+                .andExpect(content().string(containsString("Esta compra abriga a 1 niño en Cusco.")))
+                .andExpect(content().string(containsString("Guía de tallas")))
+                .andExpect(content().string(containsString("Este producto aún no tiene reseñas.")))
+                .andExpect(content().string(containsString("para dejar tu reseña")))
+                .andExpect(content().string(not(containsString("Escribe tu reseña"))));
+    }
+
+    @Test
+    void tiendaSinResultados() throws Exception {
+        mvc.perform(get("/tienda").param("q", "zzz"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("No encontramos productos con esos filtros.")))
+                .andExpect(content().string(containsString("Limpiar filtros")));
     }
 
     @Test

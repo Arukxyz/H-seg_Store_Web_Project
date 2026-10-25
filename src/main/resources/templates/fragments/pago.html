@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<!--
+  Instrucciones de pago (1.5 y 1.6). El portal NO cobra en línea: el pedido
+  queda PENDIENTE y el encargado lo confirma en el escritorio al recibir el pago.
+  PENDIENTE DE DEFINIR CON EL EQUIPO: número de Yape/Plin y cuenta bancaria.
+  Cuando estén, se cambian solo aquí (o se pasan a un bloque de contenido_web).
+
+  Uso: <th:block th:replace="~{fragments/pago :: instrucciones(${codigo})}"/>
+       codigo → el WEB-nnnnnn del pedido, o null si aún no existe (confirmar)
+-->
+<body>
+<div class="hs-pago" th:fragment="instrucciones(codigo)">
+    <p class="hs-pago__titulo"><i class="bi bi-wallet2" aria-hidden="true"></i> Cómo pagar</p>
+    <p class="mb-2">
+        Paga por <strong>Yape, Plin o transferencia bancaria</strong> y escribe
+        <strong th:text="${codigo != null} ? 'el código ' + ${codigo} : 'tu código de pedido'">tu código de pedido</strong>
+        en el mensaje o concepto del pago.
+    </p>
+    <ul class="mb-2 ps-3">
+        <li>Yape / Plin: número por confirmar · a nombre de 14-DIEZ S.A.C.</li>
+        <li>Transferencia: cuenta por confirmar</li>
+    </ul>
+    <p class="mb-0">Cuando confirmemos tu pago, preparamos tu pedido y activamos tu donación.</p>
+</div>
+</body>
+</html>

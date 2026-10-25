@@ -10,13 +10,21 @@
 <main>
 
     <!-- ══ HeroBanner ══════════════════════════════════════════════════════ -->
-    <!-- Foto temporal de Unsplash (el export no trae imágenes propias);
-         reemplazar por fotografía de HÖSÉG en static/images/ antes de la entrega. -->
+    <!-- Título, bajada e imagen editables desde el panel (bloque 'home.banner').
+         Sin imagen en el panel se usa /images/hero-cusco.jpg (static/images/); si
+         tampoco existe, la imagen se oculta y queda el fondo oscuro del hero. -->
     <section id="inicio" class="hs-hero" data-nav="inicio">
         <img class="hs-hero__imagen"
-             src="https://images.unsplash.com/photo-1785810116787-489fb894b9f7?w=1440&h=900&fit=crop&auto=format"
+             th:src="@{${bloques['home.banner']?.imagenUrl ?: '/images/hero-cusco.jpg'}}"
+             onerror="this.hidden = true"
              alt="Paisaje altoandino de Cusco">
         <div class="hs-hero__velo" aria-hidden="true"></div>
+        <!-- Atribución que exige la licencia CC BY de la foto por defecto (docs/creditos-imagenes.md).
+             Si el panel pone otra imagen, desaparece: el crédito es solo de esta foto. -->
+        <p class="hs-credito-foto hs-credito-foto--hero" th:if="${bloques['home.banner']?.imagenUrl == null}">
+            Foto: <a href="https://commons.wikimedia.org/wiki/File:Ausangate_Landscape.jpg" target="_blank" rel="noopener">Ausangate Landscape</a>,
+            Petr Meissner, <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener license">CC BY 2.0</a>
+        </p>
 
         <div class="container hs-hero__contenido">
             <div class="hs-hero__texto">
@@ -25,9 +33,11 @@
                     <span class="hs-chip-vidrio hs-chip-vidrio--salvia">Buy One, Plant One</span>
                 </div>
 
-                <h1 class="hs-hero__titulo">Abriga a alguien más con cada compra.</h1>
+                <h1 class="hs-hero__titulo"
+                    th:text="${bloques['home.banner']?.titulo ?: 'Abriga a alguien más con cada compra.'}">Abriga a alguien más con cada compra.</h1>
 
-                <p class="hs-hero__bajada">
+                <p class="hs-hero__bajada"
+                   th:text="${bloques['home.banner']?.cuerpo ?: 'Empresa peruana de ropa de abrigo con triple impacto. Cada prenda llega a dos personas: a ti y a un niño de una comunidad altoandina de Cusco.'}">
                     Empresa peruana de ropa de abrigo con triple impacto. Cada prenda llega a dos personas:
                     a ti y a un niño de una comunidad altoandina de Cusco.
                 </p>
@@ -138,14 +148,15 @@
             <p class="hs-kicker">Consulta tu impacto</p>
             <h2 class="hs-h2 mb-3">¿Ya compraste? Mira a quién abrigaste.</h2>
             <p class="hs-texto-secundario hs-cta__texto mx-auto mb-4">
-                Ingresa el número de tu boleta (ej. <strong>WEB-000110</strong>) y te mostramos a qué comunidad
-                llegó tu donación. También puedes escanear el QR impreso en tu boleta.
+                Ingresa el número de tu boleta (ej. <strong>WEB-000110</strong> o solo <strong>110</strong>) y te
+                mostramos a qué comunidad llegó tu donación. También puedes escanear el QR impreso en tu boleta.
             </p>
-            <!-- Solo redirige: la consulta la resuelve la página del portal (GET ?boleta=) -->
+            <!-- Solo redirige: la consulta la resuelve la página del portal (GET ?boleta=),
+                 que acepta el código completo o solo el número -->
             <form class="hs-cta__form mx-auto" method="get" th:action="@{${rutaConsulta}}">
                 <label class="visually-hidden" for="boleta">Número de boleta</label>
                 <input class="hs-input" type="text" id="boleta" name="boleta" placeholder="WEB-000110"
-                       pattern="[A-Za-z]+-\d+" title="Formato WEB-000110" autocomplete="off" required>
+                       pattern="([A-Za-z]+-)?\d{1,6}" title="WEB-000110 o solo el número" autocomplete="off" required>
                 <button type="submit" class="hs-btn hs-btn--primario">Consultar</button>
             </form>
         </div>
@@ -156,17 +167,26 @@
         <div class="container">
             <div class="row g-4 g-sm-5 align-items-center">
                 <div class="col-12 col-md-6">
-                    <!-- Foto temporal de Unsplash; reemplazar por fotografía propia -->
+                    <!-- Imagen del bloque 'nosotros.historia' o /images/comunidad-cusco.jpg;
+                         si no existe, queda el fondo crema del recuadro -->
                     <div class="hs-about__imagen">
-                        <img src="https://images.unsplash.com/photo-1761810833690-5b866a047c2c?w=800&h=600&fit=crop&auto=format"
-                             alt="Comunidad altoandina de Cusco" loading="lazy">
+                        <img th:src="@{${bloques['nosotros.historia']?.imagenUrl ?: '/images/comunidad-cusco.jpg'}}"
+                             onerror="this.hidden = true"
+                             alt="Alpacas en los Andes de Cusco" loading="lazy">
                     </div>
+                    <p class="hs-credito-foto mt-2 mb-0" th:if="${bloques['nosotros.historia']?.imagenUrl == null}">
+                        Foto: <a href="https://commons.wikimedia.org/wiki/File:Alpacas_in_the_mountains.jpg" target="_blank" rel="noopener">Alpacas in the mountains</a>,
+                        Havardtl, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener license">CC BY 4.0</a>
+                    </p>
                 </div>
                 <div class="col-12 col-md-6 d-flex flex-column gap-4">
                     <p class="hs-kicker mb-0">Quiénes somos</p>
-                    <h2 class="hs-h2 mb-0">Ropa que calienta en los dos sentidos.</h2>
+                    <!-- Título y primer párrafo editables desde el panel (bloque 'nosotros.historia') -->
+                    <h2 class="hs-h2 mb-0"
+                        th:text="${bloques['nosotros.historia']?.titulo ?: 'Ropa que calienta en los dos sentidos.'}">Ropa que calienta en los dos sentidos.</h2>
                     <div class="hs-texto-secundario d-flex flex-column gap-3">
-                        <p class="mb-0">
+                        <p class="mb-0"
+                           th:text="${bloques['nosotros.historia']?.cuerpo ?: 'HÖSÉG nació en Perú con una pregunta simple: ¿puede vender ropa de abrigo y al mismo tiempo asegurarse de que quienes más la necesitan también la tengan? La respuesta es sí, y lo probamos con cada pedido.'}">
                             HÖSÉG nació en Perú con una pregunta simple: ¿puede vender ropa de abrigo y al mismo tiempo
                             asegurarse de que quienes más la necesitan también la tengan? La respuesta es sí, y lo
                             probamos con cada pedido.
@@ -186,8 +206,7 @@
                         <span class="hs-chip hs-chip--pequeno">ONG aliada</span>
                         <span class="hs-chip hs-chip--pequeno">Trazabilidad 100%</span>
                     </div>
-                    <!-- Página "Nosotros" completa: pendiente; por ahora ancla a esta franja -->
-                    <a class="hs-enlace-flecha" href="#nosotros">
+                    <a class="hs-enlace-flecha" th:href="@{/nosotros}">
                         Conoce más <i class="bi bi-arrow-right" aria-hidden="true"></i>
                     </a>
                 </div>
