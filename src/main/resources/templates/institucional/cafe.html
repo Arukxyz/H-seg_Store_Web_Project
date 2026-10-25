@@ -1,49 +1,143 @@
 <!DOCTYPE html>
-<!--
-  ESQUELETO · Bloque 3 · 3.2 Höség Café (GET /cafe, InstitucionalController).
-  Modelo:
-    arboles      long: contador "árboles sembrados por Höség Café" (lo edita el panel)
-    carta        List<CategoriaCarta> (categoria, items[nombre, descripcion, precio, disponible])
-    locales      List<LocalCafe> (nombre, direccion, horario, telefono, urlMapa)
-    cafesEnGrano List<TarjetaProducto>: café en grano de la tienda (badge 1 árbol, enlaza al detalle)
--->
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: pagina(titulo='Höség Café · HÖSÉG', activa='cafe',
                                           transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
 <body>
 <main class="hs-main--bajo-nav">
-    <section class="hs-seccion">
-        <div class="container">
-            <h1 class="hs-h2">Por cada café, sembramos un árbol en Cusco</h1>
-            <p th:text="${#numbers.formatInteger(arboles, 1, 'COMMA')} + ' árboles sembrados'">5,018 árboles sembrados</p>
+    <!-- SECCIÓN 1: BANNER PRINCIPAL -->
+    <section class="hs-seccion hs-seccion--alterna text-center py-5">
+        <div class="container hs-ancho-sm">
+            <span class="hs-kicker text-uppercase tracking-wider" style="color: var(--hs-terracotta); font-weight: 700; font-size: 0.9rem;">100% Café de Especialidad Peruano</span>
+            <h1 class="hs-h2 my-2 fw-bold" style="color: var(--hs-bark);">Por cada café, sembramos un árbol en Cusco</h1>
+            
+            <!-- Contador de Impacto Oficial -->
+<div class="d-inline-flex align-items-center gap-3 bg-white px-4 py-2 mt-3 rounded-pill shadow-sm">
+    <i class="bi bi-tree text-success h3 mb-0"></i>
+    <div class="text-start">
+        <span class="h3 fw-bold text-dark block mb-0" 
+              th:text="|${#numbers.formatInteger(arboles, 1, 'COMMA')} árboles sembrados|">5,018 árboles sembrados</span>
+    </div>
+</div>
 
-            <h2 class="h4 mt-4">La carta</h2>
-            <p th:if="${carta.isEmpty()}">Pronto publicaremos la carta.</p>
-            <div th:each="c : ${carta}" class="mb-3">
-                <h3 class="h6" th:text="${c.categoria}">Bebidas calientes</h3>
-                <p class="mb-1" th:each="i : ${c.items}">
-                    <span th:text="${i.nombre}">Latte</span>
-                    <span th:text="'S/ ' + ${#numbers.formatDecimal(i.precio, 1, 'COMMA', 2, 'POINT')}">S/ 9.00</span>
-                    <small th:unless="${i.disponible}">(agotado hoy)</small>
-                </p>
-            </div>
-
-            <h2 class="h4 mt-4">Cafés de especialidad</h2>
-            <div class="row g-3">
-                <div class="col-6 col-md-3" th:each="p : ${cafesEnGrano}">
-                    <th:block th:replace="~{fragments/product-card :: card(${p})}"/>
-                </div>
-            </div>
-
-            <h2 class="h4 mt-4">Visítanos</h2>
-            <p th:each="l : ${locales}">
-                <strong th:text="${l.nombre}">Höség Café Cusco</strong><br>
-                <span th:text="${l.direccion}">Calle Palacio 110 int. 2</span><br>
-                <span th:text="${l.horario}">Lunes a domingo</span>
-                <a th:if="${l.urlMapa}" th:href="${l.urlMapa}" target="_blank" rel="noopener">Ver mapa</a>
+            <p class="hs-texto-secundario mt-4 px-md-5">
+                Disfruta de una taza con propósito en Cusco. Cada sorbo apoya el programa de bosques familiares de la ONG Pachamama Raymi.
             </p>
         </div>
     </section>
-</main>
+
+    <!-- SECCIÓN 2: CARTA DIGITAL-->
+    <section class="hs-seccion py-5">
+        <div class="container-fluid px-md-5">
+            <div class="d-flex align-items-center gap-2 mb-4">
+                <i class="bi bi-cup-hot h4 mb-0" style="color: var(--hs-terracotta);"></i>
+                <h2 class="hs-h3 mb-0" style="color: var(--hs-bark); font-weight: 700;">Nuestra Carta Digital</h2>
+            </div>
+            
+            <p th:if="${carta.isEmpty()}" class="text-muted">Pronto publicaremos nuestras opciones en cocina.</p>
+            
+            <div class="w-100 overflow-x-auto pb-3" style="scrollbar-width: none; -ms-overflow-style: none;">
+                
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 hs-carousel-mobile">
+                    <div th:each="c : ${carta}" class="col">
+                        <div class="card h-100 p-4 border-0 shadow-sm" style="border-radius: var(--hs-radius); background-color: var(--hs-card); border: 1px solid var(--hs-sand) !important;">
+                            
+                            <!-- Categoría -->
+                            <div class="border-bottom pb-2 mb-3">
+                                <h3 class="h5 fw-bold mb-0 text-dark text-uppercase tracking-wide" th:text="${c.categoria}">Categoría</h3>
+                            </div>
+                            
+                            <!-- Lista de Ítems de la Categoría -->
+                            <div th:each="i, iterStat : ${c.items}" th:classappend="${!iterStat.last} ? 'mb-3' : ''">
+                                <div class="d-flex justify-content-between align-items-start gap-2">
+                                    <div class="text-start">
+                                        <strong class="text-dark d-block fw-semibold" style="font-size: 1rem;" th:text="${i.nombre}">Latte</strong>
+                                        <small class="text-muted d-block lh-sm my-1" style="font-size: 0.85rem;" th:text="${i.descripcion}">Descripción</small>
+                                    </div>
+                                    <span class="fw-bold px-2 py-1 rounded bg-light" style="color: var(--hs-terracotta); white-space: nowrap; font-size: 0.9rem;"
+                                          th:text="'S/ ' + ${#numbers.formatDecimal(i.precio, 1, 'COMMA', 2, 'POINT')}">S/ 12.00</span>
+                                </div>
+                                <span th:if="${i.disponible == false}" class="badge bg-danger bg-opacity-10 text-danger rounded-pill mt-1 d-inline-block" style="font-size: 0.75rem;">agotado hoy</span>
+                                
+                                <hr th:unless="${iterStat.last}" class="my-2 text-black-50 opacity-10">
+                            </div>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+  
+
+
+    <!-- SECCIÓN 3: SOLO CAFES EN GRANO -->
+    <section class="hs-seccion py-5 border-top bg-white">
+        <div class="container">
+            <div class="text-center mb-4">
+                <i class="bi bi-bag-heart h3 d-block mb-2" style="color: var(--hs-terracotta);"></i>
+                <h2 class="hs-h3 mb-1" style="color: var(--hs-bark); font-weight: 700;">Nuestros Cafés de Especialidad en Grano</h2>
+                <p class="text-muted small">Selecciones exclusivas listas para moler y disfrutar en casa.</p>
+            </div>
+            
+            <p th:if="${cafesEnGrano.isEmpty()}" class="text-muted text-center">Pronto publicaremos más variedades en grano.</p>
+            
+            <div class="row row-cols-2 row-cols-md-4 g-4 justify-content-center mx-auto" style="max-width: 1000px;">
+                <div class="col" th:each="p : ${cafesEnGrano}">
+                    <th:block th:replace="~{fragments/product-card :: card(${p})}"/>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN 4: MERCHANDISING EXCLUSIVO -->
+    <section class="hs-seccion py-5 border-top" style="background-color: var(--hs-cream-dark);">
+        <div class="container">
+            <div class="text-center mb-4">
+                <i class="bi bi-stars h3 d-block mb-2" style="color: var(--hs-terracotta);"></i>
+                <h2 class="hs-h3 mb-1" style="color: var(--hs-bark); font-weight: 700;">Merchandising Exclusivo</h2>
+                <p class="text-muted small">Accesorios de edición limitada disponibles en nuestro local.</p>
+            </div>
+            
+            <p th:if="${merchandising.isEmpty()}" class="text-muted text-center">Pronto publicaremos más accesorios oficiales.</p>
+            
+            <div class="row row-cols-2 row-cols-md-4 g-4 justify-content-center mx-auto" style="max-width: 1000px;">
+                <div class="col" th:each="m : ${merchandising}">
+                    <th:block th:replace="~{fragments/product-card :: card(${m})}"/>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+       <!-- SECCIÓN 5: LOCAL Y DIRECCIÓN -->
+    <section class="hs-seccion py-5 border-top bg-white">
+        <div class="container hs-ancho-sm">
+
+            <div th:if="${locales == null || locales.isEmpty()}" class="card p-4 border-0 text-white shadow text-center" style="border-radius: var(--hs-radius); background-color: var(--hs-bark);">
+                <span class="text-uppercase small fw-bold tracking-wider mb-1 d-block" style="font-size: 0.8rem; color: var(--hs-amber);">Visítanos en Cusco</span>
+                <h3 class="h4 fw-bold mb-3 text-white">Höség Café Cusco Centro</h3>
+                <div class="small text-white-50 mb-4" style="font-size: 0.9rem;">
+                    <p class="mb-2"><i class="bi bi-geo-alt me-2" style="color: var(--hs-amber);"></i>Calle Garcilaso 146, Cusco 08002</p>
+                    <p class="mb-0"><i class="bi bi-clock me-2" style="color: var(--hs-amber);"></i>Vie-Jue: 8:30am-8pm | Sáb: 8:30am-8pm | Dom: 9:30am-9pm | Lun-Mié: 9:30am-8:30pm</p>
+                </div>
+                <a href="https://hosegstore.com" target="_blank" rel="noopener" class="hs-btn hs-btn--primario rounded-pill fw-bold px-4 py-2 d-inline-block" style="font-size: 0.9rem;">
+                    <i class="bi bi-map me-2"></i>Ver Ubicación en Google Maps
+                </a>
+            </div>
+
+            <div th:unless="${locales == null || locales.isEmpty()}" th:each="l : ${locales}" class="card p-4 border-0 text-white shadow text-center mb-3" style="border-radius: var(--hs-radius); background-color: var(--hs-bark);">
+                <span class="text-uppercase small fw-bold tracking-wider mb-1 d-block" style="font-size: 0.8rem; color: var(--hs-amber);">Visítanos en Cusco</span>
+                <h3 class="h4 fw-bold mb-3 text-white" th:text="${l.nombre}">Höség Café Cusco</h3>
+                <div class="small text-white-50 mb-4" style="font-size: 0.9rem;">
+                    <p class="mb-2"><i class="bi bi-geo-alt me-2" style="color: var(--hs-amber);"></i><span th:text="${l.direccion}">Dirección</span></p>
+                    <p class="mb-0"><i class="bi bi-clock me-2" style="color: var(--hs-amber);"></i><span th:text="${l.horario}">Horario</span></p>
+                </div>
+                <a th:if="${l.urlMapa}" th:href="${l.urlMapa}" target="_blank" rel="noopener" class="hs-btn hs-btn--primario rounded-pill fw-bold px-4 py-2 d-inline-block" style="font-size: 0.9rem;">
+                    <i class="bi bi-map me-2"></i>Ver Ubicación en Google Maps
+                </a>
+            </div>
+        </div>
+    </section>
+</main> 
 </body>
 </html>

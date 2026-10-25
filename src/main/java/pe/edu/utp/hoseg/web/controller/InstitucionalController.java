@@ -3,9 +3,12 @@ package pe.edu.utp.hoseg.web.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
 import pe.edu.utp.hoseg.web.service.CafeService;
 import pe.edu.utp.hoseg.web.service.ContenidoService;
 import pe.edu.utp.hoseg.web.service.ImpactoService;
+
 
 /** Höség Café, Nosotros y páginas legales (bloque 3: CU-05, CU-06). Solo lectura. */
 @Controller
@@ -28,7 +31,18 @@ public class InstitucionalController {
         model.addAttribute("carta", cafeService.carta());
         model.addAttribute("locales", cafeService.locales());
         model.addAttribute("cafesEnGrano", cafeService.cafesEnGrano());
+        model.addAttribute("merchandising", cafeService.merchandising());
         return "institucional/cafe";
+    }
+
+    @GetMapping("/cafe/producto/{codigo}")
+    public String verDetalleProductoCafe(@PathVariable("codigo") String codigo, Model model) {
+        return cafeService.obtenerProductoPorCodigo(codigo)
+            .map(p -> {
+                model.addAttribute("producto", p);
+                return "tienda/detalle"; 
+            })
+            .orElse("redirect:/cafe"); 
     }
 
     @GetMapping("/nosotros")
