@@ -1,22 +1,86 @@
 <!DOCTYPE html>
 <!--
   ESQUELETO · Bloque 3 · 3.4 Página legal (GET /terminos y /politica-rsu, InstitucionalController).
-  Una sola plantilla para ambas. Modelo:
-    bloque           BloqueContenido o null (titulo, cuerpo, actualizadoEn) — lo edita el panel (4.5)
-    tituloPorDefecto String, por si el bloque no tiene título
-  El cuerpo es texto plano: th:text lo escapa (no se interpreta HTML guardado en la base).
+  Una sola plantilla para ambas.
 -->
-<html lang="es" xmlns:th="http://www.thymeleaf.org"
+<html lang="es" xmlns:th="http://thymeleaf.org"
       th:replace="~{layout/base :: pagina(titulo=${bloque?.titulo ?: tituloPorDefecto} + ' · HÖSÉG', activa='',
                                           transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${bloque?.titulo ?: tituloPorDefecto} + ' · HÖSÉG'">Términos y condiciones</title>
+</head>
 <body>
 <main class="hs-main--bajo-nav">
-    <section class="hs-seccion">
-        <div class="container hs-ancho-texto">
-            <h1 class="hs-h2" th:text="${bloque?.titulo ?: tituloPorDefecto}">Términos y condiciones</h1>
-            <p th:if="${bloque?.actualizadoEn}" class="hs-texto-secundario"
-               th:text="'Actualizado el ' + ${#temporals.format(bloque.actualizadoEn, 'dd/MM/yyyy')}">Actualizado</p>
-            <div style="white-space: pre-line" th:text="${bloque?.cuerpo ?: 'Contenido en preparación.'}">Texto</div>
+
+
+    <!-- BANNER DE IMAGEN DINÁMICO -->
+    <div th:if="${bloque?.imagenUrl}" class="w-100 position-relative mb-5" style="height: 250px; overflow: hidden;">
+        <img th:src="${bloque.imagenUrl}" class="w-100 h-100" style="object-fit: cover; filter: brightness(0.65);" alt="Cabecera Legal">
+        <div class="position-absolute top-50 start-50 translate-middle text-center w-100 px-3">
+            <h1 class="text-white fw-bold display-6 m-0 text-shadow" th:text="${bloque?.titulo ?: tituloPorDefecto}">Términos y condiciones</h1>
+        </div>
+    </div>
+
+    <section class="hs-seccion py-4">
+        <div class="container">
+            
+            <!-- Encabezado en texto plano si NO existe imagen_url -->
+            <div class="mb-4" th:unless="${bloque?.imagenUrl}">
+                <span class="hs-kicker text-uppercase tracking-wider">Documento Oficial</span>
+                <h1 class="hs-h2 my-2 fw-bold" style="color: var(--hs-bark);" 
+                    th:text="${bloque?.titulo ?: tituloPorDefecto}">Términos y condiciones</h1>
+            </div>
+
+            <!-- Fecha de Actualización -->
+            <p th:if="${bloque?.actualizadoEn}" class="text-muted small mb-4">
+                <i class="bi bi-clock me-1"></i>
+                <span th:text="'Actualizado el ' + ${#temporals.format(bloque.actualizadoEn, 'dd/MM/yyyy')}">Actualizado</span>
+            </p>
+
+            <hr class="my-4 text-black-50 opacity-10">
+
+            <!-- Estructura de dos columnas balanceada -->
+            <div class="row g-5">
+                
+                <!-- COLUMNA IZQUIERDA: REEMPLAZO DEL ÍNDICE POR INFORMACIÓN CORPORATIVA -->
+                <div class="col-12 col-md-3 d-none d-md-block">
+                    <div class="sticky-top pt-2" style="top: 100px; z-index: 10;">
+                        
+                        <!-- Tarjeta de Confianza Común -->
+                        <div class="card p-3 border-0 bg-light mb-3" style="border-radius: var(--hs-radius); background-color: var(--hs-card) !important; border: 1px solid var(--hs-sand) !important;">
+                            <h5 class="h6 text-uppercase fw-bold text-dark mb-3"><i class="bi bi-shield-check me-2 text-success"></i>Garantía HÖSÉG</h5>
+                            <p class="xs-small text-muted mb-0" style="font-size: 0.8rem; line-height: 1.4;">
+                                Todos nuestros procesos legales y de trazabilidad están certificados y auditados de acuerdo a los estándares de triple impacto.
+                            </p>
+                        </div>
+
+                        <!-- Tarjeta de Soporte -->
+                        <div class="card p-3 border-0 bg-light" style="border-radius: var(--hs-radius); background-color: var(--hs-card) !important; border: 1px solid var(--hs-sand) !important;">
+                            <h5 class="h6 text-uppercase fw-bold text-dark mb-2"><i class="bi bi-chat-left-text me-2 style='color: var(--hs-terracotta);'"></i>¿Consultas?</h5>
+                            <p class="xs-small text-muted mb-0" style="font-size: 0.8rem; line-height: 1.4;">
+                                Si tienes dudas sobre nuestras políticas, puedes escribir a nuestro canal institucional: <br>
+                                <strong class="text-dark">hola@socialheater.com</strong>
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- COLUMNA DERECHA: -->
+                <div id="documento" class="col-12 col-md-9">
+                    <div class="hs-texto-secundario lh-lg" style="white-space: pre-line; text-align: justify;" 
+                         th:text="${bloque?.cuerpo ?: 'Contenido en preparación.'}">Texto</div>
+                         
+                    <!-- Botón de salida -->
+                    <div class="mt-5 pt-3 border-top">
+                        <a href="/" class="hs-btn hs-btn--secundario rounded-pill">
+                            <i class="bi bi-arrow-left me-2"></i>Volver al Inicio
+                        </a>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </section>
 </main>
