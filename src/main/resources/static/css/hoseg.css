@@ -744,6 +744,20 @@
     gap: 8px;
 }
 
+/* Resultado de suscribirse, encima del formulario (flash "boletin" / "boletinError") */
+.hs-footer__aviso {
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: var(--hs-sage);
+    color: var(--hs-cream);
+    font-size: 0.875rem;
+}
+
+.hs-footer__aviso--error {
+    background: var(--hs-terracotta);
+}
+
 .hs-footer__boletin-campo {
     flex: 1 1 12rem;
     min-width: 0;
@@ -791,4 +805,16 @@
 .hs-footer__reclamaciones:hover {
     background: var(--hs-bark-light);
     color: var(--hs-cream);
+}
+
+@media (max-width: 767.98px) {
+    .hs-carousel-mobile {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        gap: 1rem !important;
+    }
+    .hs-carousel-mobile .col {
+        flex: 0 0 85% !important;
+        max-width: 85% !important;
+    }
 }

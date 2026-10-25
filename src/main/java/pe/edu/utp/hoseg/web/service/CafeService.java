@@ -15,6 +15,8 @@ import pe.edu.utp.hoseg.web.repository.CafeCartaRepository;
 import pe.edu.utp.hoseg.web.repository.CafeLocalRepository;
 import pe.edu.utp.hoseg.web.repository.ContenidoWebRepository;
 import pe.edu.utp.hoseg.web.repository.UsuarioRepository;
+import java.util.Optional;
+import pe.edu.utp.hoseg.web.repository.ProductoRepository;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -38,17 +40,20 @@ public class CafeService {
     private final ContenidoWebRepository contenidoRepository;
     private final UsuarioRepository usuarioRepository;
     private final CatalogoService catalogoService;
+    private final ProductoRepository productoRepository; // <- 1. AGREGAMOS ESTA VARIABLE
 
     public CafeService(CafeCartaRepository cartaRepository,
                        CafeLocalRepository localRepository,
                        ContenidoWebRepository contenidoRepository,
                        UsuarioRepository usuarioRepository,
-                       CatalogoService catalogoService) {
+                       CatalogoService catalogoService,
+                       ProductoRepository productoRepository) { // <- 2. LA INYECTAMOS EN EL CONSTRUCTOR
         this.cartaRepository = cartaRepository;
         this.localRepository = localRepository;
         this.contenidoRepository = contenidoRepository;
         this.usuarioRepository = usuarioRepository;
         this.catalogoService = catalogoService;
+        this.productoRepository = productoRepository; // <- 3. LA ASIGNAMOS
     }
 
     /** La carta en la página, agrupada por categoría en el orden del panel. */
@@ -178,5 +183,17 @@ public class CafeService {
 
     private static String limpio(String valor) {
         return valor == null || valor.isBlank() ? null : valor.trim();
+    }
+
+    public List<TarjetaProducto> merchandising() {
+    return catalogoService.tarjetas(new FiltroCatalogo(null, "Merchandising", null, null, null, null));
+}
+
+
+    public Optional<TarjetaProducto> obtenerProductoPorCodigo(String codigo) {
+        return catalogoService.tarjetas(new FiltroCatalogo(null, null, null, null, null, null))
+                .stream()
+                .filter(p -> p.codigo().equals(codigo))
+                .findFirst();
     }
 }
