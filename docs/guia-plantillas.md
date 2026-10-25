@@ -148,10 +148,13 @@ La ruta de consulta se lee de la propiedad `hoseg.consulta.ruta` (modelo: `${rut
 
 ## 5. Servicios que ya existen
 
-- `CatalogoService`: `tarjetas()`, `destacados(n)`. Filtra `activo AND visible_web`.
-- `ImpactoService`: `resumen()` (cifras sobre lo entregado) y `nombresComunidades()`.
+Los más usados al armar una página:
+
+- `CatalogoService`: `tarjetas()` y `tarjetas(FiltroCatalogo)`, `destacados(n)`, `detalle(codigo)`, `categorias()`, `colecciones()`. Filtra `activo AND visible_web`.
+- `ImpactoService`: `resumen()` (cifras sobre lo entregado), `nombresComunidades()`, `nombresOng()`, `consultarBoleta(codigo)` y `consultarDonacion(id)`.
 - `CarritoService` (`@SessionScope`, un carrito por visitante): `agregar(Producto, cantidad)`, `quitar(codigo)`, `vaciar()`, `items()`, `estaVacio()`, `totalUnidades()`, `total()`. Cada talla es un `Producto` distinto, así que cada línea del carrito es un código.
-- Repositorios: `ProductoRepository`, `ClienteRepository` (`findByEmailIgnoreCase`), `VentaRepository` (`findByCodigoComprobante`), `DonacionRepository`, `LoteDonacionRepository`, `ComunidadRepository`.
+- `ContenidoService`: `bloque(clave)` y `bloques(...)`, los textos editables desde el panel; si un bloque no existe, la plantilla usa su texto por defecto.
+- `ResenaService`, `VentaService`, `ClienteService`, `CafeService` y los demás: la lista completa, con qué controlador usa cada uno, está en el [README](../README.md#estructura); qué pone cada controlador en el modelo, en [contrato-backend.md](contrato-backend.md).
 
 Los controladores **no** usan repositorios ni contienen reglas de negocio: llaman a servicios. Las validaciones de formulario van en DTOs de `dto/` con `@NotBlank`, `@Email`, `@Size`.
 

@@ -19,7 +19,7 @@ El sistema está formado por dos aplicaciones que comparten una base de datos Po
 ### Portal web (este repositorio)
 | Documento | Contenido |
 |---|---|
-| [../README.md](../README.md) | Requisitos, configuración de credenciales, ejecución y estructura del código |
+| [../README.md](../README.md) | Requisitos, configuración (credenciales y opcionales), ejecución, estructura del código con qué servicio usa cada controlador, librerías de apoyo, logs, pruebas, versiones y estado |
 | [diagramas/casos-de-uso-web.md](diagramas/casos-de-uso-web.md) | Actores, requerimientos funcionales y matriz de casos de uso del portal (diagrama en `casos-de-uso-web.drawio`) |
 | [diagramas/mapas-navegacion.drawio](diagramas/mapas-navegacion.drawio) | Mapas de navegación del portal y del escritorio (se abre en [draw.io](https://app.diagrams.net)) |
 | [brief-diseno-home.md](brief-diseno-home.md) | Brief de diseño de la página principal: público, requisitos, estructura y sistema visual |

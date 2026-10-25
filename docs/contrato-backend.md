@@ -180,7 +180,7 @@ Se entra con los usuarios **ADMINISTRADOR** del escritorio (tabla `usuario`), co
 - **Mensajes:**
   - Bandeja: `mensajes`; `POST /admin/mensajes/{id}/atendido` lo marca como atendido.
   - Reclamaciones: `reclamos` y `respuestaForm`; `POST /admin/reclamaciones/{id}/respuesta` responde y la respuesta se envía por correo.
-  - Suscriptores: `suscriptores`; `GET /admin/suscriptores.csv` descarga la lista.
+  - Suscriptores: `suscriptores`; `GET /admin/suscriptores.csv` y `GET /admin/suscriptores.xlsx` (Excel, con Apache POI) descargan la lista de activos.
 - **Reseñas:** `resenas` (`producto`, `talla`, `calificacion`, `comentario`, `cliente`, `estado`, `moderadaPor`), `estado` y `estados`.
   - `POST /admin/resenas/{id}/ocultar` y `POST /admin/resenas/{id}/publicar`.
 
