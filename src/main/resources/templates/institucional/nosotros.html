@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<!--
+<!-- =========================================================================
   ESQUELETO · Bloque 3 · 3.3 Nosotros (GET /nosotros, InstitucionalController).
   Modelo:
     bloques     Map<clave, BloqueContenido>: bloques['nosotros.historia'] (titulo, cuerpo, imagenUrl);
@@ -7,28 +6,131 @@
     impacto     ResumenImpacto (abrigosEntregados, arbolesPlantados, comunidadesAlcanzadas, pedidosConImpacto)
     comunidades List<String>
     ongs        List<String>
--->
+========================================================================= -->
+<!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: pagina(titulo='Nosotros · HÖSÉG', activa='nosotros',
                                           transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
 <body>
 <main class="hs-main--bajo-nav">
-    <section class="hs-seccion">
+
+    <!-- SECCIÓN 1: HISTORIA (BANNER PRINCIPAL) -->
+    <section class="hs-seccion hs-seccion--alterna py-5">
         <div class="container">
-            <h1 class="hs-h2" th:text="${bloques['nosotros.historia']?.titulo ?: 'Ropa que calienta en los dos sentidos.'}">Ropa que calienta en los dos sentidos.</h1>
-            <p th:text="${bloques['nosotros.historia']?.cuerpo ?: 'HÖSÉG nació en Perú con una pregunta simple.'}">Historia</p>
-
-            <h2 class="h4 mt-4">Nuestro impacto</h2>
-            <p th:text="${impacto.abrigosEntregados} + ' abrigos entregados · ' + ${impacto.arbolesPlantados} + ' árboles plantados · '
-                        + ${impacto.comunidadesAlcanzadas} + ' comunidades'">Cifras</p>
-
-            <h2 class="h4 mt-4">Comunidades beneficiadas</h2>
-            <span class="hs-chip me-1" th:each="c : ${comunidades}" th:text="${c}">Omacha</span>
-
-            <h2 class="h4 mt-4">ONG aliada</h2>
-            <p th:each="o : ${ongs}" th:text="${o}">Pachamama Raymi</p>
+            <div class="row align-items-center g-4">
+                <div class="col-12 col-md-6">
+                    <span class="hs-kicker text-uppercase tracking-wider">Nosotros</span>
+                    <h1 class="hs-h2 my-2 fw-bold" th:text="${bloques['nosotros.historia']?.titulo ?: 'Abrigar también puede cambiar una historia'}">Abrigar también puede cambiar una historia</h1>
+                    <p class="hs-texto-secundario mt-3" th:text="${bloques['nosotros.historia']?.cuerpo ?: 'HÖSÉG nació en Perú con una pregunta sencilla: ¿y si cada prenda de abrigo pudiera entregar calor más allá de quien la compra?'}">Historia</p>
+                    <a href="/consulta-impacto" class="hs-btn hs-btn--primario rounded-pill mt-3 d-inline-block">Consulta el impacto de tu compra</a>
+                </div>
+                <div class="col-12 col-md-6 text-center" th:if="${bloques['nosotros.historia']?.imagenUrl}">
+                    <img th:src="${bloques['nosotros.historia'].imagenUrl}" class="img-fluid rounded" style="border-radius: var(--hs-radius); max-height: 350px; object-fit: cover;" alt="Historia Höség">
+                </div>
+            </div>
         </div>
     </section>
+
+    <!-- SECCIÓN 2: MODELOS DE TRIPLE IMPACTO -->
+    <section class="hs-seccion py-5 bg-white">
+        <div class="container">
+            <div class="text-center mb-5">
+                <span class="hs-kicker text-uppercase tracking-wider">Triple Impacto</span>
+                <h2 class="hs-h3 fw-bold mt-1" style="color: var(--hs-bark);">Una compra, una acción visible</h2>
+                <p class="text-muted small">Un modelo simple de entender y exigente de cumplir junto a nuestra ONG aliada.</p>
+            </div>
+            <div class="row g-4">
+                <!-- Modelo 1:1 Abrigo -->
+                <div class="col-12 col-md-6">
+                    <div class="card p-4 border-0 h-100 shadow-sm" style="border-radius: var(--hs-radius); background-color: var(--hs-card);">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <i class="bi bi-gift h4 mb-0" style="color: var(--hs-terracotta);"></i>
+                            <h3 class="h5 fw-bold mb-0 text-dark">Buy One, Give One</h3>
+                        </div>
+                        <p class="small text-muted mb-0">Por cada prenda de abrigo elegible que compras, entregamos un abrigo de alta calidad a una persona en una comunidad vulnerable de Cusco.</p>
+                    </div>
+                </div>
+                <!-- Modelo 1:1 Árbol -->
+                <div class="col-12 col-md-6">
+                    <div class="card p-4 border-0 h-100 shadow-sm" style="border-radius: var(--hs-radius); background-color: var(--hs-card);">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <i class="bi bi-tree h4 mb-0" style="color: var(--hs-salvia-dark, #5A7A5C);"></i>
+                            <h3 class="h5 fw-bold mb-0 text-dark">Buy One, Plant One</h3>
+                        </div>
+                        <p class="small text-muted mb-0">Por cada accesorio o producto de café seleccionado, financiamos y gestionamos la plantación y el cuidado de un árbol nativo junto a familias locales.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+        <!-- SECCIÓN 3: CIFRAS DE IMPACTO -->
+    <section class="hs-seccion py-5" style="background-color: var(--hs-cream-dark);">
+        <div class="container text-center">
+            <div class="mb-4">
+                <h2 class="hs-h3 fw-bold" style="color: var(--hs-bark);">Datos que nos comprometen</h2>
+                <p class="text-muted small">Los mostramos con orgullo porque cada cifra representa una acción real de nuestra base de datos.</p>
+            </div>
+            
+            <div class="row row-cols-2 row-cols-md-4 g-4 justify-content-center mt-2" th:if="${impacto != null}">
+                <div class="col">
+                    <i class="bi bi-gift text-muted h3 d-block mb-2"></i>
+                    <span class="h2 fw-bold d-block text-dark" th:text="${#numbers.formatInteger(impacto.abrigosEntregados, 1, 'COMMA')}">1,248</span>
+                    <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.75rem;">Abrigos entregados</small>
+                </div>
+                <div class="col">
+                    <i class="bi bi-tree text-muted h3 d-block mb-2"></i>
+                    <span class="h2 fw-bold d-block text-dark" th:text="${#numbers.formatInteger(impacto.arbolesPlantados, 1, 'COMMA')}">874</span>
+                    <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.75rem;">Árboles plantados</small>
+                </div>
+                <div class="col">
+                    <i class="bi bi-geo-alt text-muted h3 d-block mb-2"></i>
+                    <span class="h2 fw-bold d-block text-dark" th:text="${impacto.comunidadesAlcanzadas}">5</span>
+                    <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.75rem;">Comunidades</small>
+                </div>
+                <div class="col">
+                    <i class="bi bi-cart-check text-muted h3 d-block mb-2"></i>
+                    <span class="h2 fw-bold d-block text-dark" th:text="${#numbers.formatInteger(impacto.pedidosConImpacto, 1, 'COMMA')}">2,104</span>
+                    <small class="text-muted text-uppercase fw-semibold" style="font-size: 0.75rem;">Pedidos con impacto</small>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN 4: COMUNIDADES Y ONGS ALIADAS -->
+    <section class="hs-seccion py-5 bg-white">
+        <div class="container">
+            <div class="row g-4 align-items-center">
+                <div class="col-12 col-md-6">
+                    <span class="hs-kicker text-uppercase tracking-wider">Con quiénes caminamos</span>
+                    <h2 class="hs-h3 fw-bold my-2" style="color: var(--hs-bark);">Comunidades sostenidas</h2>
+                    <p class="hs-texto-secundario">Coordinamos cada jornada y entrega directamente en el territorio, respetando la organización local de Cusco.</p>
+                    
+                    <!-- Chips dinámicos para las comunidades -->
+                    <div class="mt-3 flex-wrap gap-2 d-flex">
+                        <span class="hs-chip" th:each="c : ${comunidades}" th:text="${c}">Omacha</span>
+                    </div>
+                </div>
+                
+                <div class="col-12 col-md-6">
+                    <div class="card p-4 border-0 shadow-sm" style="border-radius: var(--hs-radius); background-color: var(--hs-card); border: 1px solid var(--hs-sand) !important;">
+                        <h3 class="h6 text-uppercase tracking-wider text-muted fw-bold mb-3">ONG Aliada Principal</h3>
+                        <!-- Iteración de ONGs aliadas -->
+                        <div th:each="o : ${ongs}" class="d-flex align-items-center gap-2 mb-2 last-mb-0">
+                            <i class="bi bi-shield-check text-success h5 mb-0"></i>
+                            <span class="fw-bold text-dark" th:text="${o}">Pachamama Raymi</span>
+                        </div>
+                        <hr class="my-3 text-black-50 opacity-10">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-patch-check-fill text-primary h5 mb-0"></i>
+                            <span class="small text-muted">Empresa B Corp en proceso de certificación estándar.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
 </main>
 </body>
 </html>
