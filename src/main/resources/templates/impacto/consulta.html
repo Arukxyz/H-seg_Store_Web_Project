@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<!--
+<!-- =========================================================================
   ESQUELETO · Bloque 3 · 3.1 Consulta de impacto (GET /consulta-impacto, ImpactoController).
   Pública y sin datos personales. Acepta ?boleta=WEB-000110 (también "110") y ?donacion=id (QR de la boleta).
   También en JSON: GET /api/impacto?boleta=… (404 si no existe), para buscar sin recargar.
@@ -10,40 +9,102 @@
                  comunidad, ong, fechaDespacho, fechaEntrega)
     noEncontrado boolean (variante "Código no encontrado")
   La línea de tiempo usa EstadoDonacion: En espera de pago → Pendiente de asignar → Lote asignado → Entregada.
--->
-<html lang="es" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: pagina(titulo='Consulta tu impacto · HÖSÉG', activa='impacto',
+========================================================================= -->
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: pagina(titulo='Consulta tu impacto · HÖSÉG', activa='impacto',
                                           transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+
 <body>
-<main class="hs-main--bajo-nav">
-    <section class="hs-seccion">
-        <div class="container">
-            <h1 class="hs-h2 mb-3">Consulta tu impacto</h1>
-            <p>Escribe el código de tu boleta (está en la boleta impresa o escanea su QR).</p>
-            <form class="d-flex gap-2 hs-ancho-form mb-4" method="get" th:action="@{${rutaConsulta}}">
-                <input class="hs-input" name="boleta" th:value="${boleta}" placeholder="WEB-000110">
-                <button class="hs-btn hs-btn--primario" type="submit">Consultar</button>
-            </form>
+    <main class="hs-main--bajo-nav">
+        <section class="hs-seccion hs-seccion--alterna">
+            <div class="container hs-ancho-sm">
+                <span class="hs-kicker">Trazabilidad 1:1</span>
+                <h1 class="hs-h2 mb-3">Consulta tu impacto</h1>
+                <p class="hs-texto-secundario mb-4">Escribe el código de tu boleta (está en la boleta impresa o escanea
+                    su QR).</p>
 
-            <p th:if="${noEncontrado}">No encontramos ese código. Revisa tu boleta.</p>
+                <!-- FORMULARIO: Conserva el Context Path de manera nativa usando la variable oficial -->
+                <form class="d-flex gap-2 hs-ancho-form mb-4" method="get" th:action="@{${rutaConsulta}}">
+                    <label for="boletaInput" class="visually-hidden">Código de boleta</label>
+                    <input class="hs-input" id="boletaInput" name="boleta" th:value="${boleta}" placeholder="WEB-000110"
+                        required>
+                    <button class="hs-btn hs-btn--primario" type="submit">Consultar</button>
+                </form>
 
-            <th:block th:if="${consulta != null}">
-                <h2 class="h4" th:text="${consulta.codigoComprobante}">WEB-000110</h2>
-                <p th:text="'Compra del ' + ${#temporals.format(consulta.fechaCompra, 'dd/MM/yyyy')} + ' · ' + ${consulta.estadoVenta.etiqueta}">Compra</p>
-                <p th:unless="${consulta.tieneDonaciones()}">Esta compra no generó donaciones.</p>
-                <div class="border-bottom py-2" th:each="d : ${consulta.donaciones}">
-                    <strong th:text="${d.unidades}">1 abrigo</strong> · <span th:text="${d.producto}">Casaca</span>
-                    <ol class="d-flex gap-3 list-unstyled mb-1">
-                        <li th:each="e : ${T(pe.edu.utp.hoseg.web.model.EstadoDonacion).values()}"
-                            th:classappend="${e.paso <= d.estado.paso} ? 'fw-bold' : 'text-muted'"
-                            th:text="${e.etiqueta}">Paso</li>
-                    </ol>
-                    <span th:if="${d.comunidad}" th:text="${d.comunidad} + ' · ' + ${d.ong}">Omacha · Pachamama Raymi</span>
-                    <span th:if="${d.fechaEntrega}" th:text="'· entregado el ' + ${#temporals.format(d.fechaEntrega, 'dd/MM/yyyy')}">fecha</span>
+
+                <!-- Alerta estilizada para código no encontrado -->
+                <div th:if="${noEncontrado}" class="alert alert-warning border-0 mb-4"
+                    style="border-radius: var(--hs-radius);" role="alert">
+                    <i class="bi bi-shield-exclamation me-2"></i>No encontramos ese código. Por favor, revisa tu boleta.
                 </div>
-            </th:block>
-        </div>
-    </section>
-</main>
+
+                <!-- Bloque de resultados públicos -->
+                <th:block th:if="${consulta != null}">
+                    <div class="card p-4 border-0 shadow-sm mb-4"
+                        style="border-radius: var(--hs-radius); background-color: var(--hs-card);">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h2 class="h4 mb-0 fw-bold" th:text="${consulta.codigoComprobante}">WEB-000110</h2>
+                            <span class="badge bg-opacity-10 text-dark"
+                                th:classappend="${consulta.estadoVenta.name() == 'PAGADO'} ? 'bg-success text-success' : 'bg-warning text-warning'"
+                                th:text="${consulta.estadoVenta.name() == 'PAGADO' ? 'Pagado' : 'Pendiente'}">Pagado</span>
+                        </div>
+
+                        <p class="hs-texto-secundario small mb-4"
+                            th:text="'Compra del ' + ${#temporals.format(consulta.fechaCompra, 'dd/MM/yyyy')}"></p>
+
+                        <div th:unless="${consulta.tieneDonaciones()}" class="text-muted py-2">
+                            <i class="bi bi-info-circle me-2"></i>Esta compra no generó donaciones asociadas.
+                        </div>
+
+                        <!-- Iteración de Donaciones aplicando tokens del sistema -->
+                        <div class="border-bottom py-3" th:each="d, iterStat : ${consulta.donaciones}"
+                            th:classappend="${iterStat.last} ? 'border-0' : ''">
+                            <div class="row align-items-center">
+                                <!-- Contenedor del Icono basado en el tipo ENUM real -->
+                                <div class="col-3 col-sm-2 text-center">
+                                    <div class="d-flex align-items-center justify-content-center rounded"
+                                        style="width: 60px; height: 60px; background-color: var(--hs-cream-dark) !important;">
+                                        <i th:if="${d.tipo.name() == 'ARBOL'}"
+                                            class="bi bi-tree text-success h3 mb-0"></i>
+                                        <i th:if="${d.tipo.name() == 'ABRIGO'}"
+                                            class="bi bi-gift text-danger h3 mb-0"></i>
+                                    </div>
+                                </div>
+
+                                <!-- Detalles de la donación (Derecha) -->
+                                <div class="col-9 col-sm-10">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <strong th:text="${d.unidades}">1 abrigo</strong> · <span
+                                            class="text-dark fw-bold" th:text="${d.producto}">Casaca Älpafill
+                                            Cusco</span>
+                                    </div>
+
+                                    <!-- LÍNEA DE TIEMPO CORREGIDA: Utiliza th:styleappend seguro para evitar el quiebre del compilador -->
+                                    <div class="my-2">
+                                        <ol class="d-flex flex-wrap gap-2 list-unstyled mb-0 p-0 row">
+                                            <li th:each="e : ${T(pe.edu.utp.hoseg.web.model.EstadoDonacion).values()}"
+                                                class="col-auto rounded-pill px-2 py-0 border"
+                                                th:styleappend="${e.paso <= d.estado.paso} ? 'background-color: var(--hs-cream-dark); border-color: var(--hs-terracotta); font-size: 0.8rem; font-weight: 600;' : 'background-color: transparent; color: var(--hs-muted); border-color: var(--hs-sand); font-size: 0.8rem;'"
+                                                th:text="${e.etiqueta}">Paso</li>
+                                        </ol>
+                                    </div>
+
+                                    <!-- Detalles de Destino -->
+                                    <div class="small text-muted mt-2" th:if="${d.comunidad}">
+                                        <i class="bi bi-geo-alt me-1"></i>
+                                        <span th:text="${d.comunidad} + ' · ONG: ' + ${d.ong}">Omacha · Pachamama
+                                            Raymi</span>
+                                        <span th:if="${d.fechaEntrega}"
+                                            th:text="' · Entregado el ' + ${#temporals.format(d.fechaEntrega, 'dd/MM/yyyy')}">fecha</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </th:block>
+            </div>
+        </section>
+    </main>
 </body>
+
 </html>
