@@ -125,6 +125,8 @@ public class SecurityConfig {
             Optional<Integer> bloqueo = error instanceof LockedException
                     ? bloqueoAccesoService.minutosDeBloqueoDeCliente(email)
                     : bloqueoAccesoService.falloDeCliente(email);
+            // Capa adicional (Guava, solo auditoría): fuerza bruta distribuida por IP.
+            bloqueoAccesoService.registrarIntentoFallidoDesdeIp(request.getRemoteAddr());
             response.sendRedirect(request.getContextPath() + "/login?" + motivo(error, bloqueo));
         };
     }
@@ -136,6 +138,7 @@ public class SecurityConfig {
                     ? bloqueoAccesoService.minutosDeBloqueoDeUsuario(username)
                     : error instanceof DisabledException ? Optional.empty()
                     : bloqueoAccesoService.falloDeUsuario(username);
+            bloqueoAccesoService.registrarIntentoFallidoDesdeIp(request.getRemoteAddr());
             response.sendRedirect(request.getContextPath() + "/admin/login?" + motivo(error, bloqueo));
         };
     }

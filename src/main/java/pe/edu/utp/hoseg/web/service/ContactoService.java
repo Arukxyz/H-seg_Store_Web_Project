@@ -8,6 +8,7 @@ import pe.edu.utp.hoseg.web.model.EstadoMensaje;
 import pe.edu.utp.hoseg.web.model.MensajeContacto;
 import pe.edu.utp.hoseg.web.repository.MensajeContactoRepository;
 import pe.edu.utp.hoseg.web.repository.UsuarioRepository;
+import pe.edu.utp.hoseg.web.util.SaneamientoTexto;
 
 import java.util.List;
 
@@ -28,13 +29,21 @@ public class ContactoService {
         this.notificacionService = notificacionService;
     }
 
-    /** Guarda el mensaje y envía el acuse de recibo. */
+    /**
+     * Guarda el mensaje y envía el acuse de recibo.
+     *
+     * <p>{@code nombre} y {@code asunto} se normalizan con
+     * {@link SaneamientoTexto} antes de guardarse: son de una sola línea y
+     * {@code asunto} termina en el "Subject" del correo de acuse
+     * ({@code NotificacionService.acuseContacto}), así que no deben poder
+     * llevar saltos de línea (inyección de cabeceras de correo).</p>
+     */
     @Transactional
     public void registrar(MensajeContactoForm form) {
         MensajeContacto m = new MensajeContacto();
-        m.setNombre(form.getNombre().trim());
+        m.setNombre(SaneamientoTexto.normalizarLineaObligatoria(form.getNombre()));
         m.setEmail(form.getEmail().trim());
-        m.setAsunto(form.getAsunto().trim());
+        m.setAsunto(SaneamientoTexto.paraAsuntoDeCorreo(form.getAsunto(), 150));
         m.setMensaje(form.getMensaje().trim());
         mensajeRepository.save(m);
         notificacionService.acuseContacto(m.getEmail(), m.getNombre(), m.getAsunto());

@@ -15,6 +15,8 @@ nbproject/private/
 .settings/
 .project
 .classpath
+# Logs de la aplicación (llevan IPs)
+logs/
 
 # Sistema operativo
 .DS_Store

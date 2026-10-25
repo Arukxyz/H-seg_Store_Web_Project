@@ -9,7 +9,7 @@
     respuestaForm RespuestaReclamoForm (respuesta) → POST /admin/reclamaciones/{id}/respuesta (se envía por correo)
     reclamoConError Integer: hoja cuyo formulario volvió con error (si existe)
     suscriptores  List<SuscriptorBoletin> (email, suscritoEn)
-  Acciones: POST /admin/mensajes/{id}/atendido · GET /admin/suscriptores.csv (Exportar CSV)
+  Acciones: POST /admin/mensajes/{id}/atendido · GET /admin/suscriptores.csv (Exportar CSV) · GET /admin/suscriptores.xlsx (Exportar Excel)
 -->
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/admin :: pagina(titulo='Mensajes · HÖSÉG', activa='mensajes', contenido=~{::main})}">
@@ -54,6 +54,7 @@
 
     <th:block th:if="${pestana == 'suscriptores'}">
         <a class="hs-btn hs-btn--secundario mb-3" th:href="@{/admin/suscriptores.csv}">Exportar CSV</a>
+        <a class="hs-btn hs-btn--secundario mb-3" th:href="@{/admin/suscriptores.xlsx}">Exportar Excel</a>
         <p th:each="s : ${suscriptores}" th:text="${s.email} + ' · ' + ${#temporals.format(s.suscritoEn, 'dd/MM/yyyy')}">ana@correo.pe</p>
     </th:block>
 </main>

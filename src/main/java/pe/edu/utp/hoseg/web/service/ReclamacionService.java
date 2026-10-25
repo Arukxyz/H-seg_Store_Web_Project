@@ -11,6 +11,7 @@ import pe.edu.utp.hoseg.web.model.TipoReclamo;
 import pe.edu.utp.hoseg.web.repository.LibroReclamacionRepository;
 import pe.edu.utp.hoseg.web.repository.UsuarioRepository;
 import pe.edu.utp.hoseg.web.repository.VentaRepository;
+import pe.edu.utp.hoseg.web.util.SaneamientoTexto;
 
 import java.util.List;
 import java.util.Locale;
@@ -56,7 +57,10 @@ public class ReclamacionService {
         }
         LibroReclamacion r = new LibroReclamacion();
         r.setTipo(form.getTipo());
-        r.setNombre(form.getNombre().trim());
+        // nombre es de una sola línea y viaja en el cuerpo del correo de constancia
+        // (NotificacionService.constanciaReclamo): se normaliza con SaneamientoTexto
+        // (Apache Commons Lang3) para evitar saltos de línea sueltos.
+        r.setNombre(SaneamientoTexto.normalizarLineaObligatoria(form.getNombre()));
         r.setTipoDoc(form.getTipoDoc());
         r.setNumDoc(form.getNumDoc().trim());
         r.setDomicilio(form.getDomicilio().trim());
