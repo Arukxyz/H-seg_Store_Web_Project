@@ -945,3 +945,88 @@
         animation: none;
     }
 }
+
+/* =====================================================================
+   Registro de Cliente · Grilla de 2 columnas en Desktop + Responsivo
+   ===================================================================== */
+
+.hs-cuenta__contenedor--registro-ancho {
+    width: min(calc(100% - 2rem), 52rem);
+    padding: 2.25rem 2.5rem;
+}
+
+.hs-cuenta__subtitulo {
+    color: var(--hs-bark);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.hs-cuenta__subtitulo i {
+    color: var(--hs-terracotta);
+}
+
+.hs-cuenta__grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem 1.25rem;
+    margin-top: 0.75rem;
+}
+
+.hs-cuenta__grid-2 .hs-cuenta__campo {
+    margin-top: 0;
+}
+
+.hs-cuenta__campo--full {
+    grid-column: 1 / -1;
+}
+
+.hs-cuenta__grid-2 .form-select {
+    min-height: 44px;
+    border-radius: 0.75rem;
+    border: 1px solid var(--hs-sand);
+    background-color: var(--hs-card);
+    color: var(--hs-bark);
+    font-size: 0.95rem;
+}
+
+.hs-cuenta__grid-2 .form-select:focus {
+    border-color: var(--hs-terracotta);
+    box-shadow: 0 0 0 3px var(--hs-terracotta-light);
+}
+
+.hs-cuenta__terminos--card {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 1.5rem;
+    padding: 0.9rem 1rem;
+    border-radius: 0.85rem;
+    background: var(--hs-cream);
+    border: 1px solid var(--hs-sand);
+    font-size: 0.9rem;
+}
+
+.hs-cuenta__terminos--card input[type="checkbox"] {
+    margin-top: 0.25rem;
+    margin-right: 0;
+    accent-color: var(--hs-terracotta);
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 680px) {
+    .hs-cuenta__contenedor--registro-ancho {
+        padding: 1.5rem 1.25rem;
+    }
+
+    .hs-cuenta__grid-2 {
+        grid-template-columns: 1fr;
+        gap: 0.85rem;
+    }
+
+    .hs-cuenta__grid-2 .form-select {
+        font-size: 16px;
+    }
+}

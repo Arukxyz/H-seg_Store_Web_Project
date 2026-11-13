@@ -1,52 +1,168 @@
 <!DOCTYPE html>
 <!--
-  ESQUELETO · Bloque 2 · 2.2 Registro (GET/POST /registro, AuthController).
+  Bloque 2 · 2.2 Registro (GET/POST /registro, AuthController).
   Modelo:
     registroForm   RegistroClienteForm (nombre, apellido, tipoDoc, numDoc, email, telefono, direccion,
                    contrasena, confirmacion, aceptaTerminos). Errores globales: documentoValido, contrasenasCoinciden.
-                   "email" y "numDoc" también reciben errores de negocio (ya registrado).
     tiposDocumento TipoDocumento[] (DNI, CE, PASAPORTE, RUC; etiqueta)
-  Éxito: redirige a /login?registrado.
 -->
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: pagina(titulo='Crear cuenta · HÖSÉG', activa='cuenta',
-                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+                                          transparente=false, contenido=~{::main}, estilos=~{::link}, scripts=~{::script})}">
+<link rel="stylesheet" th:href="@{/css/cuenta.css}">
 <body>
 <main class="hs-main--bajo-nav">
-    <section class="hs-seccion">
-        <div class="container hs-ancho-form">
-            <h1 class="hs-h2 mb-3">Crear cuenta</h1>
+    <th:block th:replace="~{fragments/avisos :: avisos}"/>
+
+    <section class="hs-cuenta hs-cuenta--atmosferica">
+        <!-- Mismo fondo atmosférico con foto difuminada y halos cálidos -->
+        <div class="hs-cuenta__fondo" aria-hidden="true">
+            <img th:src="@{/images/comunidad-cusco.jpg}" alt="" class="hs-cuenta__fondo-img">
+            <div class="hs-cuenta__fondo-capa"></div>
+        </div>
+
+        <div class="hs-cuenta__contenedor hs-cuenta__contenedor--glass hs-cuenta__contenedor--registro-ancho">
+            <div class="hs-cuenta__emblema" aria-hidden="true">
+                <i class="bi bi-stars"></i>
+            </div>
+
+            <p class="hs-cuenta__eyebrow text-center">ÚNETE A HÖSÉG</p>
+            <h1 class="hs-h2 hs-cuenta__titulo">Crear cuenta</h1>
+            <p class="hs-cuenta__intro">
+                Regístrate para guardar tus direcciones, seguir tus pedidos<br>
+                y ver el impacto social de cada compra.
+            </p>
+
             <form th:object="${registroForm}" method="post" th:action="@{/registro}">
-                <input class="hs-input mt-2" th:field="*{nombre}" placeholder="Nombre">
-                <div class="text-danger" th:errors="*{nombre}"></div>
-                <input class="hs-input mt-2" th:field="*{apellido}" placeholder="Apellido">
-                <div class="text-danger" th:errors="*{apellido}"></div>
-                <select class="form-select mt-2" th:field="*{tipoDoc}">
-                    <option value="">Tipo de documento</option>
-                    <option th:each="t : ${tiposDocumento}" th:value="${t}" th:text="${t.etiqueta}">DNI</option>
-                </select>
-                <div class="text-danger" th:errors="*{tipoDoc}"></div>
-                <input class="hs-input mt-2" th:field="*{numDoc}" placeholder="Número de documento">
-                <div class="text-danger" th:errors="*{numDoc}"></div>
-                <div class="text-danger" th:errors="*{documentoValido}"></div>
-                <input class="hs-input mt-2" type="email" th:field="*{email}" placeholder="Email">
-                <div class="text-danger" th:errors="*{email}"></div>
-                <input class="hs-input mt-2" th:field="*{telefono}" placeholder="Celular (opcional)">
-                <div class="text-danger" th:errors="*{telefono}"></div>
-                <input class="hs-input mt-2" th:field="*{direccion}" placeholder="Dirección (opcional)">
-                <div class="text-danger" th:errors="*{direccion}"></div>
-                <input class="hs-input mt-2" type="password" th:field="*{contrasena}" placeholder="Contraseña" autocomplete="new-password">
-                <div class="text-danger" th:errors="*{contrasena}"></div>
-                <input class="hs-input mt-2" type="password" th:field="*{confirmacion}" placeholder="Repite la contraseña" autocomplete="new-password">
-                <div class="text-danger" th:errors="*{confirmacion}"></div>
-                <div class="text-danger" th:errors="*{contrasenasCoinciden}"></div>
-                <label class="d-block mt-2"><input type="checkbox" th:field="*{aceptaTerminos}">
-                    Acepto los <a th:href="@{/terminos}">términos</a> y la política de privacidad</label>
-                <div class="text-danger" th:errors="*{aceptaTerminos}"></div>
-                <button class="hs-btn hs-btn--primario mt-3" type="submit">Crear cuenta</button>
+
+                <!-- Bloque 1: Datos personales -->
+                <h2 class="hs-cuenta__subtitulo">
+                    <i class="bi bi-person-vcard me-1" aria-hidden="true"></i> Datos personales
+                </h2>
+                <div class="hs-cuenta__grid-2">
+                    <label class="hs-cuenta__campo">
+                        <span>Nombre *</span>
+                        <input class="hs-input" th:field="*{nombre}" placeholder="Ej. Ana" autocomplete="given-name" required>
+                        <div class="text-danger hs-cuenta__error" th:errors="*{nombre}"></div>
+                    </label>
+
+                    <label class="hs-cuenta__campo">
+                        <span>Apellido *</span>
+                        <input class="hs-input" th:field="*{apellido}" placeholder="Ej. Torres" autocomplete="family-name" required>
+                        <div class="text-danger hs-cuenta__error" th:errors="*{apellido}"></div>
+                    </label>
+
+                    <label class="hs-cuenta__campo">
+                        <span>Tipo de documento *</span>
+                        <select class="form-select" th:field="*{tipoDoc}" required>
+                            <option value="">Selecciona tu documento</option>
+                            <option th:each="t : ${tiposDocumento}" th:value="${t}" th:text="${t.etiqueta}">DNI</option>
+                        </select>
+                        <div class="text-danger hs-cuenta__error" th:errors="*{tipoDoc}"></div>
+                    </label>
+
+                    <label class="hs-cuenta__campo">
+                        <span>Número de documento *</span>
+                        <input class="hs-input" th:field="*{numDoc}" placeholder="Ej. 71234567" required>
+                        <div class="text-danger hs-cuenta__error" th:errors="*{numDoc}"></div>
+                        <div class="text-danger hs-cuenta__error" th:errors="*{documentoValido}"></div>
+                    </label>
+                </div>
+
+                <!-- Bloque 2: Datos de contacto -->
+                <h2 class="hs-cuenta__subtitulo">
+                    <i class="bi bi-geo-alt me-1" aria-hidden="true"></i> Datos de contacto
+                </h2>
+                <div class="hs-cuenta__grid-2">
+                    <label class="hs-cuenta__campo">
+                        <span>Correo electrónico *</span>
+                        <input class="hs-input" type="email" th:field="*{email}" placeholder="tu@correo.com" autocomplete="email" required>
+                        <div class="text-danger hs-cuenta__error" th:errors="*{email}"></div>
+                    </label>
+
+                    <label class="hs-cuenta__campo">
+                        <span>Celular <span class="hs-cuenta__opcional">(opcional)</span></span>
+                        <input class="hs-input" th:field="*{telefono}" placeholder="Ej. 987 654 321" autocomplete="tel">
+                        <div class="text-danger hs-cuenta__error" th:errors="*{telefono}"></div>
+                    </label>
+
+                    <label class="hs-cuenta__campo hs-cuenta__campo--full">
+                        <span>Dirección <span class="hs-cuenta__opcional">(opcional)</span></span>
+                        <input class="hs-input" th:field="*{direccion}" placeholder="Av. / Calle, número y distrito" autocomplete="street-address">
+                        <div class="text-danger hs-cuenta__error" th:errors="*{direccion}"></div>
+                    </label>
+                </div>
+
+                <!-- Bloque 3: Seguridad -->
+                <h2 class="hs-cuenta__subtitulo">
+                    <i class="bi bi-shield-lock me-1" aria-hidden="true"></i> Seguridad
+                </h2>
+                <div class="hs-cuenta__grid-2">
+                    <label class="hs-cuenta__campo">
+                        <span>Contraseña *</span>
+                        <div class="hs-cuenta__input-wrap">
+                            <input id="reg-password" class="hs-input hs-cuenta__input--pass" type="password"
+                                   th:field="*{contrasena}" placeholder="Mínimo 8 caracteres"
+                                   autocomplete="new-password" required>
+                            <button type="button" class="hs-cuenta__ojo" data-toggle-pass="reg-password"
+                                    aria-label="Mostrar u ocultar contraseña">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="text-danger hs-cuenta__error" th:errors="*{contrasena}"></div>
+                    </label>
+
+                    <label class="hs-cuenta__campo">
+                        <span>Repite la contraseña *</span>
+                        <div class="hs-cuenta__input-wrap">
+                            <input id="reg-confirm" class="hs-input hs-cuenta__input--pass" type="password"
+                                   th:field="*{confirmacion}" placeholder="Vuelve a escribir tu clave"
+                                   autocomplete="new-password" required>
+                            <button type="button" class="hs-cuenta__ojo" data-toggle-pass="reg-confirm"
+                                    aria-label="Mostrar u ocultar confirmación">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="text-danger hs-cuenta__error" th:errors="*{confirmacion}"></div>
+                        <div class="text-danger hs-cuenta__error" th:errors="*{contrasenasCoinciden}"></div>
+                    </label>
+                </div>
+
+                <!-- Términos y botón de envío -->
+                <label class="hs-cuenta__terminos hs-cuenta__terminos--card">
+                    <input type="checkbox" th:field="*{aceptaTerminos}" required>
+                    <span>Acepto los <a th:href="@{/terminos}" class="hs-cuenta__cta-registro">términos y condiciones</a> y la política de privacidad de HÖSÉG.</span>
+                </label>
+                <div class="text-danger hs-cuenta__error" th:errors="*{aceptaTerminos}"></div>
+
+                <button class="hs-btn hs-btn--primario hs-cuenta__boton mt-4" type="submit">
+                    <span>Crear mi cuenta</span>
+                    <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </button>
             </form>
+
+            <div class="hs-cuenta__pie">
+                <span>¿Ya tienes una cuenta?</span>
+                <a th:href="@{/login}" class="hs-cuenta__cta-registro">Inicia sesión</a>
+            </div>
         </div>
     </section>
 </main>
+
+<script>
+document.querySelectorAll('[data-toggle-pass]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const input = document.getElementById(btn.dataset.togglePass);
+        const icon = btn.querySelector('i');
+        if (!input) return;
+        const mostrar = input.type === 'password';
+        input.type = mostrar ? 'text' : 'password';
+        if (icon) {
+            icon.classList.toggle('bi-eye', !mostrar);
+            icon.classList.toggle('bi-eye-slash', mostrar);
+        }
+    });
+});
+</script>
 </body>
 </html>
