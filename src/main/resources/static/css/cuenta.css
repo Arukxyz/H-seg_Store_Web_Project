@@ -1109,3 +1109,218 @@
 .hs-cuenta__match[hidden] {
     display: none;
 }
+
+/* =====================================================================
+   Panel Mi Cuenta · Cabecera cálida, Tarjetas de Impacto y Acordeón
+   ===================================================================== */
+
+.hs-cuenta__hero-card {
+    max-width: 100%;
+    padding: 2.25rem 1.5rem;
+    border-radius: 1.5rem;
+    border: 1px solid var(--hs-sand);
+    background:
+        radial-gradient(circle at 15% 20%, var(--hs-terracotta-light) 0%, transparent 50%),
+        radial-gradient(circle at 85% 80%, var(--hs-sage-light) 0%, transparent 55%),
+        var(--hs-card);
+    box-shadow: var(--hs-shadow-card-reposo);
+    animation: hsCuentaEntrada 0.5s var(--hs-ease) both;
+}
+
+.hs-cuenta__avatar-grande {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 0.9rem;
+    border-radius: 50%;
+    background: var(--hs-terracotta);
+    color: var(--hs-sobre-acento);
+    font-family: var(--hs-font-display);
+    font-size: 24px;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+    box-shadow: var(--hs-shadow-card);
+}
+
+.hs-cuenta__pestanas a {
+    background: var(--hs-card);
+    border: 1px solid var(--hs-sand);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.hs-cuenta__pestanas a.is-activa {
+    border-color: var(--hs-terracotta);
+}
+
+/* Tarjetas de Impacto Social con acentos diferenciados */
+.hs-cuenta__impacto {
+    opacity: 0;
+    animation: hsCuentaEntrada 0.5s var(--hs-ease) forwards;
+    transition: transform var(--hs-t-fast), box-shadow var(--hs-t-fast);
+}
+
+.hs-cuenta__impacto:nth-child(1) { animation-delay: 0.08s; }
+.hs-cuenta__impacto:nth-child(2) { animation-delay: 0.16s; }
+.hs-cuenta__impacto:nth-child(3) { animation-delay: 0.24s; }
+
+.hs-cuenta__impacto:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--hs-shadow-card);
+}
+
+.hs-cuenta__impacto-cifra {
+    font-family: var(--hs-font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--hs-bark);
+    margin: 0.25rem 0 0.35rem;
+}
+
+.hs-cuenta__impacto-sub {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--hs-muted);
+}
+
+.hs-cuenta__impacto--entregado {
+    background: var(--hs-sage-light);
+    border-color: var(--hs-badge-arbol-borde);
+}
+.hs-cuenta__impacto--entregado .hs-cuenta__impacto-icono {
+    background: var(--hs-card);
+    color: var(--hs-sage);
+}
+.hs-cuenta__impacto--entregado .hs-cuenta__impacto-cifra {
+    color: var(--hs-sage);
+}
+
+.hs-cuenta__impacto--espera .hs-cuenta__impacto-icono {
+    background: var(--hs-amber-light);
+    color: var(--hs-terracotta);
+}
+
+/* Tarjetas de Pedidos con hover suave */
+.hs-cuenta__pedido {
+    transition: transform var(--hs-t-fast), box-shadow var(--hs-t-fast), border-color var(--hs-t-fast);
+}
+
+.hs-cuenta__pedido:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--hs-shadow-card);
+    border-color: var(--hs-terracotta);
+}
+
+.hs-cuenta__aporte-texto {
+    color: var(--hs-sage);
+}
+
+.hs-cuenta__pedido-enlace {
+    color: var(--hs-terracotta);
+}
+
+/* Layout de Mis Datos + Acordeón desplegable de contraseña */
+.hs-cuenta__datos-layout {
+    max-width: 46rem;
+    margin-inline: auto;
+    display: grid;
+    gap: 1.25rem;
+}
+
+.hs-cuenta__acordeon {
+    padding: 0;
+    overflow: hidden;
+}
+
+.hs-cuenta__acordeon-resumen {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.35rem 1.5rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background var(--hs-t-fast);
+}
+
+.hs-cuenta__acordeon-resumen::-webkit-details-marker {
+    display: none;
+}
+
+.hs-cuenta__acordeon-resumen:hover {
+    background: var(--hs-cream);
+}
+
+.hs-cuenta__acordeon-titulo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.hs-cuenta__acordeon-icono {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--hs-terracotta-light);
+    color: var(--hs-terracotta);
+    display: grid;
+    place-items: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+
+.hs-cuenta__acordeon-flecha {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--hs-cream);
+    border: 1px solid var(--hs-sand);
+    color: var(--hs-bark);
+    display: grid;
+    place-items: center;
+    transition: transform var(--hs-t-fast);
+}
+
+.hs-cuenta__acordeon[open] .hs-cuenta__acordeon-flecha {
+    transform: rotate(180deg);
+}
+
+.hs-cuenta__acordeon-cuerpo {
+    padding: 0.25rem 1.5rem 1.5rem;
+    border-top: 1px solid var(--hs-cream-dark);
+    animation: hsCuentaEntrada 0.3s var(--hs-ease) both;
+}
+
+@media (max-width: 640px) {
+    .hs-cuenta__hero-card {
+        padding: 1.75rem 1rem;
+    }
+    .hs-cuenta__acordeon-resumen {
+        padding: 1.1rem 1.25rem;
+    }
+    .hs-cuenta__acordeon-cuerpo {
+        padding: 0.25rem 1.25rem 1.25rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hs-cuenta__hero-card,
+    .hs-cuenta__impacto,
+    .hs-cuenta__acordeon-cuerpo {
+        animation: none;
+        opacity: 1;
+    }
+}
+
+
+/* Transición suave entre pestañas de Mi Cuenta */
+.hs-cuenta__contenido-tab {
+    animation: hsCuentaEntrada 0.4s var(--hs-ease) both;
+    transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.hs-cuenta__contenido-tab.is-leaving {
+    opacity: 0;
+    transform: translateY(8px);
+}
