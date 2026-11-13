@@ -222,5 +222,50 @@
     }
 
 
+        // Buscador de bloques, contador de caracteres y vista previa de imagen en Contenido
+    const buscadorContenido = document.getElementById('filtro-contenido');
+    const filasContenido = [...document.querySelectorAll('.hs-content-row')];
+    const vacioContenido = document.querySelector('.hs-content-search-empty');
+    if (buscadorContenido && filasContenido.length) {
+      buscadorContenido.addEventListener('input', () => {
+        const termino = buscadorContenido.value.trim().toLowerCase();
+        let visibles = 0;
+        filasContenido.forEach(fila => {
+          const coincide = !termino || (fila.dataset.search || '').includes(termino);
+          fila.hidden = !coincide;
+          if (coincide) visibles += 1;
+        });
+        if (vacioContenido) vacioContenido.hidden = visibles > 0;
+      });
+    }
+
+    const textareaCuerpo = document.getElementById('contenido-cuerpo');
+    const contadorCuerpo = document.getElementById('contenido-char-count');
+    if (textareaCuerpo && contadorCuerpo) {
+      const actualizarContador = () => {
+        contadorCuerpo.textContent = `${textareaCuerpo.value.length.toLocaleString('es-PE')} / 20,000`;
+      };
+      textareaCuerpo.addEventListener('input', actualizarContador);
+      actualizarContador();
+    }
+
+    const inputImgContenido = document.getElementById('contenido-imagen');
+    const wrapImgContenido = document.getElementById('contenido-img-preview-wrap');
+    const imgPreviewContenido = document.getElementById('contenido-img-preview');
+    if (inputImgContenido && wrapImgContenido && imgPreviewContenido) {
+      imgPreviewContenido.addEventListener('error', () => { wrapImgContenido.hidden = true; });
+      imgPreviewContenido.addEventListener('load', () => { wrapImgContenido.hidden = false; });
+      inputImgContenido.addEventListener('input', () => {
+        const url = inputImgContenido.value.trim();
+        if (!url) {
+          wrapImgContenido.hidden = true;
+          imgPreviewContenido.removeAttribute('src');
+        } else {
+          imgPreviewContenido.src = url;
+        }
+      });
+    }
+
+
   });
 })();

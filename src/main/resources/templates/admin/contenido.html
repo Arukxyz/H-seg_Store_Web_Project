@@ -1,34 +1,168 @@
 <!DOCTYPE html>
 <!--
-  ESQUELETO · Bloque 4 · 4.5 Contenido (GET /admin/contenido?clave=…, AdminContenidoController).
-  Modelo:
-    bloques       List<BloqueContenido> (clave, titulo, cuerpo, imagenUrl, actualizadoEn)
-    clave         String o null: bloque abierto en el editor
-    contenidoForm ContenidoForm (titulo, cuerpo, imagenUrl [/images/… o https://…]) — solo si hay clave
+  PLANTILLA · Bloque 4 · 4.5 Contenido (GET /admin/contenido?clave=…, AdminContenidoController).
   Guardar: POST /admin/contenido/{clave}. Las claves las fija el código; aquí no se crean bloques.
 -->
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/admin :: pagina(titulo='Contenido · HÖSÉG', activa='contenido', contenido=~{::main})}">
 <body>
-<main class="container-fluid pb-5">
-    <h1 class="h3">Contenido</h1>
-    <ul>
-        <li th:each="b : ${bloques}">
-            <a th:href="@{/admin/contenido(clave=${b.clave})}" th:text="${b.clave}">home.banner</a>
-            <span th:text="${b.titulo}">Título</span>
-        </li>
-    </ul>
-    <form th:if="${clave != null}" th:object="${contenidoForm}" method="post"
-          th:action="@{/admin/contenido/{c}(c=${clave})}" class="hs-ancho-form">
-        <h2 class="h5" th:text="${clave}">home.banner</h2>
-        <input class="form-control mt-2" th:field="*{titulo}" placeholder="Título">
-        <div class="text-danger" th:errors="*{titulo}"></div>
-        <textarea class="form-control mt-2" th:field="*{cuerpo}" rows="8" placeholder="Texto"></textarea>
-        <div class="text-danger" th:errors="*{cuerpo}"></div>
-        <input class="form-control mt-2" th:field="*{imagenUrl}" placeholder="/images/banner.jpg">
-        <div class="text-danger" th:errors="*{imagenUrl}"></div>
-        <button class="hs-btn hs-btn--primario mt-2" type="submit">Publicar</button>
-    </form>
+<main class="hs-admin-page hs-content-page">
+    <header class="hs-page-heading">
+        <div>
+            <p class="hs-eyebrow">ADMINISTRACIÓN · HÖSÉG</p>
+            <h1>Contenido</h1>
+            <p class="hs-page-desc">Actualiza los textos, mensajes e imágenes publicadas en la tienda web.</p>
+        </div>
+        <div class="hs-catalog-search">
+            <div class="hs-input-icon-wrap">
+                <i class="bi bi-search hs-input-icon" aria-hidden="true"></i>
+                <input type="search" id="filtro-contenido" class="hs-admin-input hs-admin-input--con-icono"
+                       placeholder="Buscar bloque o sección..." aria-label="Filtrar bloques de contenido">
+            </div>
+        </div>
+    </header>
+
+    <section class="hs-admin-card hs-anim-card-1" aria-labelledby="content-list-title">
+        <div class="hs-card-head hs-card-head--wrap">
+            <div>
+                <h2 id="content-list-title">Bloques de contenido</h2>
+                <p>Selecciona «Editar» para modificar el título, cuerpo o imagen de un bloque.</p>
+            </div>
+            <span class="hs-soft-label" th:text="${#lists.size(bloques)} + ' bloques'">0 bloques</span>
+        </div>
+
+        <!-- Aviso de desplazamiento horizontal en móvil -->
+        <p class="hs-aviso-deslizar d-md-none px-3 pt-3 mb-1">
+            <span>Desliza la tabla para editar un bloque</span>
+            <i class="bi bi-arrow-right hs-aviso-deslizar__flecha" aria-hidden="true"></i>
+        </p>
+
+        <div class="hs-table-scroll">
+            <table class="hs-admin-table">
+                <thead>
+                <tr>
+                    <th scope="col">Clave / sección</th>
+                    <th scope="col">Título y vista previa</th>
+                    <th scope="col">Recurso visual</th>
+                    <th scope="col">Actualizado</th>
+                    <th scope="col" class="hs-col-actions">Acción</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="b : ${bloques}" class="hs-content-row"
+                    th:attr="data-search=${#strings.toLowerCase((b.clave ?: '') + ' ' + (b.titulo ?: '') + ' ' + (b.cuerpo ?: ''))}">
+                    <td>
+                        <span class="hs-code-pill" th:text="${b.clave}">nosotros.historia</span>
+                    </td>
+                    <td>
+                        <strong th:text="${b.titulo ?: 'Sin título'}">Título</strong>
+                        <span class="hs-table-sub hs-truncate-text" th:text="${b.cuerpo ?: 'Sin descripción'}">Texto</span>
+                    </td>
+                    <td>
+                        <span th:if="${b.imagenUrl != null and !#strings.isEmpty(b.imagenUrl)}" class="hs-media-badge">
+                            <i class="bi bi-image" aria-hidden="true"></i>
+                            <span th:text="${b.imagenUrl}">/images/foto.jpg</span>
+                        </span>
+                        <span th:if="${b.imagenUrl == null or #strings.isEmpty(b.imagenUrl)}" class="hs-muted small">
+                            Solo texto
+                        </span>
+                    </td>
+                    <td class="hs-date"
+                        th:text="${b.actualizadoEn != null} ? ${#temporals.format(b.actualizadoEn, 'dd/MM/yyyy')} : 'Sin registro'">—</td>
+                    <td class="hs-col-actions">
+                        <a class="hs-admin-btn hs-admin-btn--ghost hs-admin-btn--sm"
+                           th:href="@{/admin/contenido(clave=${b.clave})}">
+                            <i class="bi bi-pencil-square" aria-hidden="true"></i> Editar
+                        </a>
+                    </td>
+                </tr>
+                <tr th:if="${bloques.isEmpty()}">
+                    <td colspan="5" class="hs-empty-row">
+                        <div class="hs-empty-box">
+                            <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+                            <span>No hay bloques de contenido configurados.</span>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="hs-content-search-empty" hidden>
+                    <td colspan="5" class="hs-empty-row">
+                        <div class="hs-empty-box">
+                            <i class="bi bi-search" aria-hidden="true"></i>
+                            <span>No encontramos bloques que coincidan con tu búsqueda.</span>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Modal de edición del bloque seleccionado -->
+    <div th:if="${clave != null}" class="modal fade hs-admin-modal" id="contenido-modal" tabindex="-1"
+         aria-labelledby="contenido-modal-title" aria-hidden="true" data-auto-open="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <p class="hs-eyebrow">EDITAR BLOQUE</p>
+                        <h2 id="contenido-modal-title" class="modal-title" th:text="${clave}">nosotros.historia</h2>
+                    </div>
+                    <a class="btn-close" aria-label="Cerrar editor" th:href="@{/admin/contenido}"></a>
+                </div>
+<form class="hs-modal-form" th:object="${contenidoForm}" method="post" th:action="@{/admin/contenido/{c}(c=${clave})}">
+                    <div class="modal-body hs-modal-fields">
+                        <div class="hs-field">
+                            <label for="contenido-titulo">TÍTULO</label>
+                            <input id="contenido-titulo" class="hs-admin-input" th:field="*{titulo}"
+                                   maxlength="200" placeholder="Título principal de la sección">
+                            <p class="hs-field-error" th:errors="*{titulo}"></p>
+                        </div>
+
+                        <div class="hs-field">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label for="contenido-cuerpo" class="mb-0">CONTENIDO</label>
+                                <span class="hs-char-counter" id="contenido-char-count">0 / 20,000</span>
+                            </div>
+                            <textarea id="contenido-cuerpo" class="hs-admin-input" rows="7"
+                                      th:field="*{cuerpo}" maxlength="20000"
+                                      placeholder="Escribe el contenido..."></textarea>
+                            <p class="hs-field-error" th:errors="*{cuerpo}"></p>
+                        </div>
+
+                        <div class="hs-field">
+                            <label for="contenido-imagen">URL DE IMAGEN (OPCIONAL)</label>
+                            <div class="hs-input-icon-wrap">
+                                <i class="bi bi-image hs-input-icon" aria-hidden="true"></i>
+                                <input id="contenido-imagen" class="hs-admin-input hs-admin-input--con-icono"
+                                       th:field="*{imagenUrl}" placeholder="/images/archivo.jpg o https://...">
+                            </div>
+                            <p class="hs-field-error" th:errors="*{imagenUrl}"></p>
+
+                            <!-- Vista previa en tiempo real de la imagen -->
+                            <div class="hs-img-preview-box" id="contenido-img-preview-wrap"
+                                 th:hidden="${contenidoForm.imagenUrl == null or #strings.isEmpty(contenidoForm.imagenUrl)}">
+                                <span class="hs-img-preview-label">Vista previa de imagen</span>
+                                <img id="contenido-img-preview"
+                                     th:src="${contenidoForm.imagenUrl != null and !#strings.isEmpty(contenidoForm.imagenUrl)} ? @{${contenidoForm.imagenUrl}} : ''"
+                                     alt="Vista previa del recurso">
+                            </div>
+                        </div>
+
+                        <p class="hs-form-note">
+                            <i class="bi bi-info-circle" aria-hidden="true"></i>
+                            <span>Usa una ruta local <code>/images/...</code> o una dirección <code>https://</code>. La clave del bloque es fija.</span>
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <a class="hs-admin-btn hs-admin-btn--ghost" th:href="@{/admin/contenido}">Cancelar</a>
+                        <button class="hs-admin-btn hs-admin-btn--primary" type="submit">
+                            <i class="bi bi-check2-circle" aria-hidden="true"></i> Publicar cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </main>
 </body>
 </html>
