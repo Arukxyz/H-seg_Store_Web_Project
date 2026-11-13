@@ -1030,3 +1030,60 @@
         font-size: 16px;
     }
 }
+
+
+/* =====================================================================
+   Recuperar / Restablecer · Estado de éxito animado y caja de consejo
+   ===================================================================== */
+
+@keyframes hsPopExito {
+    0% {
+        opacity: 0;
+        transform: scale(0.7);
+    }
+    70% {
+        transform: scale(1.08);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.hs-cuenta__exito {
+    animation: hsCuentaEntrada 0.45s var(--hs-ease) both;
+}
+
+.hs-cuenta__emblema--exito {
+    background: var(--hs-sage-light);
+    border-color: var(--hs-badge-arbol-borde);
+    color: var(--hs-sage);
+    animation: hsPopExito 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hs-cuenta__tip-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 0.9rem 1rem;
+    border-radius: 0.85rem;
+    background: var(--hs-cream);
+    border: 1px solid var(--hs-sand);
+    color: var(--hs-muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.hs-cuenta__tip-box i {
+    color: var(--hs-sage);
+    font-size: 1.1rem;
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hs-cuenta__exito,
+    .hs-cuenta__emblema--exito {
+        animation: none;
+    }
+}
