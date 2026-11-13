@@ -1087,3 +1087,25 @@
         animation: none;
     }
 }
+
+/* Emblema ámbar de enlace vencido e indicador de coincidencia de clave */
+.hs-cuenta__emblema--alerta {
+    background: var(--hs-amber-light);
+    border-color: var(--hs-badge-abrigo-borde);
+    color: var(--hs-terracotta);
+    animation: hsPopExito 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hs-cuenta__match {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0.75rem 0 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--hs-sage);
+}
+
+.hs-cuenta__match[hidden] {
+    display: none;
+}
