@@ -1,51 +1,248 @@
 <!DOCTYPE html>
 <!--
-  ESQUELETO · Bloque 2 · 2.6 Detalle de pedido (GET /cuenta/pedidos/{codigo}, CuentaController).
-  Modelo:
-    pedido  DetallePedido: codigoComprobante, fecha, estado, totalProductos, totalAPagar, impacto, puedeResenar,
-            lineas List<LineaPedido> (codigoProducto, nombre, talla, cantidad, precioUnitario, subtotal, tipoCompromiso),
-            envio EnvioVista o null (tipo, estado, nombreReceptor, direccion, distrito…, costo, courier,
-                  codigoSeguimiento, fechaDespacho, fechaEntrega),
-            donaciones List<DonacionVista> (tipo, unidades "2 abrigos", producto, estado [etiqueta, paso 0-3],
-                  comunidad, ong, fechaEntrega) ← misma línea de tiempo que la consulta pública (bloque 3).
+  Bloque 2 · 2.6 Detalle de pedido (GET /cuenta/pedidos/{codigo}, CuentaController).
   "Reseñar" lleva a /tienda/{codigoProducto}#resenas.
 -->
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: pagina(titulo=${pedido.codigoComprobante} + ' · HÖSÉG', activa='cuenta',
-                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+                                          transparente=false, contenido=~{::main}, estilos=~{::link}, scripts=~{::script})}">
+<link rel="stylesheet" th:href="@{/css/cuenta.css}">
 <body>
 <main class="hs-main--bajo-nav">
-    <section class="hs-seccion">
+    <th:block th:replace="~{fragments/avisos :: avisos}"/>
+
+    <section class="hs-cuenta">
         <div class="container">
-            <a th:href="@{/cuenta}">← Mis pedidos</a>
-            <h1 class="hs-h2" th:text="${pedido.codigoComprobante}">WEB-000110</h1>
-            <p th:text="${#temporals.format(pedido.fecha, 'dd/MM/yyyy HH:mm')} + ' · ' + ${pedido.estado.etiqueta}">Fecha · Estado</p>
+            <a class="hs-detalle__volver" th:href="@{/cuenta}">
+                <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                <span>Volver a mis pedidos</span>
+            </a>
 
-            <div class="border-bottom py-2" th:each="l : ${pedido.lineas}">
-                <span th:text="${l.cantidad} + ' × ' + ${l.nombre} + ' (' + ${l.talla} + ')'">1 × Casaca (M)</span>
-                · <span th:text="'S/ ' + ${#numbers.formatDecimal(l.subtotal, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</span>
-                <a th:if="${pedido.puedeResenar}" th:href="@{/tienda/{c}(c=${l.codigoProducto})} + '#resenas'">Reseñar</a>
-            </div>
-            <p class="mt-2" th:text="'Total: S/ ' + ${#numbers.formatDecimal(pedido.totalAPagar, 1, 'COMMA', 2, 'POINT')}">Total</p>
-
-            <section th:if="${pedido.envio != null}" class="mt-4">
-                <h2 class="h5">Envío</h2>
-                <p th:text="${pedido.envio.tipo.etiqueta} + ' · ' + ${pedido.envio.estado.etiqueta}">Delivery · Preparando</p>
-                <p th:if="${pedido.envio.direccion}" th:text="${pedido.envio.direccion} + ', ' + ${pedido.envio.distrito}">Dirección</p>
-                <p th:if="${pedido.envio.codigoSeguimiento}" th:text="${pedido.envio.courier} + ' · ' + ${pedido.envio.codigoSeguimiento}">Courier</p>
-            </section>
-
-            <section class="mt-4" th:unless="${pedido.donaciones.isEmpty()}">
-                <h2 class="h5" th:text="'Tu impacto: ' + ${pedido.impacto.texto}">Tu impacto</h2>
-                <div class="border-bottom py-2" th:each="d : ${pedido.donaciones}">
-                    <strong th:text="${d.unidades}">1 abrigo</strong> · <span th:text="${d.producto}">Casaca</span>
-                    · <span th:text="${d.estado.etiqueta}">Pendiente de asignar</span>
-                    <span th:if="${d.comunidad}" th:text="'· ' + ${d.comunidad} + ' (' + ${d.ong} + ')'">Omacha</span>
-                    <span th:if="${d.fechaEntrega}" th:text="'· entregado el ' + ${#temporals.format(d.fechaEntrega, 'dd/MM/yyyy')}">fecha</span>
+            <!-- Cabecera del comprobante -->
+            <header class="hs-detalle__cabecera">
+                <div>
+                    <p class="hs-cuenta__eyebrow">RESUMEN DE COMPRA</p>
+                    <h1 class="hs-h2 hs-detalle__titulo" th:text="${pedido.codigoComprobante}">WEB-000110</h1>
+                    <p class="hs-detalle__fecha"
+                       th:text="'Realizado el ' + ${#temporals.format(pedido.fecha, 'dd/MM/yyyy HH:mm')}">
+                        Realizado el 23/10/2026 10:30
+                    </p>
                 </div>
-            </section>
+                <span class="hs-chip hs-detalle__estado" th:text="${pedido.estado.etiqueta}">Pagado</span>
+            </header>
+
+            <div class="hs-detalle__columnas">
+                <!-- Columna izquierda: Productos, Envío e Impacto -->
+                <div class="hs-detalle__principal">
+
+                    <!-- Tarjeta 1: Productos del pedido -->
+                    <section class="hs-detalle__tarjeta" aria-labelledby="titulo-productos-pedido">
+                        <div class="hs-detalle__seccion-cabecera">
+                            <h2 id="titulo-productos-pedido">Productos del pedido</h2>
+                            <span th:text="${#lists.size(pedido.lineas)} + (${#lists.size(pedido.lineas) == 1} ? ' producto' : ' productos')">
+                                1 producto
+                            </span>
+                        </div>
+
+                        <div class="hs-detalle__producto" th:each="l : ${pedido.lineas}">
+                            <div class="hs-detalle__producto-icono" aria-hidden="true">
+                                <span th:text="${l.nombre != null and !#strings.isEmpty(l.nombre)} ? ${#strings.toUpperCase(#strings.substring(l.nombre, 0, 1))} : 'H'">C</span>
+                            </div>
+
+                            <div class="hs-detalle__producto-info">
+                                <h3 th:text="${l.nombre}">Casaca</h3>
+                                <p>Talla: <strong th:text="${l.talla ?: 'Única'}">M</strong></p>
+                                <p>Cantidad: <strong th:text="${l.cantidad}">1</strong></p>
+                                <p class="hs-detalle__precio-unitario"
+                                   th:text="'Precio unitario: S/ ' + ${#numbers.formatDecimal(l.precioUnitario, 1, 'COMMA', 2, 'POINT')}">
+                                    Precio unitario: S/ 259.90
+                                </p>
+                                <a class="hs-detalle__resenar" th:if="${pedido.puedeResenar}"
+                                   th:href="@{/tienda/{c}(c=${l.codigoProducto})} + '#resenas'">
+                                    <i class="bi bi-star me-1" aria-hidden="true"></i> Escribir una reseña
+                                </a>
+                            </div>
+
+                            <div class="hs-detalle__subtotal">
+                                <strong th:text="'S/ ' + ${#numbers.formatDecimal(l.subtotal, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</strong>
+                            </div>
+                        </div>
+
+                        <div class="hs-detalle__totales">
+                            <div>
+                                <span>Subtotal de productos</span>
+                                <strong th:text="'S/ ' + ${#numbers.formatDecimal(pedido.totalProductos, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</strong>
+                            </div>
+                            <div th:if="${pedido.envio != null}">
+                                <span>Costo de envío</span>
+                                <strong th:text="${pedido.envio.costo != null and pedido.envio.costo.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? 'S/ ' + ${#numbers.formatDecimal(pedido.envio.costo, 1, 'COMMA', 2, 'POINT')} : 'Gratis'">
+                                    S/ 10.00
+                                </strong>
+                            </div>
+                            <div class="hs-detalle__total-final">
+                                <span>Total del pedido</span>
+                                <strong th:text="'S/ ' + ${#numbers.formatDecimal(pedido.totalAPagar, 1, 'COMMA', 2, 'POINT')}">S/ 269.90</strong>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Tarjeta 2: Información del envío -->
+                    <section class="hs-detalle__tarjeta" th:if="${pedido.envio != null}" aria-labelledby="titulo-envio-pedido">
+                        <div class="hs-detalle__seccion-cabecera">
+                            <h2 id="titulo-envio-pedido">Información del envío</h2>
+                            <span class="hs-chip hs-chip--pequeno" th:text="${pedido.envio.estado.etiqueta}">Preparando</span>
+                        </div>
+
+                        <div class="hs-detalle__envio-resumen">
+                            <div>
+                                <span class="hs-cuenta__etiqueta">MODALIDAD</span>
+                                <strong th:text="${pedido.envio.tipo.etiqueta}">Delivery</strong>
+                            </div>
+                            <div th:if="${pedido.envio.courier != null and !#strings.isEmpty(pedido.envio.courier)}">
+                                <span class="hs-cuenta__etiqueta">EMPRESA DE ENVÍO</span>
+                                <strong th:text="${pedido.envio.courier}">Courier</strong>
+                            </div>
+                            <div th:if="${pedido.envio.codigoSeguimiento != null and !#strings.isEmpty(pedido.envio.codigoSeguimiento)}">
+                                <span class="hs-cuenta__etiqueta">CÓDIGO DE SEGUIMIENTO</span>
+                                <div class="d-inline-flex align-items-center gap-2">
+                                    <strong id="tracking-code" th:text="${pedido.envio.codigoSeguimiento}">TRACK123</strong>
+                                    <button type="button" class="hs-detalle__copiar-btn" data-copy-target="tracking-code"
+                                            title="Copiar código de seguimiento">
+                                        <i class="bi bi-copy" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="hs-detalle__direccion"
+                             th:if="${pedido.envio.direccion != null and !#strings.isEmpty(pedido.envio.direccion)}">
+                            <span class="hs-detalle__direccion-icono" aria-hidden="true">
+                                <i class="bi bi-geo-alt-fill"></i>
+                            </span>
+                            <div>
+                                <h3>Dirección de entrega</h3>
+                                <p th:if="${pedido.envio.nombreReceptor != null and !#strings.isEmpty(pedido.envio.nombreReceptor)}">
+                                    <strong th:text="${pedido.envio.nombreReceptor}">Nombre del receptor</strong>
+                                </p>
+                                <p th:text="${pedido.envio.direccion}">Av. Principal 123</p>
+                                <p th:if="${pedido.envio.distrito != null and !#strings.isEmpty(pedido.envio.distrito)}"
+                                   th:text="${pedido.envio.distrito}">Distrito</p>
+                            </div>
+                        </div>
+
+                        <div class="hs-detalle__fechas-envio"
+                             th:if="${pedido.envio.fechaDespacho != null or pedido.envio.fechaEntrega != null}">
+                            <p th:if="${pedido.envio.fechaDespacho != null}">
+                                <span>Fecha de despacho</span>
+                                <strong th:text="${#temporals.format(pedido.envio.fechaDespacho, 'dd/MM/yyyy')}">24/10/2026</strong>
+                            </p>
+                            <p th:if="${pedido.envio.fechaEntrega != null}">
+                                <span>Fecha de entrega</span>
+                                <strong th:text="${#temporals.format(pedido.envio.fechaEntrega, 'dd/MM/yyyy')}">25/10/2026</strong>
+                            </p>
+                        </div>
+                    </section>
+                    <!-- Tarjeta 3: Trazabilidad del impacto social -->
+                    <section class="hs-detalle__tarjeta" th:unless="${pedido.donaciones.isEmpty()}"
+                             aria-labelledby="titulo-impacto-pedido">
+                        <div class="hs-detalle__impacto-cabecera hs-detalle__impacto-cabecera--sage">
+                            <p class="hs-cuenta__eyebrow mb-1">MÁS QUE UNA COMPRA</p>
+                            <h2 id="titulo-impacto-pedido">El impacto que compartes</h2>
+                            <p th:if="${pedido.impacto != null and pedido.impacto.tieneImpacto()}"
+                               th:text="'Tu pedido representa ' + ${pedido.impacto.texto} + '.'">
+                                Tu pedido representa 2 abrigos + 1 árbol.
+                            </p>
+                        </div>
+
+                        <article class="hs-detalle__donacion" th:each="d : ${pedido.donaciones}">
+                            <div class="hs-detalle__donacion-cabecera">
+                                <div>
+                                    <span class="hs-detalle__donacion-icono" aria-hidden="true">
+                                        <i class="bi" th:classappend="${#strings.containsIgnoreCase(d.tipo.name(), 'ARBOL')} ? 'bi-tree-fill' : 'bi-heart-fill'"></i>
+                                    </span>
+                                    <h3 th:text="${d.producto}">Casaca</h3>
+                                    <p th:text="${d.unidades}">2 abrigos</p>
+                                </div>
+                                <span class="hs-chip hs-chip--pequeno" th:text="${d.estado.etiqueta}">Pendiente de asignar</span>
+                            </div>
+
+                            <!-- Línea de tiempo de 4 pasos (paso 0-3) -->
+                            <ol class="hs-linea-tiempo" aria-label="Progreso de entrega del impacto">
+                                <li th:classappend="${d.estado.paso >= 0} ? 'is-hecho'"><span>Registrado</span></li>
+                                <li th:classappend="${d.estado.paso >= 1} ? 'is-hecho'"><span>Asignado</span></li>
+                                <li th:classappend="${d.estado.paso >= 2} ? 'is-hecho'"><span>En ruta</span></li>
+                                <li th:classappend="${d.estado.paso >= 3} ? 'is-hecho'"><span>Entregado</span></li>
+                            </ol>
+
+                            <div class="hs-detalle__donacion-destino">
+                                <p th:if="${d.comunidad != null and !#strings.isEmpty(d.comunidad)}">
+                                    <span>Comunidad beneficiaria</span>
+                                    <strong th:text="${d.comunidad}">Comunidad</strong>
+                                </p>
+                                <p th:if="${d.ong != null and !#strings.isEmpty(d.ong)}">
+                                    <span>Organización aliada</span>
+                                    <strong th:text="${d.ong}">Organización</strong>
+                                </p>
+                                <p th:if="${d.fechaEntrega != null}">
+                                    <span>Entrega registrada</span>
+                                    <strong th:text="${#temporals.format(d.fechaEntrega, 'dd/MM/yyyy')}">25/10/2026</strong>
+                                </p>
+                            </div>
+                        </article>
+                    </section>
+                </div>
+
+                <!-- Columna lateral sticky: Resumen rápido y agradecimiento -->
+                <aside class="hs-detalle__lateral">
+                    <div class="hs-detalle__tarjeta hs-detalle__resumen">
+                        <p class="hs-cuenta__eyebrow mb-1">TU COMPRA</p>
+                        <h2>Resumen del pedido</h2>
+                        <p class="hs-detalle__resumen-codigo" th:text="${pedido.codigoComprobante}">WEB-000110</p>
+
+                        <div>
+                            <span>Productos</span>
+                            <strong th:text="'S/ ' + ${#numbers.formatDecimal(pedido.totalProductos, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</strong>
+                        </div>
+                        <div th:if="${pedido.envio != null}">
+                            <span>Envío</span>
+                            <strong th:text="${pedido.envio.costo != null and pedido.envio.costo.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? 'S/ ' + ${#numbers.formatDecimal(pedido.envio.costo, 1, 'COMMA', 2, 'POINT')} : 'Gratis'">S/ 10.00</strong>
+                        </div>
+                        <div class="hs-detalle__resumen-total">
+                            <span>Total</span>
+                            <strong th:text="'S/ ' + ${#numbers.formatDecimal(pedido.totalAPagar, 1, 'COMMA', 2, 'POINT')}">S/ 269.90</strong>
+                        </div>
+
+                        <a th:href="@{/tienda}" class="hs-btn hs-btn--primario hs-cuenta__boton">
+                            <span>Seguir explorando</span>
+                            <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                        </a>
+                    </div>
+
+                    <div class="hs-detalle__mensaje hs-detalle__mensaje--calido">
+                        <span aria-hidden="true"><i class="bi bi-heart-fill"></i></span>
+                        <h2>Gracias por ser parte</h2>
+                        <p>Tu compra forma parte de una manera más consciente de consumir y compartir.</p>
+                    </div>
+                </aside>
+            </div>
         </div>
     </section>
 </main>
+
+<script>
+document.querySelectorAll('[data-copy-target]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const target = document.getElementById(btn.dataset.copyTarget);
+        const icon = btn.querySelector('i');
+        if (!target || !navigator.clipboard) return;
+        navigator.clipboard.writeText(target.textContent.trim()).then(() => {
+            if (icon) {
+                icon.className = 'bi bi-check2';
+                setTimeout(() => { icon.className = 'bi bi-copy'; }, 1800);
+            }
+        });
+    });
+});
+</script>
 </body>
 </html>

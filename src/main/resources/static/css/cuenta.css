@@ -1324,3 +1324,173 @@
     opacity: 0;
     transform: translateY(8px);
 }
+
+
+/* =====================================================================
+   Detalle de Pedido · Acentos salvia, botón copiar y tarjeta cálida
+   ===================================================================== */
+
+.hs-detalle__volver {
+    color: var(--hs-terracotta);
+    font-weight: 600;
+}
+
+.hs-detalle__resenar {
+    color: var(--hs-terracotta);
+}
+
+.hs-detalle__direccion {
+    background: var(--hs-cream);
+    border: 1px solid var(--hs-sand);
+}
+
+.hs-detalle__direccion-icono {
+    color: var(--hs-terracotta);
+}
+
+.hs-detalle__impacto-cabecera--sage {
+    background: var(--hs-sage-light);
+    border: 1px solid var(--hs-badge-arbol-borde);
+}
+
+.hs-detalle__donacion-icono {
+    background: var(--hs-sage-light);
+    color: var(--hs-sage);
+}
+
+.hs-detalle__mensaje--calido {
+    background: var(--hs-cream);
+}
+
+.hs-detalle__mensaje--calido > span {
+    background: var(--hs-terracotta-light);
+    color: var(--hs-terracotta);
+}
+
+.hs-detalle__copiar-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--hs-sand);
+    background: var(--hs-cream);
+    color: var(--hs-bark);
+    display: inline-grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background var(--hs-t-fast), color var(--hs-t-fast);
+}
+
+.hs-detalle__copiar-btn:hover {
+    background: var(--hs-terracotta);
+    border-color: var(--hs-terracotta);
+    color: var(--hs-sobre-acento);
+}
+
+/* =====================================================================
+   Arreglo Sticky Lateral + Línea de Tiempo de Impacto (PC y Móvil)
+   ===================================================================== */
+
+/* 1. Evitar que "Resumen del pedido" tape "Gracias por ser parte" al hacer scroll */
+.hs-detalle__resumen {
+    position: static !important;
+}
+
+@media (min-width: 901px) {
+    .hs-detalle__lateral {
+        position: sticky;
+        top: 6rem;
+    }
+}
+
+/* 2. Línea de tiempo visual de 4 pasos (Registrado → Asignado → En ruta → Entregado) */
+.hs-detalle__donacion .hs-linea-tiempo {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+    position: relative;
+}
+
+.hs-detalle__donacion .hs-linea-tiempo li {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--hs-muted);
+}
+
+/* Línea horizontal conectora entre pasos */
+.hs-detalle__donacion .hs-linea-tiempo li:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 12px;
+    left: calc(50% + 14px);
+    width: calc(100% - 28px);
+    height: 2px;
+    background: var(--hs-sand);
+    z-index: 0;
+}
+
+.hs-detalle__donacion .hs-linea-tiempo li.is-hecho:not(:last-child)::after {
+    background: var(--hs-sage);
+}
+
+/* Círculo indicador de cada paso */
+.hs-detalle__donacion .hs-linea-tiempo li::before {
+    content: "";
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--hs-card);
+    border: 2px solid var(--hs-sand);
+    display: grid;
+    place-items: center;
+    font-family: "bootstrap-icons";
+    font-size: 13px;
+    color: var(--hs-card);
+    position: relative;
+    z-index: 1;
+    transition: background var(--hs-t-fast), border-color var(--hs-t-fast);
+}
+
+.hs-detalle__donacion .hs-linea-tiempo li.is-hecho {
+    color: var(--hs-bark);
+    font-weight: 700;
+}
+
+.hs-detalle__donacion .hs-linea-tiempo li.is-hecho::before {
+    content: "\F26E"; /* bi-check */
+    background: var(--hs-sage);
+    border-color: var(--hs-sage);
+}
+
+.hs-detalle__donacion .hs-linea-tiempo li span {
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+/* Ajuste limpio en pantallas de celular pequeñas */
+@media (max-width: 480px) {
+    .hs-detalle__donacion .hs-linea-tiempo li {
+        font-size: 10.5px;
+        gap: 6px;
+    }
+
+    .hs-detalle__donacion .hs-linea-tiempo li::before {
+        width: 20px;
+        height: 20px;
+        font-size: 11px;
+    }
+
+    .hs-detalle__donacion .hs-linea-tiempo li:not(:last-child)::after {
+        top: 10px;
+        left: calc(50% + 11px);
+        width: calc(100% - 22px);
+    }
+}
