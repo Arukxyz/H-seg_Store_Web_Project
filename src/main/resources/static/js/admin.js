@@ -1,6 +1,13 @@
 /* Bloque 4: exclusivamente interacciones de interfaz; los POST siguen siendo del backend. */
 (() => {
   'use strict';
+
+  const scrollCafeGuardado = sessionStorage.getItem('hs_cafe_scroll');
+  if (scrollCafeGuardado) {
+    window.scrollTo(0, parseInt(scrollCafeGuardado, 10));
+    sessionStorage.removeItem('hs_cafe_scroll');
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     // Filtro visual de pedidos recibidos para el rango GET actual (no altera indicadores).
     const filtros = [...document.querySelectorAll('[data-order-filter]')];
@@ -173,6 +180,43 @@
           }
           sessionStorage.setItem('hs_catalog_scroll', String(window.scrollY));
           loader.hidden = false;
+        });
+      });
+    }
+
+
+        // Buscador instantáneo en Carta de Höség Café
+    const buscadorCafe = document.getElementById('filtro-cafe');
+    const filasCafe = [...document.querySelectorAll('.hs-cafe-row')];
+    const vacioCafe = document.querySelector('.hs-cafe-search-empty');
+    if (buscadorCafe && filasCafe.length) {
+      buscadorCafe.addEventListener('input', () => {
+        const termino = buscadorCafe.value.trim().toLowerCase();
+        let visibles = 0;
+        filasCafe.forEach(fila => {
+          const coincide = !termino || (fila.dataset.search || '').includes(termino);
+          fila.hidden = !coincide;
+          if (coincide) visibles += 1;
+        });
+        if (vacioCafe) vacioCafe.hidden = visibles > 0;
+      });
+    }
+
+
+           // Conservar posición de scroll y mostrar velo suave al abrir "Editar" en Höség Café
+   
+    const enlacesEditarCafe = [...document.querySelectorAll('.hs-cafe-page a[href*="item="], .hs-cafe-page a[href*="local="]')];
+    if (enlacesEditarCafe.length) {
+      const loaderCafe = document.createElement('div');
+      loaderCafe.className = 'hs-saving-overlay';
+      loaderCafe.hidden = true;
+      loaderCafe.innerHTML = '<div class="hs-saving-pill"><span class="hs-spinner" aria-hidden="true"></span><span>Cargando datos...</span></div>';
+      document.body.appendChild(loaderCafe);
+
+      enlacesEditarCafe.forEach(enlace => {
+        enlace.addEventListener('click', () => {
+          sessionStorage.setItem('hs_cafe_scroll', String(window.scrollY));
+          loaderCafe.hidden = false;
         });
       });
     }

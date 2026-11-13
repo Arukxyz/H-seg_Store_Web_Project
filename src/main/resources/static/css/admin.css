@@ -2520,3 +2520,145 @@ body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul a[hre
     border-radius: 50%;
     animation: hsSpin 0.7s linear infinite;
 }
+
+/* =====================================================================
+   Höség Café · Tarjeta de Árboles Plantados + Animación de Modales
+   ===================================================================== */
+
+.hs-tree-card {
+    max-width: 640px;
+}
+
+.hs-tree-hero {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin: 20px 22px 0;
+    padding: 20px 22px;
+    border-radius: var(--hs-radius-sm);
+    border: 1px solid var(--hs-badge-arbol-borde);
+    background: var(--hs-sage-light);
+}
+
+.hs-tree-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: var(--hs-card);
+    color: var(--hs-sage);
+    display: grid;
+    place-items: center;
+    font-size: 26px;
+    flex-shrink: 0;
+    box-shadow: var(--hs-shadow-card-reposo);
+}
+
+.hs-tree-number {
+    display: block;
+    font-family: var(--hs-font-display);
+    font-size: clamp(28px, 5vw, 38px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--hs-sage);
+}
+
+.hs-tree-caption {
+    display: block;
+    margin-top: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: var(--hs-muted);
+}
+
+.hs-form-block {
+    padding: 20px 22px 24px;
+}
+
+.hs-inline-submit {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+    max-width: 380px;
+}
+
+.hs-inline-submit .hs-admin-input {
+    flex: 1;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.hs-form-hint {
+    margin: 12px 0 0;
+    font-size: 12.5px;
+    line-height: 1.5;
+}
+
+/* Animación suave de entrada para los Modales del Admin */
+.hs-admin-modal .modal-dialog {
+    transform: translateY(16px) scale(0.96) !important;
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+.hs-admin-modal.show .modal-dialog {
+    transform: translateY(0) scale(1) !important;
+}
+
+@media (max-width: 480px) {
+    .hs-tree-hero {
+        margin: 16px 16px 0;
+        padding: 16px;
+        gap: 14px;
+    }
+    .hs-tree-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 22px;
+    }
+    .hs-form-block {
+        padding: 16px 16px 20px;
+    }
+    .hs-inline-submit {
+        flex-direction: column;
+        max-width: 100%;
+    }
+    .hs-inline-submit .hs-admin-btn {
+        width: 100%;
+    }
+}
+
+.hs-cafe-head-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.hs-cafe-search {
+    width: 220px;
+}
+
+.hs-cafe-head-actions .hs-admin-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+@media (max-width: 767.98px) {
+    .hs-cafe-head-actions {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .hs-cafe-search {
+        width: 100%;
+    }
+    .hs-cafe-head-actions .hs-admin-btn {
+        width: 100%;
+    }
+    .hs-cafe-search .hs-admin-input {
+        font-size: 16px;
+    }
+}
