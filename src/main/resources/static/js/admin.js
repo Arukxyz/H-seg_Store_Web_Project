@@ -9,25 +9,85 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    // Filtro visual de pedidos recibidos para el rango GET actual (no altera indicadores).
+   
+   
+        // Filtro visual y paginación de Pedidos web en Panel (10 por página)
     const filtros = [...document.querySelectorAll('[data-order-filter]')];
     const pedidos = [...document.querySelectorAll('[data-order-status]')];
     const filaVacia = document.querySelector('.hs-filter-empty');
-    if (filtros.length) {
+    const panelPagBox = document.getElementById('panel-paginacion');
+    const panelPagInfo = document.getElementById('panel-paginacion-info');
+    const panelPagNum = document.getElementById('panel-paginacion-num');
+    const panelBtnPrev = document.getElementById('panel-prev');
+    const panelBtnNext = document.getElementById('panel-next');
+
+    if (pedidos.length) {
+      const PEDIDOS_POR_PAGINA = 10;
+      let paginaPedidos = 1;
+      let estadoPedido = 'TODOS';
+
+      const actualizarPedidos = () => {
+        const filtrados = pedidos.filter(
+          pedido => estadoPedido === 'TODOS' || pedido.dataset.orderStatus === estadoPedido
+        );
+        const totalPaginas = Math.max(1, Math.ceil(filtrados.length / PEDIDOS_POR_PAGINA));
+        if (paginaPedidos > totalPaginas) paginaPedidos = totalPaginas;
+        const inicio = (paginaPedidos - 1) * PEDIDOS_POR_PAGINA;
+        const fin = inicio + PEDIDOS_POR_PAGINA;
+
+        pedidos.forEach(p => { p.hidden = true; });
+        filtrados.slice(inicio, fin).forEach(p => { p.hidden = false; });
+
+        if (filaVacia) filaVacia.hidden = filtrados.length > 0;
+        if (panelPagBox) {
+          panelPagBox.hidden = filtrados.length <= PEDIDOS_POR_PAGINA;
+          if (panelPagInfo) {
+            panelPagInfo.textContent = `Mostrando ${inicio + 1}–${Math.min(fin, filtrados.length)} de ${filtrados.length}`;
+          }
+          if (panelPagNum) panelPagNum.textContent = `${paginaPedidos} / ${totalPaginas}`;
+          if (panelBtnPrev) panelBtnPrev.disabled = paginaPedidos <= 1;
+          if (panelBtnNext) panelBtnNext.disabled = paginaPedidos >= totalPaginas;
+        }
+      };
+
       filtros.forEach(boton => boton.addEventListener('click', () => {
-        const estado = boton.dataset.orderFilter;
-        let visibles = 0;
+        estadoPedido = boton.dataset.orderFilter;
+        paginaPedidos = 1;
         filtros.forEach(filtro => {
-          filtro.classList.toggle('is-active', filtro === boton);
-          filtro.setAttribute('aria-pressed', String(filtro === boton));
+          const activo = filtro === boton;
+          filtro.classList.toggle('is-active', activo);
+          filtro.setAttribute('aria-pressed', String(activo));
         });
-        pedidos.forEach(pedido => {
-          const coincide = estado === 'TODOS' || pedido.dataset.orderStatus === estado;
-          pedido.hidden = !coincide;
-          if (coincide) visibles += 1;
-        });
-        if (filaVacia) filaVacia.hidden = visibles > 0 || pedidos.length === 0;
+        actualizarPedidos();
       }));
+
+      panelBtnPrev?.addEventListener('click', () => {
+        if (paginaPedidos > 1) { paginaPedidos -= 1; actualizarPedidos(); }
+      });
+
+      panelBtnNext?.addEventListener('click', () => {
+        paginaPedidos += 1;
+        actualizarPedidos();
+      });
+
+      actualizarPedidos();
+    }
+
+    // Conteo animado suave para los números enteros de KPIs en Panel
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.querySelectorAll('.hs-panel-page .hs-metric strong:not(.hs-metric-money):not(.hs-metric-impact)').forEach(el => {
+        const objetivo = parseInt(el.textContent.trim(), 10);
+        if (!Number.isNaN(objetivo) && objetivo > 0) {
+          const duracion = 450;
+          const inicio = performance.now();
+          const animar = (ahora) => {
+            const progreso = Math.min(1, (ahora - inicio) / duracion);
+            el.textContent = String(Math.round(objetivo * (1 - Math.pow(1 - progreso, 3))));
+            if (progreso < 1) requestAnimationFrame(animar);
+          };
+          requestAnimationFrame(animar);
+        }
+      });
     }
 
     // Modales de alta/edición existentes; nunca genera nuevas rutas.
