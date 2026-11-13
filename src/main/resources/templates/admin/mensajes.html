@@ -1,62 +1,217 @@
 <!DOCTYPE html>
 <!--
-  ESQUELETO · Bloque 4 · 4.6 Mensajes (GET /admin/mensajes?pestana=bandeja|reclamaciones|suscriptores, AdminMensajesController).
-  Modelo:
-    pestana       "bandeja" | "reclamaciones" | "suscriptores"
-    estado        EstadoMensaje o null (filtro ?estado=NUEVO|ATENDIDO de la bandeja)
-    mensajes      List<MensajeAdmin> (id, nombre, email, asunto, mensaje, estado, creadoEn, atendidoEn, atendidoPor)
-    reclamos      List<ReclamoAdmin> (id, numeroHoja, tipo, nombre, …, detalle, pedidoConsumidor, estado, respuesta)
-    respuestaForm RespuestaReclamoForm (respuesta) → POST /admin/reclamaciones/{id}/respuesta (se envía por correo)
-    reclamoConError Integer: hoja cuyo formulario volvió con error (si existe)
-    suscriptores  List<SuscriptorBoletin> (email, suscritoEn)
-  Acciones: POST /admin/mensajes/{id}/atendido · GET /admin/suscriptores.csv (Exportar CSV) · GET /admin/suscriptores.xlsx (Exportar Excel)
+  PLANTILLA · Bloque 4 · 4.6 Mensajes (GET /admin/mensajes?pestana=bandeja|reclamaciones|suscriptores, AdminMensajesController).
+  Acciones: POST /admin/mensajes/{id}/atendido · POST /admin/reclamaciones/{id}/respuesta
+            GET /admin/suscriptores.csv · GET /admin/suscriptores.xlsx
 -->
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/admin :: pagina(titulo='Mensajes · HÖSÉG', activa='mensajes', contenido=~{::main})}">
 <body>
-<main class="container-fluid pb-5">
-    <h1 class="h3">Mensajes</h1>
-    <nav class="mb-3">
-        <a th:href="@{/admin/mensajes}" th:classappend="${pestana == 'bandeja'} ? 'fw-bold'">Bandeja</a> ·
-        <a th:href="@{/admin/mensajes(pestana='reclamaciones')}" th:classappend="${pestana == 'reclamaciones'} ? 'fw-bold'">Reclamaciones</a> ·
-        <a th:href="@{/admin/mensajes(pestana='suscriptores')}" th:classappend="${pestana == 'suscriptores'} ? 'fw-bold'">Suscriptores</a>
+<main class="hs-admin-page hs-messages-page">
+    <header class="hs-page-heading">
+        <div>
+            <p class="hs-eyebrow">COMUNICACIÓN · HÖSÉG</p>
+            <h1>Mensajes</h1>
+            <p class="hs-page-desc">Revisa consultas de contacto, hojas de reclamaciones y suscriptores del boletín.</p>
+        </div>
+    </header>
+
+    <!-- Pestañas principales -->
+    <nav class="hs-tab-strip hs-page-tabs" aria-label="Secciones de comunicación">
+        <a th:href="@{/admin/mensajes}" class="hs-tab"
+           th:classappend="${pestana == 'bandeja'} ? 'is-active'"
+           th:attr="aria-current=${pestana == 'bandeja'} ? 'page'">
+            <i class="bi bi-inbox" aria-hidden="true"></i> Bandeja
+        </a>
+        <a th:href="@{/admin/mensajes(pestana='reclamaciones')}" class="hs-tab"
+           th:classappend="${pestana == 'reclamaciones'} ? 'is-active'"
+           th:attr="aria-current=${pestana == 'reclamaciones'} ? 'page'">
+            <i class="bi bi-journal-text" aria-hidden="true"></i> Reclamaciones
+        </a>
+        <a th:href="@{/admin/mensajes(pestana='suscriptores')}" class="hs-tab"
+           th:classappend="${pestana == 'suscriptores'} ? 'is-active'"
+           th:attr="aria-current=${pestana == 'suscriptores'} ? 'page'">
+            <i class="bi bi-people" aria-hidden="true"></i> Suscriptores
+        </a>
     </nav>
 
-    <th:block th:if="${pestana == 'bandeja'}">
-        <p th:if="${mensajes.isEmpty()}">No hay mensajes.</p>
-        <article class="border-bottom py-2" th:each="m : ${mensajes}">
-            <strong th:text="${m.asunto}">Asunto</strong> · <span th:text="${m.nombre} + ' <' + ${m.email} + '>'">Ana</span>
-            · <span th:text="${m.estado}">NUEVO</span>
-            <p class="mb-1" th:text="${m.mensaje}">Mensaje</p>
-            <form th:if="${m.estado.name() == 'NUEVO'}" method="post" th:action="@{/admin/mensajes/{id}/atendido(id=${m.id})}">
-                <button class="btn btn-sm btn-outline-secondary" type="submit">Marcar atendido</button>
-            </form>
-            <small th:if="${m.atendidoPor}" th:text="'Atendido por ' + ${m.atendidoPor}">Atendido</small>
-        </article>
-    </th:block>
+    <!-- PESTAÑA 1: BANDEJA DE ENTRADA -->
+    <section th:if="${pestana == 'bandeja'}" class="hs-admin-card hs-anim-card-1" aria-labelledby="titulo-bandeja">
+        <div class="hs-card-head hs-card-head--wrap">
+            <div>
+                <h2 id="titulo-bandeja">Bandeja de entrada</h2>
+                <p>Mensajes recibidos desde el formulario de contacto de la web.</p>
+            </div>
+            <div class="hs-pill-filter" role="group" aria-label="Filtrar por estado">
+                <a th:href="@{/admin/mensajes}" class="hs-pill-option"
+                   th:classappend="${estado == null} ? 'is-active'">Todos</a>
+                <a th:href="@{/admin/mensajes(estado='NUEVO')}" class="hs-pill-option"
+                   th:classappend="${estado != null and estado.name() == 'NUEVO'} ? 'is-active'">Nuevos</a>
+                <a th:href="@{/admin/mensajes(estado='ATENDIDO')}" class="hs-pill-option"
+                   th:classappend="${estado != null and estado.name() == 'ATENDIDO'} ? 'is-active'">Atendidos</a>
+            </div>
+        </div>
 
-    <th:block th:if="${pestana == 'reclamaciones'}">
-        <p th:if="${reclamos.isEmpty()}">No hay hojas registradas.</p>
-        <article class="border-bottom py-2" th:each="r : ${reclamos}">
-            <strong th:text="${r.numeroHoja}">LR-000001</strong> · <span th:text="${r.tipo}">RECLAMO</span>
-            · <span th:text="${r.nombre}">Ana</span> · <span th:text="${r.estado}">REGISTRADO</span>
-            <p class="mb-1" th:text="${r.detalle}">Detalle</p>
-            <p class="mb-1" th:text="'Pide: ' + ${r.pedidoConsumidor}">Pedido</p>
-            <p th:if="${r.respuesta}" th:text="'Respuesta: ' + ${r.respuesta}">Respuesta</p>
-            <form th:if="${r.estado.name() == 'REGISTRADO'}" th:object="${respuestaForm}" method="post"
-                  th:action="@{/admin/reclamaciones/{id}/respuesta(id=${r.id})}">
-                <textarea class="form-control" th:field="*{respuesta}" rows="3"></textarea>
-                <div class="text-danger" th:if="${reclamoConError == r.id}" th:errors="*{respuesta}"></div>
-                <button class="hs-btn hs-btn--primario mt-1" type="submit">Responder</button>
-            </form>
-        </article>
-    </th:block>
+        <div class="hs-inbox-list" th:if="${!mensajes.isEmpty()}">
+            <article class="hs-inbox-item" th:each="m : ${mensajes}"
+                     th:classappend="${m.estado.name() == 'NUEVO'} ? 'is-unread'">
+                <div class="hs-inbox-meta">
+                    <div class="hs-inbox-sender-wrap">
+                        <span class="hs-sender-avatar" aria-hidden="true"
+                              th:text="${m.nombre != null and !#strings.isEmpty(m.nombre)} ? ${#strings.toUpperCase(#strings.substring(m.nombre, 0, 1))} : 'C'">A</span>
+                        <div class="hs-inbox-sender">
+                            <strong th:text="${m.nombre}">Ana Torres</strong>
+                            <span th:text="${m.email}">ana@correo.pe</span>
+                        </div>
+                    </div>
+                    <div class="hs-inbox-tags">
+                        <span class="hs-date" th:if="${m.creadoEn != null}"
+                              th:text="${#temporals.format(m.creadoEn, 'dd/MM/yyyy HH:mm')}">23/10/2026</span>
+                        <span class="hs-state"
+                              th:classappend="${m.estado.name() == 'NUEVO'} ? 'hs-state--pendiente' : 'hs-state--pagado'"
+                              th:text="${m.estado.name() == 'NUEVO'} ? 'Nuevo' : 'Atendido'">Nuevo</span>
+                    </div>
+                </div>
 
-    <th:block th:if="${pestana == 'suscriptores'}">
-        <a class="hs-btn hs-btn--secundario mb-3" th:href="@{/admin/suscriptores.csv}">Exportar CSV</a>
-        <a class="hs-btn hs-btn--secundario mb-3" th:href="@{/admin/suscriptores.xlsx}">Exportar Excel</a>
-        <p th:each="s : ${suscriptores}" th:text="${s.email} + ' · ' + ${#temporals.format(s.suscritoEn, 'dd/MM/yyyy')}">ana@correo.pe</p>
-    </th:block>
+                <h3 class="hs-inbox-subject" th:text="${m.asunto}">Consulta sobre talla</h3>
+                <p class="hs-inbox-body" th:text="${m.mensaje}">Contenido del mensaje</p>
+
+                <div class="hs-inbox-foot">
+                    <span class="hs-muted small" th:if="${m.atendidoPor != null}">
+                        <i class="bi bi-check2-all" aria-hidden="true"></i>
+                        <span th:text="'Atendido por ' + ${m.atendidoPor}">Atendido</span>
+                    </span>
+                    <span th:if="${m.atendidoPor == null}"></span>
+
+                    <form th:if="${m.estado.name() == 'NUEVO'}" method="post"
+                          th:action="@{/admin/mensajes/{id}/atendido(id=${m.id})}">
+                        <button class="hs-admin-btn hs-admin-btn--primary hs-admin-btn--sm" type="submit">
+                            <i class="bi bi-check2" aria-hidden="true"></i> Marcar atendido
+                        </button>
+                    </form>
+                </div>
+            </article>
+        </div>
+
+        <div class="hs-empty-box py-5 px-3" th:if="${mensajes.isEmpty()}">
+            <i class="bi bi-inbox" aria-hidden="true"></i>
+            <p class="hs-empty-block p-0">No hay mensajes en esta vista.</p>
+        </div>
+    </section>
+    <!-- PESTAÑA 2: LIBRO DE RECLAMACIONES -->
+    <section th:if="${pestana == 'reclamaciones'}" class="hs-admin-card hs-anim-card-1" aria-labelledby="titulo-reclamos">
+        <div class="hs-card-head">
+            <div>
+                <h2 id="titulo-reclamos">Libro de Reclamaciones</h2>
+                <p>Responder una reclamación enviará la respuesta oficial al correo del consumidor.</p>
+            </div>
+        </div>
+
+        <div class="hs-claim-list" th:if="${!reclamos.isEmpty()}">
+            <article class="hs-claim-item" th:each="r : ${reclamos}"
+                     th:classappend="${r.estado.name() == 'REGISTRADO'} ? 'is-pending'">
+                <div class="hs-claim-head">
+                    <div>
+                        <span class="hs-code-pill mb-1" th:text="${r.numeroHoja}">LR-000001</span>
+                        <h3 th:text="${r.nombre}">Nombre del consumidor</h3>
+                    </div>
+                    <div class="hs-inbox-tags">
+                        <span class="hs-soft-label" th:text="${r.tipo}">RECLAMO</span>
+                        <span class="hs-state"
+                              th:classappend="${r.estado.name() == 'REGISTRADO'} ? 'hs-state--pendiente' : 'hs-state--pagado'"
+                              th:text="${r.estado}">REGISTRADO</span>
+                    </div>
+                </div>
+
+                <dl class="hs-claim-grid">
+                    <div>
+                        <dt>Detalle de los hechos</dt>
+                        <dd th:text="${r.detalle}">Detalle</dd>
+                    </div>
+                    <div>
+                        <dt>Pedido del consumidor</dt>
+                        <dd th:text="${r.pedidoConsumidor}">Pedido</dd>
+                    </div>
+                </dl>
+
+                <div class="hs-claim-reply" th:if="${r.respuesta != null and !#strings.isEmpty(r.respuesta)}">
+                    <strong><i class="bi bi-reply-fill" aria-hidden="true"></i> Respuesta enviada al consumidor:</strong>
+                    <p th:text="${r.respuesta}">Respuesta</p>
+                </div>
+
+                <form th:if="${r.estado.name() == 'REGISTRADO'}" th:object="${respuestaForm}" method="post"
+                      th:action="@{/admin/reclamaciones/{id}/respuesta(id=${r.id})}" class="hs-claim-form">
+                    <label th:for="'resp-' + ${r.id}">RESPUESTA OFICIAL AL CONSUMIDOR</label>
+                    <textarea th:id="'resp-' + ${r.id}" class="hs-admin-input" rows="3"
+                              name="respuesta" placeholder="Escribe la respuesta oficial que se enviará por correo..."
+                              th:text="${reclamoConError == r.id} ? *{respuesta} : ''" required></textarea>
+                    <p class="hs-field-error" th:if="${reclamoConError == r.id}" th:errors="*{respuesta}"></p>
+                    <div>
+                        <button class="hs-admin-btn hs-admin-btn--primary hs-admin-btn--sm" type="submit">
+                            <i class="bi bi-send" aria-hidden="true"></i> Enviar respuesta
+                        </button>
+                    </div>
+                </form>
+            </article>
+        </div>
+
+        <div class="hs-empty-box py-5 px-3" th:if="${reclamos.isEmpty()}">
+            <i class="bi bi-journal-check" aria-hidden="true"></i>
+            <p class="hs-empty-block p-0">Todavía no hay reclamaciones registradas.</p>
+        </div>
+    </section>
+
+    <!-- PESTAÑA 3: SUSCRIPTORES DEL BOLETÍN -->
+    <section th:if="${pestana == 'suscriptores'}" class="hs-admin-card hs-anim-card-1" aria-labelledby="titulo-suscriptores">
+        <div class="hs-card-head hs-card-head--wrap">
+            <div>
+                <h2 id="titulo-suscriptores">Suscriptores del boletín</h2>
+                <p>Contactos que aceptaron recibir novedades de HÖSÉG.</p>
+            </div>
+            <div class="hs-export-group">
+                <a class="hs-admin-btn hs-admin-btn--ghost hs-admin-btn--sm" th:href="@{/admin/suscriptores.csv}">
+                    <i class="bi bi-filetype-csv" aria-hidden="true"></i> Exportar CSV
+                </a>
+                <a class="hs-admin-btn hs-admin-btn--primary hs-admin-btn--sm" th:href="@{/admin/suscriptores.xlsx}">
+                    <i class="bi bi-file-earmark-excel" aria-hidden="true"></i> Exportar Excel
+                </a>
+            </div>
+        </div>
+
+        <div class="hs-feature-counter">
+            <i class="bi bi-envelope-check" aria-hidden="true"></i>
+            <strong th:text="${#lists.size(suscriptores)}">0</strong>
+            <span>contactos suscritos</span>
+        </div>
+
+        <div class="hs-table-scroll">
+            <table class="hs-admin-table">
+                <thead>
+                <tr>
+                    <th scope="col">Correo electrónico</th>
+                    <th scope="col">Fecha de suscripción</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="s : ${suscriptores}">
+                    <td class="hs-cell-strong">
+                        <i class="bi bi-envelope me-2 hs-text-terracotta" aria-hidden="true"></i>
+                        <span th:text="${s.email}">ana@correo.pe</span>
+                    </td>
+                    <td class="hs-date" th:text="${#temporals.format(s.suscritoEn, 'dd/MM/yyyy')}">23/10/2026</td>
+                </tr>
+                <tr th:if="${suscriptores.isEmpty()}">
+                    <td colspan="2" class="hs-empty-row">
+                        <div class="hs-empty-box">
+                            <i class="bi bi-people" aria-hidden="true"></i>
+                            <span>No hay suscriptores activos todavía.</span>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
 </main>
 </body>
 </html>

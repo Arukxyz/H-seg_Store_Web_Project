@@ -2767,3 +2767,329 @@ body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul a[hre
         flex: 1;
     }
 }
+
+
+/* =====================================================================
+   Mensajes · Bandeja tipo Inbox, Libro de Reclamaciones y Suscriptores
+   ===================================================================== */
+
+.hs-inbox-sender-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.hs-sender-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--hs-terracotta-light);
+    color: var(--hs-terracotta);
+    font-family: var(--hs-font-display);
+    font-size: 15px;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+
+.hs-inbox-item.is-unread .hs-sender-avatar {
+    background: var(--hs-terracotta);
+    color: var(--hs-sobre-acento);
+}
+
+.hs-inbox-tags {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.hs-inbox-item,
+.hs-claim-item {
+    transition: background var(--hs-t-fast);
+}
+
+.hs-inbox-item:hover,
+.hs-claim-item:hover {
+    background: var(--hs-cream);
+}
+
+/* Botones de exportación CSV + Excel en Suscriptores */
+.hs-export-group {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+@media (max-width: 640px) {
+    .hs-export-group {
+        width: 100%;
+    }
+    .hs-export-group .hs-admin-btn {
+        flex: 1;
+    }
+}
+
+
+
+/* =====================================================================
+   Mensajes · Filtros Píldora, Bandeja tipo Inbox y Reclamaciones
+   ===================================================================== */
+
+/* Píldoras de filtro (Todos | Nuevos | Atendidos) */
+.hs-pill-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-cream);
+    border: 1px solid var(--hs-sand);
+}
+
+.hs-pill-option {
+    padding: 6px 14px;
+    border-radius: var(--hs-radius-pill);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--hs-muted);
+    text-decoration: none;
+    transition: background var(--hs-t-fast), color var(--hs-t-fast);
+}
+
+.hs-pill-option:hover {
+    color: var(--hs-bark);
+    background: var(--hs-cream-dark);
+}
+
+.hs-pill-option.is-active {
+    background: var(--hs-bark);
+    color: var(--hs-cream);
+}
+
+/* Lista y tarjetas de Bandeja de Entrada */
+.hs-inbox-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.hs-inbox-item {
+    padding: 20px 22px;
+    border-bottom: 1px solid var(--hs-cream-dark);
+    transition: background var(--hs-t-fast);
+}
+
+.hs-inbox-item:last-child {
+    border-bottom: 0;
+}
+
+.hs-inbox-item.is-unread {
+    border-left: 3px solid var(--hs-terracotta);
+}
+
+.hs-inbox-item:hover {
+    background: var(--hs-cream);
+}
+
+.hs-inbox-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.hs-inbox-sender-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.hs-sender-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--hs-terracotta-light);
+    color: var(--hs-terracotta);
+    font-family: var(--hs-font-display);
+    font-size: 16px;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+
+.hs-inbox-item.is-unread .hs-sender-avatar {
+    background: var(--hs-terracotta);
+    color: var(--hs-sobre-acento);
+}
+
+.hs-inbox-sender {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+}
+
+.hs-inbox-sender strong {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--hs-bark);
+}
+
+.hs-inbox-sender span {
+    font-size: 12.5px;
+    color: var(--hs-muted);
+}
+
+.hs-inbox-tags {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.hs-inbox-subject {
+    font-family: var(--hs-font-display);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--hs-bark);
+    margin: 0 0 6px;
+}
+
+.hs-inbox-body {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--hs-bark);
+    margin: 0 0 14px;
+    white-space: pre-line;
+}
+
+.hs-inbox-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Libro de Reclamaciones */
+.hs-claim-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.hs-claim-item {
+    padding: 22px;
+    border-bottom: 1px solid var(--hs-cream-dark);
+    transition: background var(--hs-t-fast);
+}
+
+.hs-claim-item:last-child {
+    border-bottom: 0;
+}
+
+.hs-claim-item.is-pending {
+    border-left: 3px solid var(--hs-terracotta);
+}
+
+.hs-claim-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.hs-claim-head h3 {
+    font-family: var(--hs-font-display);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--hs-bark);
+    margin: 6px 0 0;
+}
+
+.hs-claim-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: var(--hs-radius-sm);
+    background: var(--hs-cream);
+    border: 1px solid var(--hs-cream-dark);
+    margin: 0 0 16px;
+}
+
+.hs-claim-grid dt {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--hs-muted);
+    margin-bottom: 4px;
+}
+
+.hs-claim-grid dd {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--hs-bark);
+    margin: 0;
+}
+
+.hs-claim-reply {
+    padding: 14px 16px;
+    border-radius: var(--hs-radius-sm);
+    background: var(--hs-sage-light);
+    border: 1px solid var(--hs-badge-arbol-borde);
+    color: var(--hs-bark);
+    font-size: 13px;
+}
+
+.hs-claim-reply strong {
+    display: block;
+    color: var(--hs-sage);
+    margin-bottom: 4px;
+}
+
+.hs-claim-reply p {
+    margin: 0;
+    line-height: 1.55;
+}
+
+.hs-claim-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.hs-claim-form label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--hs-muted);
+}
+
+/* Botones de exportación CSV + Excel en Suscriptores */
+.hs-export-group {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+@media (max-width: 640px) {
+    .hs-inbox-item,
+    .hs-claim-item {
+        padding: 16px;
+    }
+    .hs-export-group {
+        width: 100%;
+    }
+    .hs-export-group .hs-admin-btn {
+        flex: 1;
+    }
+}
+
