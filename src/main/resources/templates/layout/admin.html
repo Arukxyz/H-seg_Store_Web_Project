@@ -20,6 +20,7 @@
     <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.min.css}">
     <link rel="stylesheet" th:href="@{/css/tokens.css}">
     <link rel="stylesheet" th:href="@{/css/hoseg.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
 </head>
 <body>
 <div class="d-flex min-vh-100">
@@ -34,13 +35,26 @@
             <li><a th:href="@{/admin/resenas}" th:classappend="${activa == 'resenas'} ? 'fw-bold'">Reseñas</a></li>
         </ul>
     </nav>
+
+        <!-- Botón flotante para desplegar el menú en arco en móvil -->
+    <button type="button" class="hs-admin-fab" aria-label="Abrir menú del panel" aria-expanded="false">
+        <i class="bi bi-grid" aria-hidden="true"></i>
+    </button>
+    <div class="hs-admin-fab-backdrop" hidden></div>
+
+
     <div class="flex-grow-1">
-        <header class="d-flex justify-content-end align-items-center gap-3 p-3 border-bottom">
-            <span th:text="${#authentication.principal.nombre}">Administrador</span>
+                      <header class="d-flex justify-content-end align-items-center gap-3 p-3 border-bottom">
+            <div class="hs-admin-user">
+                <span class="hs-avatar" aria-hidden="true"
+                      th:text="${#strings.substring(#authentication.principal.nombre, 0, 1)}">A</span>
+                <span th:text="${#authentication.principal.nombre}">Administrador</span>
+            </div>
             <form th:action="@{/admin/logout}" method="post" class="m-0">
                 <button class="hs-btn hs-btn--secundario" type="submit">Cerrar sesión</button>
             </form>
         </header>
+
         <div class="container-fluid pt-3">
             <div class="alert alert-success" role="status" th:if="${exito}" th:text="${exito}">Guardado.</div>
             <div class="alert alert-danger" role="alert" th:if="${error}" th:text="${error}">Error.</div>
@@ -49,5 +63,6 @@
     </div>
 </div>
 <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}" defer></script>
+<script th:src="@{/js/admin.js}" defer></script>
 </body>
 </html>

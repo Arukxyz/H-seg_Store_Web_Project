@@ -1955,3 +1955,337 @@ body:has(.hs-admin-page)>.d-flex.min-vh-100>.flex-grow-1>header .hs-btn {
         font-size: 19px;
     }
 }
+
+/* =====================================================================
+   Mejoras visuales Panel + Animaciones + Menú flotante Glassmorphism
+   ===================================================================== */
+
+/* 1. Avatar con inicial en el header del panel */
+body:has(.hs-admin-page) > .d-flex.min-vh-100 > .flex-grow-1 > header > span::before {
+    display: none !important; /* oculta el círculo vacío anterior */
+}
+
+.hs-admin-user {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    color: var(--hs-bark);
+}
+
+.hs-admin-user .hs-avatar {
+    width: 30px;
+    height: 30px;
+    background: var(--hs-terracotta);
+    color: var(--hs-sobre-acento);
+    font-family: var(--hs-font-display);
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: var(--hs-shadow-card-reposo);
+}
+
+/* 2. Iconos Bootstrap Icons reales en la navegación del panel */
+body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul a::before {
+    font-family: "bootstrap-icons" !important;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    line-height: 1;
+    width: 19px;
+    font-size: 17px;
+}
+body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul a[href$="/admin/panel"]::before     { content: "\F3FB"; } /* bi-grid-1x2 */
+body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul a[href$="/admin/catalogo"]::before  { content: "\F179"; } /* bi-bag */
+body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul a[href$="/admin/cafe"]::before { content: "\F7EB"; } /* bi-cup-hot */
+body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul a[href$="/admin/contenido"]::before { content: "\F389"; } /* bi-file-earmark-text */
+body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul a[href$="/admin/mensajes"]::before  { content: "\F32F"; } /* bi-envelope */
+body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul a[href$="/admin/resenas"]::before   { content: "\F588"; } /* bi-star */
+
+/* 3. Animaciones suaves de entrada al cargar el panel */
+@keyframes hsPanelEntrada {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hs-admin-page .hs-page-heading {
+    animation: hsPanelEntrada 0.45s var(--hs-ease) both;
+}
+
+.hs-metrics .hs-metric {
+    opacity: 0;
+    animation: hsPanelEntrada 0.5s var(--hs-ease) forwards;
+    transition: transform var(--hs-t-fast), box-shadow var(--hs-t-fast), border-color var(--hs-t-fast);
+}
+
+.hs-metrics .hs-metric:nth-child(1) { animation-delay: 0.05s; }
+.hs-metrics .hs-metric:nth-child(2) { animation-delay: 0.11s; }
+.hs-metrics .hs-metric:nth-child(3) { animation-delay: 0.17s; }
+.hs-metrics .hs-metric:nth-child(4) { animation-delay: 0.23s; }
+.hs-metrics .hs-metric:nth-child(5) { animation-delay: 0.29s; }
+.hs-metrics .hs-metric:nth-child(6) { animation-delay: 0.35s; }
+
+.hs-admin-page > .hs-admin-card {
+    opacity: 0;
+    animation: hsPanelEntrada 0.55s var(--hs-ease) 0.38s forwards;
+}
+
+.hs-metric:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--hs-shadow-card);
+    border-color: var(--hs-terracotta);
+}
+
+.hs-metric-icon {
+    transition: transform var(--hs-t-fast);
+}
+.hs-metric:hover .hs-metric-icon {
+    transform: scale(1.08);
+}
+
+/* 4. Acentos visuales en las métricas (KPIs) */
+.hs-metric--impacto {
+    background: var(--hs-sage-light);
+    border-color: var(--hs-badge-arbol-borde);
+}
+.hs-metric--impacto .hs-metric-icon {
+    background: var(--hs-card);
+    color: var(--hs-sage);
+}
+.hs-metric--impacto strong {
+    color: var(--hs-sage);
+}
+
+.hs-metric--alerta {
+    background: var(--hs-amber-light);
+    border-color: var(--hs-badge-abrigo-borde);
+}
+.hs-metric--alerta .hs-metric-icon {
+    background: var(--hs-card);
+    color: var(--hs-terracotta);
+}
+
+/* Pill para código de comprobante y estado vacío */
+.hs-code-pill {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 7px;
+    background: var(--hs-cream);
+    border: 1px solid var(--hs-sand);
+    color: var(--hs-bark);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+}
+
+.hs-empty-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 0;
+    color: var(--hs-muted);
+}
+.hs-empty-box i {
+    font-size: 28px;
+    color: var(--hs-sand);
+}
+
+/* =====================================================================
+   Menú flotante en Arco (Radial FAB) para Móvil · HÖSÉG Admin
+   ===================================================================== */
+
+/* Oculto en escritorio */
+.hs-admin-fab,
+.hs-admin-fab-backdrop {
+    display: none;
+}
+
+@media (max-width: 640px) {
+    /* Fondo suave difuminado al abrir el arco */
+    .hs-admin-fab-backdrop {
+        position: fixed;
+        inset: 0;
+        background: var(--hs-velo-agotado);
+        -webkit-backdrop-filter: blur(4px);
+        backdrop-filter: blur(4px);
+        z-index: 1040;
+    }
+    .hs-admin-fab-backdrop:not([hidden]) {
+        display: block;
+    }
+
+    /* Botón principal flotante (esquina inferior derecha) */
+    .hs-admin-fab {
+        position: fixed;
+        right: 18px;
+        bottom: max(18px, env(safe-area-inset-bottom));
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        border: 1px solid var(--hs-pill-border);
+        background: var(--hs-terracotta);
+        color: var(--hs-sobre-acento);
+        box-shadow: var(--hs-shadow-pill);
+        display: grid;
+        place-items: center;
+        font-size: 22px;
+        z-index: 1060;
+        transition: transform var(--hs-t-pill) var(--hs-ease), background var(--hs-t-fast);
+    }
+
+    .hs-admin-fab.is-open {
+        background: var(--hs-bark);
+        transform: rotate(45deg);
+    }
+
+    /* Contenedor invisible del arco en la esquina inferior derecha */
+       body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] {
+        position: fixed !important;
+        right: 18px !important;
+        bottom: max(18px, env(safe-area-inset-bottom)) !important;
+        left: auto !important;
+        top: auto !important;
+        transform: none !important;
+        width: 56px !important;
+        height: 56px !important;
+        padding: 0 !important;
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+        overflow: visible !important;
+        pointer-events: none;
+        z-index: 1055 !important;
+    }
+
+
+    body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul {
+        display: block !important;
+        position: relative;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul li {
+        position: absolute;
+        right: 4px;
+        bottom: 4px;
+        opacity: 0;
+        transform: translate(0, 0) scale(0.4);
+        transition: transform 0.35s var(--hs-ease), opacity 0.25s var(--hs-ease);
+        pointer-events: none;
+    }
+
+    /* Burbujas individuales + etiqueta glassmorphism */
+    body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul a {
+        position: relative !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 48px !important;
+        height: 48px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        background: var(--hs-card) !important;
+        border: 1px solid var(--hs-sand) !important;
+        color: var(--hs-bark) !important;
+        box-shadow: var(--hs-shadow-card-hover) !important;
+        font-size: 0 !important; /* oculta el texto dentro del círculo */
+        overflow: visible !important;
+    }
+
+    body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul a::before {
+        font-size: 19px !important;
+        width: auto !important;
+        margin: 0 !important;
+    }
+
+    /* Etiqueta flotante legible a la izquierda de cada burbuja */
+    body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul a::after {
+        position: absolute;
+        right: 58px;
+        padding: 5px 11px;
+        border-radius: var(--hs-radius-pill);
+        background: var(--hs-pill-bg);
+        -webkit-backdrop-filter: var(--hs-pill-blur);
+        backdrop-filter: var(--hs-pill-blur);
+        border: 1px solid var(--hs-pill-border);
+        color: var(--hs-cream);
+        font-family: var(--hs-font-body);
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+        box-shadow: var(--hs-shadow-card);
+    }
+
+    body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul li:nth-child(1) a::after { content: "Panel"; }
+    body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul li:nth-child(2) a::after { content: "Catálogo"; }
+    body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul li:nth-child(3) a::after { content: "Höség Café"; }
+    body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul li:nth-child(4) a::after { content: "Contenido"; }
+    body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul li:nth-child(5) a::after { content: "Mensajes"; }
+    body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul li:nth-child(6) a::after { content: "Reseñas"; }
+
+    /* Estado activo en terracota */
+    body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul a.fw-bold {
+        background: var(--hs-terracotta) !important;
+        border-color: var(--hs-terracotta) !important;
+        color: var(--hs-sobre-acento) !important;
+    }
+
+    /* Despliegue en arco suave al abrir */
+    body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"].is-open ul li {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"].is-open ul li:nth-child(1) {
+        transform: translate(0px, -342px) scale(1);
+        transition-delay: 0.03s;
+    }
+    body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"].is-open ul li:nth-child(2) {
+        transform: translate(-24px, -280px) scale(1);
+        transition-delay: 0.06s;
+    }
+    body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"].is-open ul li:nth-child(3) {
+        transform: translate(-52px, -218px) scale(1);
+        transition-delay: 0.09s;
+    }
+    body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"].is-open ul li:nth-child(4) {
+        transform: translate(-76px, -154px) scale(1);
+        transition-delay: 0.12s;
+    }
+    body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"].is-open ul li:nth-child(5) {
+        transform: translate(-92px, -86px) scale(1);
+        transition-delay: 0.15s;
+    }
+    body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"].is-open ul li:nth-child(6) {
+        transform: translate(-98px, -16px) scale(1);
+        transition-delay: 0.18s;
+    }
+
+    .hs-admin-page {
+        padding-bottom: 84px !important;
+    }
+}
+
+
+/* Accesibilidad: respetar preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+    .hs-admin-page .hs-page-heading,
+    .hs-metrics .hs-metric,
+    .hs-admin-page > .hs-admin-card {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}

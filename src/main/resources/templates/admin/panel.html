@@ -1,44 +1,176 @@
 <!DOCTYPE html>
 <!--
-  ESQUELETO · Bloque 4 · 4.2 Panel (GET /admin/panel?desde=AAAA-MM-DD&hasta=AAAA-MM-DD, AdminController).
+  PLANTILLA · Bloque 4 · 4.2 Panel (GET /admin/panel?desde=AAAA-MM-DD&hasta=AAAA-MM-DD, AdminController).
   Solo consulta: sin botones de confirmar ni anular (eso es del escritorio).
-  Modelo:
-    desde, hasta LocalDate (por defecto, del 1 del mes a hoy, hora de Lima)
-    indicadores  IndicadoresPanel (pedidosHoy, pendientesDePago, montoVendido, impactoGenerado [ImpactoCompra],
-                 mensajesNuevos, reclamosSinResponder)
-    pedidos      List<PedidoAdmin> (codigoComprobante, cliente, fecha, total, costoEnvio, estado, tipoEnvio, estadoEnvio)
 -->
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/admin :: pagina(titulo='Panel · HÖSÉG', activa='panel', contenido=~{::main})}">
+    th:replace="~{layout/admin :: pagina(titulo='Panel · HÖSÉG', activa='panel', contenido=~{::main})}">
+
 <body>
-<main class="container-fluid pb-5">
-    <h1 class="h3">Panel</h1>
-    <form class="d-flex gap-2 align-items-end mb-3" method="get" th:action="@{/admin/panel}">
-        <label>Desde <input class="form-control" type="date" name="desde" th:value="${desde}"></label>
-        <label>Hasta <input class="form-control" type="date" name="hasta" th:value="${hasta}"></label>
-        <button class="hs-btn hs-btn--primario" type="submit">Filtrar</button>
-    </form>
-    <ul>
-        <li th:text="'Pedidos web de hoy: ' + ${indicadores.pedidosHoy}">Pedidos de hoy</li>
-        <li th:text="'Pendientes de pago: ' + ${indicadores.pendientesDePago}">Pendientes</li>
-        <li th:text="'Monto vendido: S/ ' + ${#numbers.formatDecimal(indicadores.montoVendido, 1, 'COMMA', 2, 'POINT')}">Monto</li>
-        <li th:text="'Impacto generado: ' + (${indicadores.impactoGenerado.tieneImpacto()} ? ${indicadores.impactoGenerado.texto} : 'ninguno')">Impacto</li>
-        <li th:text="'Mensajes nuevos: ' + ${indicadores.mensajesNuevos} + ' · Reclamos sin responder: ' + ${indicadores.reclamosSinResponder}">Mensajes</li>
-    </ul>
-    <table class="table table-sm">
-        <thead><tr><th>Código</th><th>Cliente</th><th>Fecha</th><th>Total</th><th>Estado</th><th>Envío</th></tr></thead>
-        <tbody>
-        <tr th:if="${pedidos.isEmpty()}"><td colspan="6">Sin pedidos en el periodo.</td></tr>
-        <tr th:each="p : ${pedidos}">
-            <td th:text="${p.codigoComprobante}">WEB-000110</td>
-            <td th:text="${p.cliente}">Ana Torres</td>
-            <td th:text="${#temporals.format(p.fecha, 'dd/MM/yyyy HH:mm')}">23/10/2026</td>
-            <td th:text="'S/ ' + ${#numbers.formatDecimal(p.total, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</td>
-            <td th:text="${p.estado.etiqueta}">Pendiente</td>
-            <td th:text="${p.tipoEnvio != null} ? ${p.tipoEnvio.etiqueta} + ' · ' + ${p.estadoEnvio.etiqueta} : '—'">Delivery</td>
-        </tr>
-        </tbody>
-    </table>
-</main>
+    <main class="hs-admin-page hs-panel-page">
+        <div class="hs-page-heading">
+            <div>
+                <p class="hs-eyebrow">RESUMEN GENERAL · HÖSÉG</p>
+                <h1>Panel de control</h1>
+                <p class="hs-page-desc">Monitorea ventas, entregas e impacto social de la tienda web.</p>
+            </div>
+            <form method="get" th:action="@{/admin/panel}" class="hs-date-filter"
+                aria-label="Filtrar indicadores y pedidos por fecha">
+                <div class="hs-field">
+                    <label for="desde">Desde</label>
+                    <input class="hs-admin-input" id="desde" type="date" name="desde" th:value="${desde}" required>
+                </div>
+                <div class="hs-field">
+                    <label for="hasta">Hasta</label>
+                    <input class="hs-admin-input" id="hasta" type="date" name="hasta" th:value="${hasta}" required>
+                </div>
+                <button class="hs-admin-btn hs-admin-btn--primary" type="submit">
+                    <i class="bi bi-funnel" aria-hidden="true"></i> Aplicar
+                </button>
+            </form>
+        </div>
+
+        <!-- Tarjetas de KPIs con acentos dinámicos según estado -->
+        <div class="hs-metrics" aria-label="Indicadores del negocio">
+            <article class="hs-metric">
+                <span class="hs-metric-icon"><i class="bi bi-bag-check" aria-hidden="true"></i></span>
+                <span class="hs-metric-label">Pedidos de hoy</span>
+                <strong th:text="${indicadores.pedidosHoy}">0</strong>
+                <span class="hs-metric-note">Registrados hoy</span>
+            </article>
+
+            <article class="hs-metric" th:classappend="${indicadores.pendientesDePago > 0} ? 'hs-metric--alerta'">
+                <span class="hs-metric-icon"><i class="bi bi-hourglass-split" aria-hidden="true"></i></span>
+                <span class="hs-metric-label">Pendientes de pago</span>
+                <strong th:text="${indicadores.pendientesDePago}">0</strong>
+                <span class="hs-metric-note">Por verificar en escritorio</span>
+            </article>
+
+            <article class="hs-metric">
+                <span class="hs-metric-icon"><i class="bi bi-cash-stack" aria-hidden="true"></i></span>
+                <span class="hs-metric-label">Monto vendido</span>
+                <strong class="hs-metric-money"
+                    th:text="'S/ ' + ${#numbers.formatDecimal(indicadores.montoVendido, 1, 'COMMA', 2, 'POINT')}">S/
+                    0.00</strong>
+                <span class="hs-metric-note">Ventas pagadas del periodo</span>
+            </article>
+
+            <article class="hs-metric hs-metric--impacto">
+                <span class="hs-metric-icon"><i class="bi bi-tree" aria-hidden="true"></i></span>
+                <span class="hs-metric-label">Impacto generado</span>
+                <strong class="hs-metric-impact"
+                    th:text="${indicadores.impactoGenerado.tieneImpacto()} ? ${indicadores.impactoGenerado.texto} : 'Sin impacto aún'">Sin
+                    impacto</strong>
+                <span class="hs-metric-note">Compromisos del periodo</span>
+            </article>
+
+            <article class="hs-metric">
+                <span class="hs-metric-icon"><i class="bi bi-envelope" aria-hidden="true"></i></span>
+                <span class="hs-metric-label">Mensajes nuevos</span>
+                <strong th:text="${indicadores.mensajesNuevos}">0</strong>
+                <a th:href="@{/admin/mensajes}" class="hs-metric-link">
+                    Ir a bandeja <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+                </a>
+            </article>
+
+            <article class="hs-metric" th:classappend="${indicadores.reclamosSinResponder > 0} ? 'hs-metric--alerta'">
+                <span class="hs-metric-icon"><i class="bi bi-journal-text" aria-hidden="true"></i></span>
+                <span class="hs-metric-label">Reclamos sin responder</span>
+                <strong th:text="${indicadores.reclamosSinResponder}">0</strong>
+                <a th:href="@{/admin/mensajes(pestana='reclamaciones')}" class="hs-metric-link">
+                    Ver reclamaciones <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+                </a>
+            </article>
+        </div>
+
+        <!-- Tabla de pedidos del periodo -->
+        <section class="hs-admin-card hs-order-card" aria-labelledby="titulo-pedidos">
+            <div class="hs-card-head hs-card-head--wrap">
+                <div>
+                    <h2 id="titulo-pedidos">Pedidos web</h2>
+                    <p>Consulta de pedidos en el rango seleccionado. La confirmación de pagos se realiza en el
+                        escritorio.</p>
+                </div>
+                <span class="hs-soft-label">
+                    <i class="bi bi-shield-lock" aria-hidden="true"></i> Solo lectura
+                </span>
+            </div>
+
+            <div class="hs-tab-strip hs-filter-tabs" role="group" aria-label="Filtrar pedidos mostrados">
+                <button type="button" class="hs-tab is-active" data-order-filter="TODOS" aria-pressed="true">
+                    Todos <span th:text="${#lists.size(pedidos)}">0</span>
+                </button>
+                <button type="button" class="hs-tab" data-order-filter="PENDIENTE"
+                    aria-pressed="false">Pendientes</button>
+                <button type="button" class="hs-tab" data-order-filter="PAGADO" aria-pressed="false">Pagados</button>
+                <button type="button" class="hs-tab" data-order-filter="ANULADO" aria-pressed="false">Anulados</button>
+            </div>
+
+
+            <!-- Aviso de desplazamiento horizontal solo en móvil -->
+            <p class="hs-aviso-deslizar d-md-none px-3 pt-2 mb-1">
+                <span>Desliza la tabla para ver más</span>
+                <i class="bi bi-arrow-right hs-aviso-deslizar__flecha" aria-hidden="true"></i>
+            </p>
+
+            <div class="hs-table-scroll">
+
+                <table class="hs-admin-table hs-orders-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Comprobante</th>
+                            <th scope="col">Cliente</th>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Costo de envío</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col">Tipo de envío</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="p : ${pedidos}" th:attr="data-order-status=${p.estado.name()}">
+                            <td>
+                                <span class="hs-code-pill" th:text="${p.codigoComprobante}">WEB-000110</span>
+                            </td>
+                            <td class="hs-cell-strong" th:text="${p.cliente}">Cliente</td>
+                            <td class="hs-date" th:text="${#temporals.format(p.fecha, 'dd/MM/yyyy HH:mm')}">23/10/2026
+                            </td>
+                            <td class="hs-cell-strong"
+                                th:text="'S/ ' + ${#numbers.formatDecimal(p.total, 1, 'COMMA', 2, 'POINT')}">S/ 259.90
+                            </td>
+                            <td
+                                th:text="${p.costoEnvio != null} ? 'S/ ' + ${#numbers.formatDecimal(p.costoEnvio, 1, 'COMMA', 2, 'POINT')} : '—'">
+                                S/ 0.00</td>
+                            <td>
+                                <span class="hs-state"
+                                    th:classappend="'hs-state--' + ${#strings.toLowerCase(p.estado.name())}"
+                                    th:text="${p.estado.etiqueta}">Pendiente</span>
+                            </td>
+                            <td
+                                th:text="${p.tipoEnvio != null} ? ${p.tipoEnvio.etiqueta} + (${p.estadoEnvio != null} ? ' · ' + ${p.estadoEnvio.etiqueta} : '') : '—'">
+                                Recojo</td>
+                        </tr>
+                        <tr th:if="${pedidos.isEmpty()}">
+                            <td colspan="7" class="hs-empty-row">
+                                <div class="hs-empty-box">
+                                    <i class="bi bi-inbox" aria-hidden="true"></i>
+                                    <span>No hay pedidos registrados en este periodo.</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="hs-filter-empty" hidden>
+                            <td colspan="7" class="hs-empty-row">
+                                <div class="hs-empty-box">
+                                    <i class="bi bi-filter-circle" aria-hidden="true"></i>
+                                    <span>No hay pedidos con este estado en el rango actual.</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
 </body>
+
 </html>
