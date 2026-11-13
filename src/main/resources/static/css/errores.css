@@ -58,3 +58,29 @@
 .hs-barra-progreso__relleno--salvia {
   background: var(--hs-sage);
 }
+
+/* Textura de fondo: la foto de comunidad, casi invisible, detrás de la tarjeta */
+.hs-fondo-comunidad {
+  position: relative;
+  isolation: isolate;
+}
+
+.hs-fondo-comunidad::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: url("../images/comunidad-cusco.jpg") center/cover no-repeat;
+  opacity: 0.08;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hs-icono-pulso {
+    animation: none;
+  }
+  .hs-barra-progreso__relleno {
+    animation: none;
+    width: 0%;
+  }
+}
+
