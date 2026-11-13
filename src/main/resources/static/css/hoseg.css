@@ -276,6 +276,18 @@
     color: var(--hs-card);
 }
 
+/* "Cuenta" del cliente es un botón que abre su menú hacia arriba */
+button.hs-pill__item {
+    border: 0;
+    background: none;
+}
+
+/* Hacia arriba el margen superior del escritorio lo encimaría sobre el
+   óvalo: la separación la da data-bs-offset. */
+.hs-pill .hs-menu-cuenta {
+    margin: 0 !important;
+}
+
 /* ---------- Botones ------------------------------------------------- */
 .hs-btn {
     display: inline-flex;
@@ -816,5 +828,91 @@
     .hs-carousel-mobile .col {
         flex: 0 0 85% !important;
         max-width: 85% !important;
+        scroll-snap-align: start;
     }
+    /* Carta del café: cada deslizamiento se detiene al inicio de una categoría */
+    .hs-carrusel-carta {
+        scroll-snap-type: x mandatory;
+    }
+}
+
+/* Aviso "Desliza hacia los lados" sobre la carta del café (solo móvil, d-md-none) */
+.hs-aviso-deslizar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    margin-bottom: .75rem;
+    font-size: .85rem;
+    color: var(--hs-muted);
+}
+
+.hs-aviso-deslizar__flecha {
+    color: var(--hs-terracotta);
+    animation: hsDeslizar 1.6s var(--hs-ease) infinite;
+}
+
+@keyframes hsDeslizar {
+    0%, 100% { transform: translateX(0); }
+    50%      { transform: translateX(6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hs-aviso-deslizar__flecha { animation: none; }
+}
+
+/* ---------- Línea de tiempo de la donación ---------------------------
+   fragments/donacion :: lineaTiempo. La comparten "Detalle de pedido"
+   (cuenta) y la consulta pública de impacto: los pasos cumplidos llevan
+   .is-cumplido y el actual, aria-current="step". */
+.hs-linea-tiempo {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.hs-linea-tiempo__paso {
+    display: grid;
+    justify-items: center;
+    align-content: start;
+    gap: .5rem;
+    min-width: 0;
+    color: var(--hs-muted);
+    font-size: .75rem;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.hs-linea-tiempo__punto {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border: 1px solid var(--hs-sand);
+    border-radius: 50%;
+    background: var(--hs-card);
+    font-weight: 700;
+}
+
+.hs-linea-tiempo__paso.is-cumplido {
+    color: var(--hs-bark);
+}
+
+.hs-linea-tiempo__paso.is-cumplido .hs-linea-tiempo__punto {
+    border-color: var(--hs-terracotta);
+    background: var(--hs-terracotta);
+    color: var(--hs-sobre-acento);
+}
+
+.hs-linea-tiempo__paso[aria-current="step"] {
+    font-weight: 600;
+}
+
+@media (max-width: 540px) {
+    .hs-linea-tiempo { gap: .25rem; }
+    .hs-linea-tiempo__paso { font-size: .68rem; }
+    .hs-linea-tiempo__punto { width: 1.75rem; height: 1.75rem; }
 }
