@@ -1,0 +1,28 @@
+/* =====================================================================
+   HÖSÉG Web · Páginas de error (error.html, error/404.html)
+   Solo las usa el Bloque 5. No se reutiliza en otras plantillas, así que
+   vive aparte de hoseg.css para no mezclarse con estilos de otros bloques.
+   ===================================================================== */
+
+@keyframes hsPulso {
+  0% {
+    box-shadow: 0 0 0 0 var(--hs-pulso-color);
+  }
+  70% {
+    box-shadow: 0 0 0 16px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.hs-icono-pulso {
+  animation: hsPulso 2.2s var(--hs-ease) infinite;
+}
+
+.hs-icono-pulso--terracota {
+  --hs-pulso-color: color-mix(in srgb, var(--hs-terracotta) 35%, transparent);
+}
+.hs-icono-pulso--salvia {
+  --hs-pulso-color: color-mix(in srgb, var(--hs-sage) 35%, transparent);
+}
