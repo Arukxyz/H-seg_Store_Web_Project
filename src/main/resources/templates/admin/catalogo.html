@@ -1,49 +1,190 @@
 <!DOCTYPE html>
 <!--
-  ESQUELETO · Bloque 4 · 4.3 Catálogo web (GET /admin/catalogo, AdminController).
-  Modelo:
-    productos     List<ProductoAdmin> (codigo, nombre, talla, categoria, tipoCompromiso, stockComercial [solo lectura],
-                  visibleWeb, destacado)
-    destacados    long (modelos destacados ahora) · maxDestacados int (8)
-    vistaPrevia   List<TarjetaProducto>: cómo se verá el carrusel de la Home
+  PLANTILLA · Bloque 4 · 4.3 Catálogo web (GET /admin/catalogo, AdminController).
   Interruptores: POST /admin/catalogo/{codigo}/visible?visible=true|false (por talla)
                  POST /admin/catalogo/{codigo}/destacado?destacado=true|false (aplica al modelo entero)
-  Si ya hay 8 destacados, vuelve con flash "error" (variante "Límite de destacados alcanzado").
 -->
-<html lang="es" xmlns:th="http://www.thymeleaf.org"
+<html lang="es" xmlns:th="http://thymeleaf.org"
       th:replace="~{layout/admin :: pagina(titulo='Catálogo web · HÖSÉG', activa='catalogo', contenido=~{::main})}">
 <body>
-<main class="container-fluid pb-5">
-    <h1 class="h3">Catálogo web</h1>
-    <p th:text="'Destacados en la Home: ' + ${destacados} + ' de ' + ${maxDestacados}">Destacados: 3 de 8</p>
-    <table class="table table-sm">
-        <thead><tr><th>Código</th><th>Producto</th><th>Talla</th><th>Stock</th><th>Visible</th><th>Destacado</th></tr></thead>
-        <tbody>
-        <tr th:each="p : ${productos}">
-            <td th:text="${p.codigo}">HSG-CAS-001</td>
-            <td th:text="${p.nombre}">Casaca</td>
-            <td th:text="${p.talla}">M</td>
-            <td th:text="${p.stockComercial}">25</td>
-            <td>
-                <form method="post" th:action="@{/admin/catalogo/{c}/visible(c=${p.codigo})}">
-                    <input type="hidden" name="visible" th:value="${!p.visibleWeb}">
-                    <button class="btn btn-sm btn-outline-secondary" type="submit" th:text="${p.visibleWeb} ? 'Sí' : 'No'">Sí</button>
-                </form>
-            </td>
-            <td>
-                <form method="post" th:action="@{/admin/catalogo/{c}/destacado(c=${p.codigo})}">
-                    <input type="hidden" name="destacado" th:value="${!p.destacado}">
-                    <button class="btn btn-sm btn-outline-secondary" type="submit" th:text="${p.destacado} ? 'Sí' : 'No'">No</button>
-                </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-    <h2 class="h5 mt-4">Vista previa del carrusel</h2>
-    <div class="row g-3">
-        <div class="col-6 col-md-3" th:each="t : ${vistaPrevia}">
-            <th:block th:replace="~{fragments/product-card :: card(${t})}"/>
+<main class="hs-admin-page hs-catalog-page">
+    <header class="hs-page-heading">
+        <div>
+            <p class="hs-eyebrow">GESTIÓN DE TIENDA · HÖSÉG</p>
+            <h1>Catálogo web</h1>
+            <p class="hs-page-desc">Controla la publicación de las tallas y los modelos destacados de tu tienda.</p>
         </div>
+        <div class="hs-catalog-actions">
+            <a href="#titulo-destacados" class="hs-admin-btn hs-admin-btn--ghost d-xl-none">
+                <i class="bi bi-star-fill" aria-hidden="true"></i>
+                <span th:text="'Vista previa (' + ${destacados} + '/' + ${maxDestacados} + ')'">Vista previa</span>
+            </a>
+            <div class="hs-catalog-search">
+                <div class="hs-input-icon-wrap">
+                    <i class="bi bi-search hs-input-icon" aria-hidden="true"></i>
+                    <input type="search" id="filtro-catalogo" class="hs-admin-input hs-admin-input--con-icono"
+                           placeholder="Buscar producto, código o talla..." aria-label="Filtrar productos del catálogo">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="hs-notice hs-notice--warning hs-margin-bottom">
+        <i class="bi bi-info-circle" aria-hidden="true"></i>
+        <span>El stock se sincroniza desde el sistema de escritorio y no puede editarse aquí.</span>
+    </div>
+
+    <div class="hs-catalog-grid">
+        <!-- Columna izquierda: Tabla paginada y filtrable -->
+        <section class="hs-admin-card hs-anim-card-1" aria-labelledby="catalogo-listado">
+            <div class="hs-card-head hs-card-head--wrap">
+                <div>
+                    <h2 id="catalogo-listado">Productos y variantes</h2>
+                    <p>Visibilidad web por talla · Destacados por modelo</p>
+                </div>
+                <span class="hs-soft-label" th:text="${#lists.size(productos)} + ' variantes'">0 variantes</span>
+            </div>
+
+            <!-- Pestañas de filtro rápido -->
+            <div class="hs-tab-strip hs-filter-tabs" role="group" aria-label="Filtrar variantes del catálogo">
+                <button type="button" class="hs-tab is-active" data-catalog-filter="TODAS" aria-pressed="true">Todas</button>
+                <button type="button" class="hs-tab" data-catalog-filter="VISIBLES" aria-pressed="false">Visibles</button>
+                <button type="button" class="hs-tab" data-catalog-filter="OCULTAS" aria-pressed="false">Ocultas</button>
+                <button type="button" class="hs-tab" data-catalog-filter="DESTACADAS" aria-pressed="false">Destacadas</button>
+            </div>
+
+            <!-- Aviso de desplazamiento horizontal en móvil -->
+            <p class="hs-aviso-deslizar d-md-none px-3 pt-3 mb-1">
+                <span>Desliza la tabla para ver los interruptores</span>
+                <i class="bi bi-arrow-right hs-aviso-deslizar__flecha" aria-hidden="true"></i>
+            </p>
+            <div class="hs-table-scroll">
+                <table class="hs-admin-table hs-catalog-table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Producto</th>
+                        <th scope="col">Código</th>
+                        <th scope="col">Talla</th>
+                        <th scope="col">Stock</th>
+                        <th scope="col">Visible</th>
+                        <th scope="col">Destacado</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="p : ${productos}" class="hs-catalog-row"
+                        th:attr="data-search=${#strings.toLowerCase((p.nombre ?: '') + ' ' + (p.codigo ?: '') + ' ' + (p.categoria ?: '') + ' ' + (p.talla ?: ''))},
+                                 data-visible=${p.visibleWeb},
+                                 data-destacado=${p.destacado}">
+                        <td>
+                            <strong th:text="${p.nombre}">Nombre</strong>
+                            <div class="hs-catalog-meta">
+                                <span class="hs-table-sub" th:text="${p.categoria}">Categoría</span>
+                                <span th:if="${p.tipoCompromiso != null}"
+                                      class="hs-impact-pill"
+                                      th:classappend="${#strings.containsIgnoreCase(p.tipoCompromiso.name(), 'ARBOL')} ? 'hs-impact-pill--arbol' : 'hs-impact-pill--abrigo'"
+                                      th:text="${p.tipoCompromiso.etiqueta}">Impacto</span>
+                            </div>
+                        </td>
+                        <td><span class="hs-code-pill" th:text="${p.codigo}">HSG-001</span></td>
+                        <td><span class="hs-talla-badge" th:text="${p.talla ?: 'Única'}">M</span></td>
+                        <td>
+                            <span class="hs-stock" th:classappend="${p.stockComercial == 0} ? 'hs-stock--empty'"
+                                  th:text="${p.stockComercial}">0</span>
+                        </td>
+                        <td>
+                            <form method="post" th:action="@{/admin/catalogo/{c}/visible(c=${p.codigo})}">
+                                <input type="hidden" name="visible" th:value="${!p.visibleWeb}">
+                                <button class="hs-switch" type="submit"
+                                        th:classappend="${p.visibleWeb} ? 'is-on'"
+                                        role="switch"
+                                        th:attr="aria-checked=${p.visibleWeb},aria-label=|${p.visibleWeb ? 'Ocultar' : 'Mostrar'} talla ${p.talla} de ${p.nombre}|"
+                                        th:title="${p.visibleWeb} ? 'Ocultar talla' : 'Mostrar talla'">
+                                    <span aria-hidden="true"></span>
+                                </button>
+                            </form>
+                        </td>
+                        <td>
+                            <form method="post" th:action="@{/admin/catalogo/{c}/destacado(c=${p.codigo})}">
+                                <input type="hidden" name="destacado" th:value="${!p.destacado}">
+                                <button class="hs-switch" type="submit"
+                                        th:classappend="${p.destacado} ? 'is-on'"
+                                        role="switch"
+                                        th:attr="aria-checked=${p.destacado},aria-label=|${p.destacado ? 'Quitar destacado' : 'Destacar'} ${p.nombre}|"
+                                        th:title="${p.destacado} ? 'Quitar destacado' : 'Destacar producto'">
+                                    <span aria-hidden="true"></span>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${productos.isEmpty()}">
+                        <td colspan="6" class="hs-empty-row">
+                            <div class="hs-empty-box">
+                                <i class="bi bi-bag-x" aria-hidden="true"></i>
+                                <span>Todavía no hay productos para administrar.</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="hs-catalog-search-empty" hidden>
+                        <td colspan="6" class="hs-empty-row">
+                            <div class="hs-empty-box">
+                                <i class="bi bi-search" aria-hidden="true"></i>
+                                <span>No encontramos variantes con este filtro o búsqueda.</span>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Barra de paginación limpia -->
+            <div class="hs-pagination" id="catalogo-paginacion" hidden>
+                <span class="hs-pagination__info" id="catalogo-paginacion-info">Mostrando 1–10</span>
+                <div class="hs-pagination__controls">
+                    <button type="button" class="hs-admin-btn hs-admin-btn--ghost hs-admin-btn--sm" id="catalogo-prev">
+                        <i class="bi bi-chevron-left" aria-hidden="true"></i> Anterior
+                    </button>
+                    <span class="hs-pagination__page" id="catalogo-paginacion-num">1 / 1</span>
+                    <button type="button" class="hs-admin-btn hs-admin-btn--ghost hs-admin-btn--sm" id="catalogo-next">
+                        Siguiente <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Columna derecha: Vista previa del carrusel -->
+        <aside class="hs-admin-card hs-preview hs-anim-card-2" aria-labelledby="titulo-destacados">
+            <div class="hs-card-head">
+                <div>
+                    <h2 id="titulo-destacados">Vista previa · Home</h2>
+                    <p>Productos destacados del carrusel</p>
+                </div>
+            </div>
+
+            <div class="hs-feature-box">
+                <div class="hs-feature-counter">
+                    <i class="bi bi-star-fill" aria-hidden="true"></i>
+                    <strong th:text="${destacados}">0</strong>
+                    <span th:text="'de ' + ${maxDestacados} + ' modelos destacados'">de 8 modelos destacados</span>
+                </div>
+                <progress class="hs-feature-progress" th:value="${destacados}" th:max="${maxDestacados}">0</progress>
+            </div>
+
+            <div class="hs-preview-list" th:if="${!vistaPrevia.isEmpty()}">
+                <div class="hs-preview-item" th:each="t : ${vistaPrevia}">
+                    <th:block th:replace="~{fragments/product-card :: card(${t})}"/>
+                </div>
+            </div>
+
+            <div class="hs-empty-box py-4 px-3" th:if="${vistaPrevia.isEmpty()}">
+                <i class="bi bi-stars" aria-hidden="true"></i>
+                <p class="hs-muted hs-empty-msg p-0">Selecciona productos destacados para verlos aquí.</p>
+            </div>
+
+            <p class="hs-preview-note">
+                <i class="bi bi-info-circle" aria-hidden="true"></i>
+                <span>Máximo 8 modelos. La acción se aplica a todas las tallas del modelo.</span>
+            </p>
+        </aside>
     </div>
 </main>
 </body>

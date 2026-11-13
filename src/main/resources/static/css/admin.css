@@ -2289,3 +2289,234 @@ body:has(.hs-admin-page) > .d-flex.min-vh-100 > nav[aria-label="Panel"] ul a[hre
         transform: none !important;
     }
 }
+
+/* =====================================================================
+   Catálogo Web · Buscador, Paginación, Badges de Impacto y Animaciones
+   ===================================================================== */
+
+.hs-catalog-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.hs-catalog-search {
+    width: min(100%, 310px);
+}
+
+/* Animación escalonada de entrada para las columnas del catálogo */
+.hs-anim-card-1 {
+    opacity: 0;
+    animation: hsPanelEntrada 0.5s var(--hs-ease) 0.08s forwards;
+}
+
+.hs-anim-card-2 {
+    opacity: 0;
+    animation: hsPanelEntrada 0.5s var(--hs-ease) 0.18s forwards;
+}
+
+/* Metadatos y badges de impacto social en cada producto */
+.hs-catalog-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 3px;
+}
+
+.hs-catalog-meta .hs-table-sub {
+    margin-top: 0;
+}
+
+.hs-impact-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: var(--hs-radius-pill);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.hs-impact-pill--abrigo {
+    background: var(--hs-terracotta-light);
+    color: var(--hs-terracotta);
+}
+
+.hs-impact-pill--arbol {
+    background: var(--hs-sage-light);
+    color: var(--hs-sage);
+}
+
+.hs-talla-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--hs-cream-dark);
+    border: 1px solid var(--hs-sand);
+    color: var(--hs-bark);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* Interruptores con efecto rebote suave */
+.hs-switch {
+    transition: background var(--hs-t-fast), transform var(--hs-t-fast);
+}
+.hs-switch:hover {
+    transform: scale(1.06);
+}
+.hs-switch:active {
+    transform: scale(0.95);
+}
+.hs-switch span {
+    transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+/* Contador y barra de progreso de modelos destacados */
+.hs-feature-box {
+    padding: 16px 19px 18px;
+    border-bottom: 1px solid var(--hs-cream-dark);
+    margin-bottom: 14px;
+}
+.hs-feature-box .hs-feature-counter {
+    padding: 0 0 10px;
+}
+
+.hs-feature-progress {
+    width: 100%;
+    height: 7px;
+    border: 0;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-cream-dark);
+    overflow: hidden;
+    display: block;
+}
+.hs-feature-progress::-webkit-progress-bar {
+    background: var(--hs-cream-dark);
+    border-radius: var(--hs-radius-pill);
+}
+.hs-feature-progress::-webkit-progress-value {
+    background: var(--hs-terracotta);
+    border-radius: var(--hs-radius-pill);
+    transition: width 0.4s var(--hs-ease);
+}
+.hs-feature-progress::-moz-progress-bar {
+    background: var(--hs-terracotta);
+    border-radius: var(--hs-radius-pill);
+}
+
+/* Barra de paginación limpia */
+.hs-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 14px 19px;
+    border-top: 1px solid var(--hs-cream-dark);
+    background: var(--hs-card);
+}
+
+.hs-pagination__info {
+    font-size: 12px;
+    color: var(--hs-muted);
+    font-weight: 500;
+}
+
+.hs-pagination__controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hs-pagination__page {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--hs-bark);
+    padding: 0 6px;
+}
+
+/* Tarjetas de vista previa con hover suave */
+.hs-preview-item .hs-card {
+    transition: transform var(--hs-t-fast), box-shadow var(--hs-t-fast);
+}
+.hs-preview-item .hs-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--hs-shadow-card);
+}
+
+@media (max-width: 640px) {
+    .hs-catalog-actions,
+    .hs-catalog-search {
+        width: 100%;
+    }
+    .hs-catalog-actions .hs-admin-btn {
+        width: 100%;
+    }
+    .hs-catalog-search .hs-admin-input {
+        font-size: 16px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hs-anim-card-1,
+    .hs-anim-card-2 {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}
+
+/* =====================================================================
+   Overlay Glassmorphism + Spinner al guardar interruptores
+   ===================================================================== */
+
+@keyframes hsSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.hs-saving-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--hs-velo-agotado);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    display: grid;
+    place-items: center;
+    z-index: 1080;
+    animation: hsPanelEntrada 0.2s var(--hs-ease) forwards;
+}
+
+.hs-saving-overlay[hidden] {
+    display: none;
+}
+
+.hs-saving-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 22px;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-card);
+    border: 1px solid var(--hs-sand);
+    color: var(--hs-bark);
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: var(--hs-shadow-card-hover);
+}
+
+.hs-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2.5px solid var(--hs-sand);
+    border-top-color: var(--hs-terracotta);
+    border-radius: 50%;
+    animation: hsSpin 0.7s linear infinite;
+}

@@ -66,5 +66,117 @@
       if (fabBackdrop) fabBackdrop.addEventListener('click', () => toggleFab(false));
     }
 
+
+
+           // Buscador, pestañas y paginación en Catálogo web (10 por página)
+    const buscadorCatalogo = document.getElementById('filtro-catalogo');
+    const tabsCatalogo = [...document.querySelectorAll('[data-catalog-filter]')];
+    const filasCatalogo = [...document.querySelectorAll('.hs-catalog-row')];
+    const vacioCatalogo = document.querySelector('.hs-catalog-search-empty');
+    const paginacionBox = document.getElementById('catalogo-paginacion');
+    const paginacionInfo = document.getElementById('catalogo-paginacion-info');
+    const paginacionNum = document.getElementById('catalogo-paginacion-num');
+    const btnPrev = document.getElementById('catalogo-prev');
+    const btnNext = document.getElementById('catalogo-next');
+
+    if (filasCatalogo.length) {
+      const POR_PAGINA = 10;
+      let paginaActual = 1;
+      let estadoFiltro = 'TODAS';
+
+      const actualizarCatalogo = () => {
+        const termino = (buscadorCatalogo?.value || '').trim().toLowerCase();
+        const filtradas = filasCatalogo.filter(fila => {
+          const coincideTexto = !termino || (fila.dataset.search || '').includes(termino);
+          const esVisible = fila.dataset.visible === 'true';
+          const esDestacado = fila.dataset.destacado === 'true';
+          const coincideTab =
+            estadoFiltro === 'TODAS' ||
+            (estadoFiltro === 'VISIBLES' && esVisible) ||
+            (estadoFiltro === 'OCULTAS' && !esVisible) ||
+            (estadoFiltro === 'DESTACADAS' && esDestacado);
+          return coincideTexto && coincideTab;
+        });
+
+        const totalPaginas = Math.max(1, Math.ceil(filtradas.length / POR_PAGINA));
+        if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+        const inicio = (paginaActual - 1) * POR_PAGINA;
+        const fin = inicio + POR_PAGINA;
+
+        filasCatalogo.forEach(fila => { fila.hidden = true; });
+        filtradas.slice(inicio, fin).forEach(fila => { fila.hidden = false; });
+
+        if (vacioCatalogo) vacioCatalogo.hidden = filtradas.length > 0;
+        if (paginacionBox) {
+          paginacionBox.hidden = filtradas.length <= POR_PAGINA;
+          if (paginacionInfo) {
+            paginacionInfo.textContent = `Mostrando ${inicio + 1}–${Math.min(fin, filtradas.length)} de ${filtradas.length}`;
+          }
+          if (paginacionNum) paginacionNum.textContent = `${paginaActual} / ${totalPaginas}`;
+          if (btnPrev) btnPrev.disabled = paginaActual <= 1;
+          if (btnNext) btnNext.disabled = paginaActual >= totalPaginas;
+        }
+      };
+
+      buscadorCatalogo?.addEventListener('input', () => {
+        paginaActual = 1;
+        actualizarCatalogo();
+      });
+
+      tabsCatalogo.forEach(tab => tab.addEventListener('click', () => {
+        estadoFiltro = tab.dataset.catalogFilter;
+        paginaActual = 1;
+        tabsCatalogo.forEach(t => {
+          const activo = t === tab;
+          t.classList.toggle('is-active', activo);
+          t.setAttribute('aria-pressed', String(activo));
+        });
+        actualizarCatalogo();
+      }));
+
+      btnPrev?.addEventListener('click', () => {
+        if (paginaActual > 1) { paginaActual -= 1; actualizarCatalogo(); }
+      });
+
+      btnNext?.addEventListener('click', () => {
+        paginaActual += 1;
+        actualizarCatalogo();
+      });
+
+      actualizarCatalogo();
+    }
+
+
+        // Transición suave con spinner y conservación de scroll al cambiar interruptores en Catálogo
+    const formsSwitch = [...document.querySelectorAll('.hs-catalog-table form')];
+    if (formsSwitch.length) {
+      // Restaurar posición de scroll si venimos de pulsar un switch
+      const scrollGuardado = sessionStorage.getItem('hs_catalog_scroll');
+      if (scrollGuardado) {
+        window.scrollTo({ top: parseInt(scrollGuardado, 10), behavior: 'instant' });
+        sessionStorage.removeItem('hs_catalog_scroll');
+      }
+
+      // Crear overlay de carga con spinner
+      const loader = document.createElement('div');
+      loader.className = 'hs-saving-overlay';
+      loader.hidden = true;
+      loader.innerHTML = '<div class="hs-saving-pill"><span class="hs-spinner" aria-hidden="true"></span><span>Actualizando catálogo...</span></div>';
+      document.body.appendChild(loader);
+
+      formsSwitch.forEach(form => {
+        form.addEventListener('submit', () => {
+          const btn = form.querySelector('.hs-switch');
+          if (btn) {
+            btn.classList.toggle('is-on');
+            btn.disabled = true;
+          }
+          sessionStorage.setItem('hs_catalog_scroll', String(window.scrollY));
+          loader.hidden = false;
+        });
+      });
+    }
+
+
   });
 })();
