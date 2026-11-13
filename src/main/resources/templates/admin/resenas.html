@@ -1,33 +1,99 @@
 <!DOCTYPE html>
 <!--
-  ESQUELETO · Bloque 4 · 4.7 Reseñas (GET /admin/resenas?estado=PUBLICADA|OCULTA, AdminController).
-  Modelo:
-    estado   EstadoResena o null (filtro) · estados EstadoResena[]
-    resenas  List<ResenaModeracion> (id, producto, talla, codigoComprobante, calificacion, titulo, comentario,
-             cliente, emailCliente, fecha, estado, moderadaPor)
+  PLANTILLA · Bloque 4 · 4.7 Reseñas (GET /admin/resenas?estado=PUBLICADA|OCULTA, AdminController).
   Acciones: POST /admin/resenas/{id}/ocultar · POST /admin/resenas/{id}/publicar
 -->
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/admin :: pagina(titulo='Reseñas · HÖSÉG', activa='resenas', contenido=~{::main})}">
 <body>
-<main class="container-fluid pb-5">
-    <h1 class="h3">Reseñas</h1>
-    <nav class="mb-3">
-        <a th:href="@{/admin/resenas}" th:classappend="${estado == null} ? 'fw-bold'">Todas</a>
-        <th:block th:each="e : ${estados}"> · <a th:href="@{/admin/resenas(estado=${e})}" th:text="${e}"
-                   th:classappend="${e == estado} ? 'fw-bold'">PUBLICADA</a></th:block>
-    </nav>
-    <p th:if="${resenas.isEmpty()}">No hay reseñas.</p>
-    <article class="border-bottom py-2" th:each="r : ${resenas}">
-        <strong th:text="${r.producto} + ' (' + ${r.talla} + ')'">Casaca (M)</strong>
-        · <span th:text="${#strings.repeat('★', r.calificacion)}">★★★★</span>
-        · <span th:text="${r.cliente}">Ana Torres</span> · <span th:text="${r.estado}">PUBLICADA</span>
-        <p class="mb-1" th:text="${r.comentario}">Comentario</p>
-        <form method="post" th:action="${r.estado.name() == 'PUBLICADA'} ? @{/admin/resenas/{id}/ocultar(id=${r.id})} : @{/admin/resenas/{id}/publicar(id=${r.id})}">
-            <button class="btn btn-sm btn-outline-secondary" type="submit"
-                    th:text="${r.estado.name() == 'PUBLICADA'} ? 'Ocultar' : 'Volver a publicar'">Ocultar</button>
-        </form>
-    </article>
+<main class="hs-admin-page hs-reviews-page">
+    <header class="hs-page-heading">
+        <div>
+            <p class="hs-eyebrow">COMUNIDAD · HÖSÉG</p>
+            <h1>Reseñas</h1>
+            <p class="hs-page-desc">Modera las opiniones verificadas de clientes que realizaron una compra.</p>
+        </div>
+    </header>
+
+    <section class="hs-admin-card hs-anim-card-1" aria-labelledby="resenas-heading">
+        <div class="hs-card-head hs-card-head--wrap">
+            <div>
+                <h2 id="resenas-heading">Opiniones de productos</h2>
+                <p>Publica u oculta una reseña en la tienda sin eliminar su registro.</p>
+            </div>
+            <div class="hs-pill-filter" role="group" aria-label="Filtrar reseñas por estado">
+                <a class="hs-pill-option" th:classappend="${estado == null} ? 'is-active'"
+                   th:href="@{/admin/resenas}">Todas</a>
+                <a class="hs-pill-option" th:each="e : ${estados}"
+                   th:classappend="${e == estado} ? 'is-active'"
+                   th:href="@{/admin/resenas(estado=${e})}"
+                   th:text="${e.name() == 'PUBLICADA'} ? 'Publicadas' : 'Ocultas'">Publicadas</a>
+            </div>
+        </div>
+
+        <div class="hs-review-list" th:if="${!resenas.isEmpty()}">
+            <article class="hs-review" th:each="r : ${resenas}"
+                     th:classappend="${r.estado.name() == 'OCULTA'} ? 'is-hidden'">
+                <div class="hs-review-main">
+                    <div class="hs-review-top">
+                        <div class="hs-review-badges">
+                            <span class="hs-state"
+                                  th:classappend="${r.estado.name() == 'PUBLICADA'} ? 'hs-state--pagado' : 'hs-state--anulado'"
+                                  th:text="${r.estado.name() == 'PUBLICADA'} ? 'Publicada' : 'Oculta'">Publicada</span>
+                            <span class="hs-code-pill" th:if="${r.codigoComprobante != null}"
+                                  th:text="${r.codigoComprobante}">WEB-000001</span>
+                        </div>
+                        <time class="hs-date" th:if="${r.fecha != null}"
+                              th:text="${#temporals.format(r.fecha, 'dd/MM/yyyy')}">23/10/2026</time>
+                    </div>
+
+                    <div class="hs-review-product-row">
+                        <h3 th:text="${r.producto}">Producto</h3>
+                        <span class="hs-talla-badge" th:text="'Talla: ' + ${r.talla ?: 'Única'}">Talla: M</span>
+                    </div>
+
+                    <!-- Estrellas de calificación (llenas + vacías hasta 5) -->
+                    <div class="hs-review-stars"
+                         th:attr="aria-label=|Calificación: ${r.calificacion} de 5 estrellas|">
+                        <span class="hs-stars-filled" th:text="${#strings.repeat('★', r.calificacion)}">★★★★★</span><span class="hs-stars-empty" th:if="${r.calificacion < 5}" th:text="${#strings.repeat('★', 5 - r.calificacion)}"></span>
+                        <span class="hs-stars-score" th:text="${r.calificacion} + '/5'">5/5</span>
+                    </div>
+
+                    <h4 class="hs-review-title" th:if="${r.titulo != null and !#strings.isEmpty(r.titulo)}"
+                        th:text="${r.titulo}">Excelente calidad</h4>
+                    <p class="hs-review-text" th:text="${r.comentario}">Comentario del cliente</p>
+
+                    <div class="hs-review-author">
+                        <span class="hs-sender-avatar hs-sender-avatar--sm" aria-hidden="true"
+                              th:text="${r.cliente != null and !#strings.isEmpty(r.cliente)} ? ${#strings.toUpperCase(#strings.substring(r.cliente, 0, 1))} : 'C'">A</span>
+                        <span class="hs-review-author-name" th:text="${r.cliente}">Ana Torres</span>
+                        <span class="hs-muted small" th:if="${r.emailCliente != null and !#strings.isEmpty(r.emailCliente)}"
+                              th:text="'(' + ${r.emailCliente} + ')'"></span>
+                        <span class="hs-muted small" th:if="${r.moderadaPor != null}"
+                              th:text="'· Moderada por ' + ${r.moderadaPor}">· Moderada por Admin</span>
+                    </div>
+                </div>
+
+                <div class="hs-review-actions">
+                    <form method="post"
+                          th:action="${r.estado.name() == 'PUBLICADA'} ? @{/admin/resenas/{id}/ocultar(id=${r.id})} : @{/admin/resenas/{id}/publicar(id=${r.id})}">
+                        <button class="hs-admin-btn hs-admin-btn--sm"
+                                th:classappend="${r.estado.name() == 'PUBLICADA'} ? 'hs-admin-btn--ghost' : 'hs-admin-btn--primary'"
+                                type="submit">
+                            <i class="bi" th:classappend="${r.estado.name() == 'PUBLICADA'} ? 'bi-eye-slash' : 'bi-eye'"
+                               aria-hidden="true"></i>
+                            <span th:text="${r.estado.name() == 'PUBLICADA'} ? 'Ocultar reseña' : 'Volver a publicar'">Ocultar reseña</span>
+                        </button>
+                    </form>
+                </div>
+            </article>
+        </div>
+
+        <div class="hs-empty-box py-5 px-3" th:if="${resenas.isEmpty()}">
+            <i class="bi bi-star" aria-hidden="true"></i>
+            <p class="hs-empty-block p-0">No hay reseñas en esta vista.</p>
+        </div>
+    </section>
 </main>
 </body>
 </html>

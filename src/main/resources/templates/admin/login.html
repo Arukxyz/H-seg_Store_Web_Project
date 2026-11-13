@@ -1,34 +1,114 @@
 <!DOCTYPE html>
 <!--
-  ESQUELETO · Bloque 4 · 4.1 Login administrativo (GET /admin/login; el POST lo procesa Spring Security).
+  PLANTILLA · Bloque 4 · 4.1 Login administrativo (GET /admin/login; el POST lo procesa Spring Security).
   El formulario DEBE enviar "username" y "password" por POST a /admin/login.
   Usuarios de la tabla usuario del escritorio, solo rol ADMINISTRADOR; mismo bloqueo que el escritorio.
   Variantes: ?error · ?bloqueado=5 (minutos) · ?inactivo · ?sinPermiso (es ENCARGADO) · ?salir
 -->
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
-    <title>Panel · HÖSÉG</title>
+    <title>Acceso administrativo · HÖSÉG</title>
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.min.css}">
     <link rel="stylesheet" th:href="@{/css/tokens.css}">
     <link rel="stylesheet" th:href="@{/css/hoseg.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
 </head>
-<body>
-<main class="container hs-ancho-form py-5">
-    <h1 class="hs-h2 mb-3">Panel HÖSÉG</h1>
-    <div class="alert alert-danger" th:if="${param.error}">Usuario o contraseña incorrectos.</div>
-    <div class="alert alert-danger" th:if="${param.bloqueado}"
-         th:text="'Cuenta bloqueada. Intenta de nuevo en ' + ${param.bloqueado} + ' minuto(s).'">Bloqueada</div>
-    <div class="alert alert-danger" th:if="${param.inactivo}">El usuario está inactivo. Contacta a un administrador.</div>
-    <div class="alert alert-warning" th:if="${param.sinPermiso}">Tu usuario no tiene acceso al panel web.</div>
-    <div class="alert alert-info" th:if="${param.salir}">Cerraste sesión.</div>
-    <form method="post" th:action="@{/admin/login}">
-        <label class="d-block">Usuario <input class="hs-input" name="username" autocomplete="username" required></label>
-        <label class="d-block mt-2">Contraseña <input class="hs-input" type="password" name="password" autocomplete="current-password" required></label>
-        <button class="hs-btn hs-btn--primario mt-3" type="submit">Ingresar</button>
-    </form>
+<body class="hs-admin-login">
+<main class="hs-login-wrap">
+    <section class="hs-login-card hs-login-split" aria-labelledby="titulo-login">
+
+        <!-- Columna izquierda: Identidad visual (solo escritorio) -->
+        <aside class="hs-login-visual d-none d-md-flex" aria-hidden="true">
+            <img th:src="@{/images/hero-cusco.jpg}" alt="" class="hs-login-visual__img">
+            <div class="hs-login-visual__velo"></div>
+            <div class="hs-login-visual__contenido">
+                <span class="hs-chip-vidrio hs-chip-vidrio--terracota">
+                    <i class="bi bi-shield-check" aria-hidden="true"></i> Gestión con propósito
+                </span>
+                <div>
+                    <h2 class="hs-login-visual__titulo">Cada prenda abriga, cada taza reforesta.</h2>
+                    <p class="hs-login-visual__texto">
+                        Administra el catálogo, el impacto social y la experiencia de HÖSÉG desde un solo lugar.
+                    </p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Columna derecha: Formulario de acceso -->
+        <div class="hs-login-body">
+            <div class="hs-login-top">
+                <a th:href="@{/}" class="hs-login-back">
+                    <i class="bi bi-arrow-left" aria-hidden="true"></i> Volver a la tienda
+                </a>
+            </div>
+
+            <div class="hs-login-brand">
+                <span class="hs-wordmark">HÖSÉG</span>
+                <span class="hs-login-subtitle">PANEL DE ADMINISTRACIÓN</span>
+            </div>
+
+            <h1 id="titulo-login" class="visually-hidden">Iniciar sesión en el panel de administración</h1>
+
+            <!-- Avisos de Spring Security (lógica intacta) -->
+            <div th:if="${param.error}" class="hs-notice hs-notice--danger" role="alert">
+                <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                <span>Usuario o contraseña incorrectos.</span>
+            </div>
+            <div th:if="${param.bloqueado}" class="hs-notice hs-notice--warning" role="alert">
+                <i class="bi bi-shield-exclamation" aria-hidden="true"></i>
+                <span th:text="'Cuenta bloqueada. Intenta de nuevo en ' + ${param.bloqueado} + ' minuto(s).'">Cuenta bloqueada.</span>
+            </div>
+            <div th:if="${param.inactivo}" class="hs-notice hs-notice--danger" role="alert">
+                <i class="bi bi-person-x" aria-hidden="true"></i>
+                <span>El usuario está inactivo. Contacta a un administrador.</span>
+            </div>
+            <div th:if="${param.sinPermiso}" class="hs-notice hs-notice--warning" role="alert">
+                <i class="bi bi-lock" aria-hidden="true"></i>
+                <span>Tu usuario no tiene acceso al panel web.</span>
+            </div>
+            <div th:if="${param.salir}" class="hs-notice hs-notice--success" role="status">
+                <i class="bi bi-check-circle" aria-hidden="true"></i>
+                <span>Cerraste sesión correctamente.</span>
+            </div>
+
+            <form method="post" th:action="@{/admin/login}" class="hs-login-form">
+                <div class="hs-field">
+                    <label for="admin-username">USUARIO</label>
+                    <div class="hs-input-icon-wrap">
+                        <i class="bi bi-person hs-input-icon" aria-hidden="true"></i>
+                        <input id="admin-username" class="hs-admin-input hs-admin-input--con-icono"
+                               name="username" type="text" autocomplete="username"
+                               placeholder="Ingresa tu usuario" required autofocus>
+                    </div>
+                </div>
+
+                <div class="hs-field">
+                    <label for="admin-password">CONTRASEÑA</label>
+                    <div class="hs-input-icon-wrap">
+                        <i class="bi bi-lock hs-input-icon" aria-hidden="true"></i>
+                        <input id="admin-password" class="hs-admin-input hs-admin-input--con-icono"
+                               type="password" name="password" autocomplete="current-password"
+                               placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <button class="hs-admin-btn hs-admin-btn--primary hs-login-submit" type="submit"
+                        th:disabled="${param.bloqueado != null}">
+                    <span>Iniciar sesión</span>
+                    <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </button>
+            </form>
+
+            <p class="hs-login-footnote">
+                <i class="bi bi-lock-fill" aria-hidden="true"></i> Acceso exclusivo para personal autorizado.
+            </p>
+        </div>
+
+    </section>
 </main>
 </body>
 </html>
