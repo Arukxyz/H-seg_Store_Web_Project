@@ -1,22 +1,67 @@
 <!DOCTYPE html>
-<!--
-  ESQUELETO · Bloque 5 · 3.7 Error 404. Spring Boot la muestra sola para cualquier ruta inexistente
-  y cuando un servicio lanza RecursoNoEncontradoException (producto oculto, pedido ajeno…).
--->
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: pagina(titulo='Página no encontrada · HÖSÉG', activa='',
-                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+    th:replace="~{layout/base :: pagina(titulo='Página no encontrada · HÖSÉG', activa='',
+                                          transparente=false, contenido=~{::main}, estilos=~{::link}, scripts=~{::script})}">
+
+<head>
+    <link rel="stylesheet" th:href="@{/css/errores.css}">
+</head>
+
 <body>
-<main class="hs-main--bajo-nav">
-    <section class="hs-seccion">
-        <div class="container text-center">
-            <p class="hs-kicker">Error 404</p>
-            <h1 class="hs-h2">No encontramos esta página.</h1>
-            <p class="hs-texto-secundario">Puede que el enlace esté mal escrito o que el producto ya no esté a la venta.</p>
-            <a class="hs-btn hs-btn--primario" th:href="@{/}">Ir al inicio</a>
-            <a class="hs-btn hs-btn--secundario" th:href="@{/tienda}">Ver la tienda</a>
-        </div>
-    </section>
-</main>
+    <main class="hs-main--bajo-nav">
+        <section class="hs-seccion d-flex align-items-center hs-fondo-comunidad" style="min-height: 60vh;">
+            <div class="container hs-ancho-sm text-center">
+                <div class="d-inline-flex align-items-center justify-content-center mb-4 hs-icono-pulso hs-icono-pulso--salvia hs-fade-in"
+                    style="width: 88px; height: 88px; border-radius: 50%; background: var(--hs-cream-dark);">
+                    <i class="bi bi-signpost-split" style="font-size: 2.25rem; color: var(--hs-sage);"></i>
+                </div>
+
+                <p class="hs-kicker hs-fade-in" style="animation-delay: .1s;">Error 404</p>
+                <h1 class="hs-h2 mb-2 hs-fade-in" style="animation-delay: .15s;">No encontramos esta página.</h1>
+                <p class="hs-texto-secundario mb-2 hs-fade-in" style="animation-delay: .2s;">
+                    Puede que el enlace esté mal escrito, o que esta prenda ya haya encontrado otro hogar.
+                </p>
+
+                <div class="mb-2 hs-fade-in" style="animation-delay: .25s;">
+                    <div class="hs-barra-progreso mx-auto">
+                        <div class="hs-barra-progreso__relleno hs-barra-progreso__relleno--salvia"></div>
+                    </div>
+                </div>
+                <p class="hs-texto-secundario mb-4 hs-fade-in" style="animation-delay: .25s;">
+                    <small class="text-muted" id="hs-aviso-redireccion">
+                        Serás redirigido al inicio en <span id="hs-segundos">8</span> segundos…
+                    </small>
+                </p>
+
+                <div class="d-flex flex-column flex-sm-row justify-content-center gap-2 hs-fade-in"
+                    style="animation-delay: .3s;">
+                    <a class="hs-btn hs-btn--primario" id="hs-link-inicio" th:href="@{/}">
+                        <i class="bi bi-house me-1"></i> Ir al inicio
+                    </a>
+                    <a class="hs-btn hs-btn--secundario" th:href="@{/tienda}">
+                        <i class="bi bi-bag me-1"></i> Ver la tienda
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script th:inline="javascript">
+        (function () {
+            var segundosRestantes = 8;
+            var etiqueta = document.getElementById('hs-segundos');
+            var destino = document.getElementById('hs-link-inicio').href;
+
+            var intervalo = setInterval(function () {
+                segundosRestantes -= 1;
+                if (segundosRestantes <= 0) {
+                    clearInterval(intervalo);
+                    window.location.href = destino;
+                    return;
+                }
+                etiqueta.textContent = segundosRestantes;
+            }, 1000);
+        })();
+    </script>
 </body>
+
 </html>

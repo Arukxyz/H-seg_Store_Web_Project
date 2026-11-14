@@ -1,0 +1,85 @@
+/* =====================================================================
+   HÖSÉG Web · Páginas de error (error.html, error/404.html)
+   Solo las usa el Bloque 5. No se reutiliza en otras plantillas, así que
+   vive aparte de hoseg.css para no mezclarse con estilos de otros bloques.
+   ===================================================================== */
+
+@keyframes hsPulso {
+  0% {
+    box-shadow: 0 0 0 0 var(--hs-pulso-color);
+  }
+  70% {
+    box-shadow: 0 0 0 16px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+.hs-icono-pulso {
+  animation: hsPulso 2.2s var(--hs-ease) infinite;
+}
+
+.hs-icono-pulso--terracota {
+  --hs-pulso-color: color-mix(in srgb, var(--hs-terracotta) 35%, transparent);
+}
+.hs-icono-pulso--salvia {
+  --hs-pulso-color: color-mix(in srgb, var(--hs-sage) 35%, transparent);
+}
+
+@keyframes hsProgreso {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+.hs-barra-progreso {
+  width: 160px;
+  height: 4px;
+  margin: 0 auto;
+  border-radius: var(--hs-radius-pill);
+  background: var(--hs-sand);
+  overflow: hidden;
+}
+
+.hs-barra-progreso__relleno {
+  height: 100%;
+  width: 100%;
+  border-radius: var(--hs-radius-pill);
+  animation: hsProgreso 8s linear forwards;
+}
+
+.hs-barra-progreso__relleno--terracota {
+  background: var(--hs-terracotta);
+}
+.hs-barra-progreso__relleno--salvia {
+  background: var(--hs-sage);
+}
+
+/* Textura de fondo: la foto de comunidad, casi invisible, detrás de la tarjeta */
+.hs-fondo-comunidad {
+  position: relative;
+  isolation: isolate;
+}
+
+.hs-fondo-comunidad::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: url("../images/comunidad-cusco.jpg") center/cover no-repeat;
+  opacity: 0.08;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hs-icono-pulso {
+    animation: none;
+  }
+  .hs-barra-progreso__relleno {
+    animation: none;
+    width: 0%;
+  }
+}
