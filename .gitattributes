@@ -1,0 +1,15 @@
+# Texto siempre con LF en el repositorio, aunque cada quien trabaje con CRLF en Windows
+* text=auto
+
+# Binarios: sin conversión ni diff de texto
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.jar binary

@@ -1,0 +1,17 @@
+# Formato común para todos los editores (VS Code, IntelliJ, NetBeans). Prettier también lo lee.
+# El proyecto usa 4 espacios en Java, HTML, CSS y JS: no reformatear archivos enteros al guardar.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.md]
+trim_trailing_whitespace = false
+
+[design/figma-make/**]
+indent_size = 2

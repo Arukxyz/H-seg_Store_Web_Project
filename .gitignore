@@ -1,0 +1,30 @@
+# Credenciales de Supabase (ver application-local.properties.example)
+application-local.properties
+src/main/resources/application-local.properties
+.env
+
+# Maven
+target/
+*.class
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+nbproject/private/
+.settings/
+.project
+.classpath
+
+# Logs de la aplicación (llevan IPs)
+logs/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Export de Figma Make (solo referencia, no se compila)
+design/figma-make/node_modules/
+design/figma-make/dist/
+design/figma-make/.vite/
+design/figma-make/.figma/
