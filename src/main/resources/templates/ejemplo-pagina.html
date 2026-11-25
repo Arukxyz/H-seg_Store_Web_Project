@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<!--
+  PLANTILLA DE EJEMPLO para páginas nuevas (Tienda, Detalle, Carrito, Login,
+  Consulta de impacto...). Copiar este archivo, renombrarlo y borrar lo que
+  no aplique. Guía completa: docs/guia-plantillas.md.
+
+  Se sirve en /ejemplo solo con el perfil dev (EjemploController).
+
+  1. El <html> delega en layout/base: <head>, navbar, óvalo móvil, footer y
+     scripts comunes ya vienen de ahí. Solo se cambian los parámetros:
+       titulo       → <title>
+       activa       → inicio | tienda | cafe | impacto | nosotros | carrito | cuenta
+       transparente → false en toda página sin banner a pantalla completa
+       estilos      → ~{::link} si la página trae CSS propio (en su <head>); ~{} si no
+       scripts      → ~{::script} si trae JS propio (al final del <body>); ~{} si no
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: pagina(titulo='Ejemplo · HÖSÉG', activa='tienda',
+                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+<head>
+    <!-- 2. Hoja de estilo propia, si la necesita (y estilos=~{::link} arriba): -->
+    <!-- <link rel="stylesheet" th:href="@{/css/tienda.css}"> -->
+</head>
+<body>
+
+<!-- 3. hs-main--bajo-nav deja el hueco de la barra fija (56/64 px).
+        hs-seccion da el relleno vertical estándar de una sección. -->
+<main class="hs-main--bajo-nav">
+    <section class="hs-seccion">
+        <div class="container">
+
+            <p class="hs-kicker">Ejemplo de página interior</p>
+            <h1 class="hs-h2 mb-3">Así se arma una página nueva.</h1>
+            <p class="hs-texto-secundario hs-ancho-texto mb-5">
+                Esta página existe solo en desarrollo. Muestra los fragmentos y las clases
+                <code>hs-*</code> disponibles para que las demás páginas se vean como la Home
+                sin copiar CSS. Los colores y tipografías salen de <code>tokens.css</code>.
+            </p>
+
+            <!-- Botones -->
+            <h2 class="h5 mb-3">Botones</h2>
+            <div class="d-flex flex-wrap gap-2 mb-5">
+                <a class="hs-btn hs-btn--primario" href="#">Primario</a>
+                <a class="hs-btn hs-btn--secundario" href="#">Secundario</a>
+                <span class="hs-btn hs-btn--deshabilitado">Deshabilitado</span>
+                <button type="button" class="hs-btn-redondo" aria-label="Siguiente">
+                    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </button>
+            </div>
+
+            <!-- Badges y chips -->
+            <h2 class="h5 mb-3">Badges y chips</h2>
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-5">
+                <!-- El badge recibe un TipoCompromiso; aquí vienen del modelo (EjemploController) -->
+                <th:block th:each="tipo : ${compromisos}">
+                    <th:block th:replace="~{fragments/product-card :: badge(${tipo})}"/>
+                </th:block>
+                <span class="hs-chip">Omacha</span>
+                <span class="hs-chip hs-chip--pequeno">Triple impacto</span>
+                <span class="hs-chip-talla">M</span>
+            </div>
+
+            <!-- Formulario -->
+            <h2 class="h5 mb-3">Campo de texto</h2>
+            <form class="d-flex flex-column flex-sm-row gap-2 mb-5 hs-ancho-form" method="get" th:action="@{${rutaConsulta}}">
+                <label class="visually-hidden" for="ejemplo-boleta">Boleta</label>
+                <input class="hs-input" id="ejemplo-boleta" name="boleta" type="text" placeholder="WEB-000110">
+                <button type="submit" class="hs-btn hs-btn--primario">Consultar</button>
+            </form>
+
+            <!-- Tarjetas de producto: reciben un dto.TarjetaProducto -->
+            <h2 class="h5 mb-3">Tarjetas de producto</h2>
+            <div class="row g-3 mb-5">
+                <div class="col-6 col-md-4 col-xl-3" th:each="p : ${tarjetas}">
+                    <th:block th:replace="~{fragments/product-card :: card(${p})}"/>
+                </div>
+            </div>
+
+            <!-- Iconos: Bootstrap Icons (https://icons.getbootstrap.com). Se usan con
+                 <i class="bi bi-nombre" aria-hidden="true"></i> y toman el color del texto. -->
+            <h2 class="h5 mb-3">Iconos usados en el portal</h2>
+            <div class="d-flex flex-wrap gap-3 mb-5 hs-texto-secundario hs-icono">
+                <i class="bi bi-house" title="bi-house"></i>
+                <i class="bi bi-bag" title="bi-bag"></i>
+                <i class="bi bi-cup-hot" title="bi-cup-hot"></i>
+                <i class="bi bi-activity" title="bi-activity"></i>
+                <i class="bi bi-cart" title="bi-cart"></i>
+                <i class="bi bi-person" title="bi-person"></i>
+                <i class="bi bi-casaca" title="bi-casaca (abrigo, icono propio)"></i>
+                <i class="bi bi-tree" title="bi-tree (árbol)"></i>
+                <i class="bi bi-people" title="bi-people"></i>
+                <i class="bi bi-heart" title="bi-heart"></i>
+                <i class="bi bi-arrow-right" title="bi-arrow-right"></i>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Franja alterna (fondo crema oscuro) -->
+    <section class="hs-seccion hs-seccion--alterna">
+        <div class="container hs-ancho-sm text-center">
+            <p class="hs-kicker">Sección alterna</p>
+            <h2 class="hs-h2">Alterna fondos para separar bloques.</h2>
+        </div>
+    </section>
+</main>
+
+<!-- 4. Script propio, si lo necesita (y scripts=~{::script} arriba): -->
+<!-- <script th:src="@{/js/tienda.js}" defer></script> -->
+</body>
+</html>

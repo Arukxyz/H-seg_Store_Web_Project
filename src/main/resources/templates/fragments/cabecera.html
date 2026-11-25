@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<!--
+  Cabecera de página interior: antetítulo, titular y bajada, centrados, con "HÖSÉG" enorme de
+  fondo como marca de agua y entrada escalonada (estilos en hoseg.css, "Cabecera de página interior").
+  La misma que Tienda, para que todas las páginas interiores empiecen igual.
+
+  Uso:  <th:block th:replace="~{fragments/cabecera :: cabecera('Ayuda', 'Contacto', 'Texto de bajada')}"/>
+        bajada puede ser null.
+-->
+<body>
+
+<header class="hs-pagina-cabecera hs-pagina-cabecera--marca" th:fragment="cabecera(kicker, titulo, bajada)">
+    <div class="container text-center">
+        <p class="hs-kicker hs-entrada" style="--hs-i: 0" th:text="${kicker}">Ayuda</p>
+        <h1 class="hs-pagina-cabecera__titulo hs-entrada" style="--hs-i: 1" th:text="${titulo}">Contacto</h1>
+        <p class="hs-texto-secundario mt-2 mb-0 hs-ancho-texto mx-auto hs-entrada" style="--hs-i: 2"
+           th:if="${bajada}" th:text="${bajada}">Bajada</p>
+    </div>
+</header>
+
+</body>
+</html>

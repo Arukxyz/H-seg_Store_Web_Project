@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 5 · Error genérico (403, 500…). Spring Boot la usa para todo error sin
+  plantilla propia. No muestra detalles técnicos: quedan en el log del servidor por seguridad.
+
+  Diseño: ícono con aro de pulso, entrada escalonada (hs-entrada de hoseg.css), barra de
+  progreso ligada a la cuenta regresiva y textura de fondo sutil. Estilos propios en
+  css/errores.css (no se tocó hoseg.css).
+  Lógica: th:if elige el título/mensaje según ${status}; el script redirige a la Home al llegar a 0.
+  No se agregó ni se quitó ninguna variable del modelo: sigue siendo solo ${status}.
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{layout/base :: pagina(titulo='Algo salió mal · HÖSÉG', activa='',
+                                          transparente=false, contenido=~{::main}, estilos=~{::link}, scripts=~{::script})}">
+
+<head>
+    <link rel="stylesheet" th:href="@{/css/errores.css}">
+</head>
+
+<body>
+    <main class="hs-main--bajo-nav">
+        <section class="hs-seccion hs-error d-flex align-items-center hs-fondo-comunidad">
+            <div class="container hs-ancho-sm text-center">
+                <div class="hs-error__icono hs-entrada" style="--hs-i: 0">
+                    <i class="bi bi-exclamation-octagon" aria-hidden="true"></i>
+                </div>
+
+                <p class="hs-kicker hs-entrada" style="--hs-i: 1" th:text="'Error ' + ${status}">Error</p>
+
+                <h1 class="hs-h2 mb-2 hs-entrada" style="--hs-i: 2" th:if="${status == 401}">Sesión no
+                    válida.</h1>
+                <h1 class="hs-h2 mb-2 hs-entrada" style="--hs-i: 2" th:if="${status == 403}">Acceso
+                    restringido.</h1>
+                <h1 class="hs-h2 mb-2 hs-entrada" style="--hs-i: 2" th:if="${status == 500}">Un tropiezo en
+                    el camino.</h1>
+                <h1 class="hs-h2 mb-2 hs-entrada" style="--hs-i: 2"
+                    th:if="${status != 401 and status != 403 and status != 500}">Algo salió mal.</h1>
+
+                <p class="hs-texto-secundario mb-2 hs-entrada" style="--hs-i: 3" th:if="${status == 401}">
+                    Tu sesión venció o el acceso no es válido. Inicia sesión de nuevo para continuar.
+                </p>
+                <p class="hs-texto-secundario mb-2 hs-entrada" style="--hs-i: 3" th:if="${status == 403}">
+                    Tu cuenta no tiene los permisos necesarios para ingresar a esta sección.
+                </p>
+                <p class="hs-texto-secundario mb-2 hs-entrada" style="--hs-i: 3" th:if="${status == 500}">
+                    Hasta los mejores caminos tienen un desvío. El equipo de HÖSÉG ya fue notificado
+                    y está en ello.
+                </p>
+                <p class="hs-texto-secundario mb-2 hs-entrada" style="--hs-i: 3"
+                    th:if="${status != 401 and status != 403 and status != 500}">
+                    No fue posible completar tu solicitud. Inténtalo de nuevo en unos minutos.
+                </p>
+
+                <div class="mb-2 hs-entrada" style="--hs-i: 4">
+                    <div class="hs-barra-progreso mx-auto">
+                        <div class="hs-barra-progreso__relleno hs-barra-progreso__relleno--terracota"></div>
+                    </div>
+                </div>
+                <p class="hs-texto-secundario mb-4 hs-entrada" style="--hs-i: 4">
+                    <small class="hs-error__aviso" id="hs-aviso-redireccion">
+                        Serás redirigido al inicio en <span id="hs-segundos">8</span> segundos…
+                    </small>
+                </p>
+
+                <div class="d-flex flex-column flex-sm-row justify-content-center gap-2 hs-entrada"
+                    style="--hs-i: 5">
+                    <a class="hs-btn hs-btn--primario" id="hs-link-inicio" th:href="@{/}">
+                        <i class="bi bi-house me-1"></i> Ir al inicio
+                    </a>
+                    <a class="hs-btn hs-btn--secundario" th:href="@{/contacto}">
+                        <i class="bi bi-envelope me-1"></i> Contactar soporte
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script th:inline="javascript">
+        (function () {
+            var segundosRestantes = 8;
+            var etiqueta = document.getElementById('hs-segundos');
+            var destino = document.getElementById('hs-link-inicio').href;
+
+            var intervalo = setInterval(function () {
+                segundosRestantes -= 1;
+                if (segundosRestantes <= 0) {
+                    clearInterval(intervalo);
+                    window.location.href = destino;
+                    return;
+                }
+                etiqueta.textContent = segundosRestantes;
+            }, 1000);
+        })();
+    </script>
+</body>
+
+</html>

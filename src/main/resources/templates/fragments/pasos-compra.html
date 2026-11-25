@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<!--
+  Indicador de pasos de la compra (Carrito → Entrega → Pago). Reemplaza a las "migas" de las páginas de entrega y pago.
+  Uso:  <th:block th:replace="~{fragments/pasos-compra :: pasos(1)}"/>   (1 = estás en Entrega, 2 = estás en Pago)
+  Los pasos ya completados son enlaces (con una marca de verificación); el actual va resaltado; el siguiente, apagado.
+  Estilos en static/css/pasos-compra.css (cada página que lo usa debe cargar ese archivo).
+-->
+
+<body>
+    <nav aria-label="Pasos de la compra" th:fragment="pasos(actual)">
+        <ol class="hs-pasos list-unstyled d-flex flex-wrap align-items-center gap-2 mb-3">
+
+            <!-- Carrito: siempre completado -->
+            <li class="hs-pasos__item is-hecho">
+                <a class="hs-pasos__enlace" th:href="@{/carrito}">
+                    <span class="hs-pasos__num"><i class="bi bi-check-lg" aria-hidden="true"></i></span>
+                    Carrito
+                </a>
+            </li>
+            <li class="hs-pasos__raya is-hecho" aria-hidden="true"></li>
+
+            <!-- 1. Entrega: actual si actual == 1; completado (con enlace) si ya estás en el pago -->
+            <li class="hs-pasos__item" th:classappend="${actual == 1} ? 'is-actual' : 'is-hecho'"
+                th:attr="aria-current=${actual == 1} ? 'step' : null">
+                <th:block th:if="${actual == 1}">
+                    <span class="hs-pasos__num">1</span>
+                    Entrega
+                </th:block>
+                <a class="hs-pasos__enlace" th:unless="${actual == 1}" th:href="@{/carrito/entrega}">
+                    <span class="hs-pasos__num"><i class="bi bi-check-lg" aria-hidden="true"></i></span>
+                    Entrega
+                </a>
+            </li>
+            <li class="hs-pasos__raya" th:classappend="${actual > 1} ? 'is-hecho'" aria-hidden="true"></li>
+
+            <!-- 2. Pago: actual si actual == 2; si no, apagado -->
+            <li class="hs-pasos__item" th:classappend="${actual == 2} ? 'is-actual'"
+                th:attr="aria-current=${actual == 2} ? 'step' : null">
+                <span class="hs-pasos__num">2</span>
+                Pago
+            </li>
+        </ol>
+    </nav>
+</body>
+
+</html>

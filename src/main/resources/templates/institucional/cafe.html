@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<!-- =========================================================================
+  Bloque 3 · Höség Café (GET /cafe, InstitucionalController).
+  Modelo: arboles (long), carta List<CategoriaCarta> (categoria, items: nombre, descripcion, precio,
+          disponible), locales List<LocalCafe> (solo los de la cafetería: CafeService.localesCafe),
+          cafesEnGrano y merchandising List<TarjetaProducto>.
+  Estilos en static/css/cafe.css; pestañas de la carta en static/js/cafe.js; el conteo del
+  contador lo hace home.js (data-contador), igual que en Nosotros.
+  Sin JavaScript la carta muestra todas las categorías una debajo de otra.
+========================================================================= -->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: pagina(titulo='Höség Café · HÖSÉG', activa='cafe',
+                                          transparente=false, contenido=~{::main}, estilos=~{::link}, scripts=~{::script})}">
+<head>
+    <link rel="stylesheet" th:href="@{/css/cafe.css}">
+</head>
+<body>
+<main class="hs-main--bajo-nav hs-cafe">
+
+    <!-- 1 · Hero: degradado de la paleta, entrada escalonada y contador animado -->
+    <section class="hs-cafe__hero">
+        <div class="container hs-ancho-sm text-center">
+            <p class="hs-kicker hs-cafe__kicker hs-entrada" style="--hs-i: 0">100% café de especialidad peruano</p>
+            <h1 class="hs-cafe__titulo hs-entrada" style="--hs-i: 1">
+                Por cada café, sembramos <em class="hs-acento">un árbol</em> en Cusco
+            </h1>
+
+            <div class="hs-cafe__contador hs-entrada" style="--hs-i: 2">
+                <span class="hs-cafe__contador-icono"><i class="bi bi-tree" aria-hidden="true"></i></span>
+                <span class="hs-cafe__contador-texto">
+                    <strong data-contador th:data-valor="${arboles}"
+                            th:text="${#numbers.formatInteger(arboles, 1, 'COMMA')}">5,018</strong>
+                    árboles sembrados
+                </span>
+            </div>
+
+            <p class="hs-texto-secundario hs-cafe__bajada mx-auto hs-entrada" style="--hs-i: 3">
+                Disfruta de una taza con propósito en Cusco. Cada sorbo apoya el programa de bosques
+                familiares de la ONG Pachamama Raymi.
+            </p>
+        </div>
+    </section>
+
+    <!-- 2 · Cinta en bucle. El texto va dos veces para que el bucle no tenga corte;
+         la copia no se lee en voz alta. Se pausa al pasar el cursor. -->
+    <div class="hs-cinta" role="presentation">
+        <div class="hs-cinta__pista">
+            <p class="hs-cinta__texto">
+                <span>100% café de especialidad peruano</span><i class="bi bi-dot" aria-hidden="true"></i>
+                <span>Por cada café, un árbol en Cusco</span><i class="bi bi-dot" aria-hidden="true"></i>
+                <span>Bosques familiares con Pachamama Raymi</span><i class="bi bi-dot" aria-hidden="true"></i>
+                <span>Höség Café Cusco</span><i class="bi bi-dot" aria-hidden="true"></i>
+            </p>
+            <p class="hs-cinta__texto" aria-hidden="true">
+                <span>100% café de especialidad peruano</span><i class="bi bi-dot"></i>
+                <span>Por cada café, un árbol en Cusco</span><i class="bi bi-dot"></i>
+                <span>Bosques familiares con Pachamama Raymi</span><i class="bi bi-dot"></i>
+                <span>Höség Café Cusco</span><i class="bi bi-dot"></i>
+            </p>
+        </div>
+    </div>
+
+    <!-- 3 · Carta con pestañas por categoría (filtrado en el navegador: cafe.js) -->
+    <section class="hs-seccion" id="carta">
+        <div class="container hs-ancho-md">
+            <div class="text-center mb-4" data-revelar>
+                <p class="hs-kicker">En la barra</p>
+                <h2 class="hs-h2 mb-0">Nuestra carta</h2>
+            </div>
+
+            <p th:if="${carta.isEmpty()}" class="text-center hs-texto-secundario">
+                Pronto publicaremos nuestras opciones en cocina.
+            </p>
+
+            <div class="hs-carta" th:unless="${carta.isEmpty()}" data-carta>
+                <!-- Pestañas: cafe.js las muestra y las activa; sin JS quedan ocultas -->
+                <div class="hs-carta__pestanas" role="tablist" aria-label="Categorías de la carta" hidden data-carta-pestanas>
+                    <button type="button" class="hs-carta__pestana" role="tab"
+                            th:each="c, est : ${carta}"
+                            th:id="|pestana-carta-${est.index}|"
+                            th:attr="aria-controls=|panel-carta-${est.index}|"
+                            th:aria-selected="${est.first}"
+                            th:tabindex="${est.first} ? 0 : -1"
+                            th:text="${c.categoria}">Bebidas</button>
+                </div>
+
+                <section class="hs-carta__panel" role="tabpanel"
+                         th:each="c, est : ${carta}"
+                         th:id="|panel-carta-${est.index}|"
+                         th:attr="aria-labelledby=|pestana-carta-${est.index}|">
+                    <h3 class="hs-carta__categoria" th:text="${c.categoria}">Categoría</h3>
+                    <ul class="hs-carta__lista">
+                        <li class="hs-plato" th:each="i, n : ${c.items}"
+                            th:classappend="${!i.disponible} ? 'hs-plato--agotado'" th:style="|--hs-i: ${n.index}|">
+                            <div class="hs-plato__fila">
+                                <span class="hs-plato__nombre" th:text="${i.nombre}">Latte</span>
+                                <span class="hs-plato__puntos" aria-hidden="true"></span>
+                                <span class="hs-plato__precio"
+                                      th:text="'S/ ' + ${#numbers.formatDecimal(i.precio, 1, 'COMMA', 2, 'POINT')}">S/ 12.00</span>
+                            </div>
+                            <p class="hs-plato__descripcion" th:if="${i.descripcion}" th:text="${i.descripcion}">Descripción</p>
+                            <span class="hs-plato__agotado" th:unless="${i.disponible}">Agotado hoy</span>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4 · Cafés en grano -->
+    <section class="hs-seccion hs-seccion--alterna">
+        <div class="container">
+            <div class="text-center mb-4" data-revelar>
+                <span class="hs-cafe__sello"><i class="bi bi-bag-heart" aria-hidden="true"></i></span>
+                <h2 class="hs-h2 mb-1">Nuestros cafés de especialidad en grano</h2>
+                <p class="hs-texto-secundario mb-0">Selecciones exclusivas listas para moler y disfrutar en casa.</p>
+            </div>
+
+            <p th:if="${cafesEnGrano.isEmpty()}" class="hs-texto-secundario text-center">Pronto publicaremos más variedades en grano.</p>
+
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 justify-content-center mx-auto hs-cafe__grilla">
+                <div class="col" th:each="p, n : ${cafesEnGrano}" data-revelar th:style="|--hs-i: ${n.index}|">
+                    <th:block th:replace="~{fragments/product-card :: card(${p})}"/>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5 · Merchandising -->
+    <section class="hs-seccion">
+        <div class="container">
+            <div class="text-center mb-4" data-revelar>
+                <span class="hs-cafe__sello"><i class="bi bi-stars" aria-hidden="true"></i></span>
+                <h2 class="hs-h2 mb-1">Merchandising exclusivo</h2>
+                <p class="hs-texto-secundario mb-0">Accesorios de edición limitada disponibles en nuestro local.</p>
+            </div>
+
+            <p th:if="${merchandising.isEmpty()}" class="hs-texto-secundario text-center">Pronto publicaremos más accesorios oficiales.</p>
+
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 justify-content-center mx-auto hs-cafe__grilla">
+                <div class="col" th:each="m, n : ${merchandising}" data-revelar th:style="|--hs-i: ${n.index}|">
+                    <th:block th:replace="~{fragments/product-card :: card(${m})}"/>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6 · El local de la cafetería. La foto es /images/locales/<clave>.jpg (ver
+         docs/fotos-locales-y-evidencia.md); si aún no existe se oculta y queda el fondo. -->
+    <section class="hs-seccion hs-seccion--alterna">
+        <div class="container hs-ancho-md">
+
+            <article th:if="${locales == null || locales.isEmpty()}" class="hs-local" data-revelar>
+                <div class="hs-local__foto" aria-hidden="true">
+                    <i class="bi bi-cup-hot"></i>
+                    <img th:src="@{/images/locales/hoseg-cafe-cusco.jpg}" alt="" loading="lazy" onerror="this.remove()">
+                </div>
+                <div class="hs-local__cuerpo">
+                    <span class="hs-local__kicker">Visítanos en Cusco</span>
+                    <h3 class="hs-local__nombre">Höség Café Cusco Centro</h3>
+                    <p class="hs-local__dato"><i class="bi bi-geo-alt" aria-hidden="true"></i>Calle Garcilaso 146, Cusco 08002</p>
+                    <p class="hs-local__dato"><i class="bi bi-clock" aria-hidden="true"></i>Vie-Jue: 8:30am-8pm | Sáb: 8:30am-8pm | Dom: 9:30am-9pm | Lun-Mié: 9:30am-8:30pm</p>
+                    <a href="https://www.google.com/maps/search/?api=1&amp;query=Calle+Garcilaso+146,+Cusco" target="_blank" rel="noopener"
+                       class="hs-btn hs-btn--primario">
+                        <i class="bi bi-map" aria-hidden="true"></i>Ver ubicación en Google Maps
+                    </a>
+                </div>
+            </article>
+
+            <article th:unless="${locales == null || locales.isEmpty()}" th:each="l : ${locales}" class="hs-local" data-revelar>
+                <div class="hs-local__foto" aria-hidden="true">
+                    <i class="bi bi-cup-hot"></i>
+                    <img th:src="@{|/images/locales/${l.clave()}.jpg|}" alt="" loading="lazy" onerror="this.remove()">
+                </div>
+                <div class="hs-local__cuerpo">
+                    <span class="hs-local__kicker">Visítanos en Cusco</span>
+                    <h3 class="hs-local__nombre" th:text="${l.nombre}">Höség Café Cusco</h3>
+                    <p class="hs-local__dato"><i class="bi bi-geo-alt" aria-hidden="true"></i><span th:text="${l.direccion}">Dirección</span></p>
+                    <p class="hs-local__dato" th:if="${l.horario}"><i class="bi bi-clock" aria-hidden="true"></i><span th:text="${l.horario}">Horario</span></p>
+                    <a th:if="${l.urlMapa}" th:href="${l.urlMapa}" target="_blank" rel="noopener" class="hs-btn hs-btn--primario">
+                        <i class="bi bi-map" aria-hidden="true"></i>Ver ubicación en Google Maps
+                    </a>
+                </div>
+            </article>
+        </div>
+    </section>
+</main>
+<script th:src="@{/js/home.js}" defer></script>
+<script th:src="@{/js/cafe.js}" defer></script>
+</body>
+</html>

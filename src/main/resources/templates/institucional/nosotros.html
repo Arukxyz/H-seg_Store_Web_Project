@@ -1,0 +1,287 @@
+<!-- =========================================================================
+  Bloque 3 · 3.3 Nosotros (GET /nosotros, InstitucionalController).
+  Modelo:
+    bloques     Map<clave, BloqueContenido>: bloques['nosotros.historia'] (titulo, cuerpo, imagenUrl);
+                puede faltar → usar el texto por defecto con ?: (Elvis)
+    impacto     ResumenImpacto (abrigosEntregados, arbolesPlantados, comunidadesAlcanzadas, pedidosConImpacto)
+    comunidades List<String>
+    ongs        List<String>
+    locales     List<LocalCafe>: todos los locales (tiendas y cafetería). Foto: /images/locales/<clave>.jpg
+    evidencias  List<FotoEvidencia>: fotos reales de entregas (static/images/evidencia/). Vacía → sin galería.
+
+  Navbar con transparente=true, igual que la Home: la barra arranca transparente sobre la foto
+  y se vuelve crema al bajar. Por eso el <main> no lleva hs-main--bajo-nav (la foto sube hasta el
+  borde de la pantalla) y el hueco de la barra lo da el propio banner (ver nosotros.css).
+  Estilos en static/css/nosotros.css; aparición al entrar en pantalla con el módulo común
+  static/js/revelar.js (data-revelar); conteo de cifras en home.js; locales en locales.js.
+  Cómo agregar las fotos de locales y de evidencia: docs/fotos-locales-y-evidencia.md.
+========================================================================= -->
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{layout/base :: pagina(titulo='Nosotros · HÖSÉG', activa='nosotros',
+                                          transparente=true, contenido=~{::main}, estilos=~{::link}, scripts=~{::script})}">
+
+<head>
+    <!-- home.css trae el estilo de .hs-contador (cifras) y .hs-credito-foto, que esta página reutiliza -->
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+    <link rel="stylesheet" th:href="@{/css/nosotros.css}">
+</head>
+
+<body>
+    <!-- tipoAbrigo / tipoArbol son los mismos enums que usan las tarjetas de producto, para reutilizar su badge -->
+    <main class="hs-nosotros"
+        th:with="tipoAbrigo=${T(pe.edu.utp.hoseg.web.model.TipoCompromiso).ABRIGO}, tipoArbol=${T(pe.edu.utp.hoseg.web.model.TipoCompromiso).ARBOL}">
+
+        <!-- SECCIÓN 1: HISTORIA (BANNER PRINCIPAL) -->
+        <!-- Foto a todo el ancho con velo y panel de vidrio. La foto hace un zoom de entrada de 2 s
+             (hsAcercar). Entrada escalonada del contenido del panel. -->
+        <section class="hs-nosotros__hero">
+            <img class="hs-nosotros__fondo"
+                th:src="@{${bloques['nosotros.historia']?.imagenUrl ?: '/images/comunidad-cusco.jpg'}}"
+                onerror="this.hidden = true" alt="Alpacas en los Andes de Cusco">
+            <div class="hs-nosotros__velo" aria-hidden="true"></div>
+            <!-- Crédito de la foto por defecto (CC BY); desaparece si el panel pone otra imagen -->
+            <p class="hs-credito-foto hs-credito-foto--hero" th:if="${bloques['nosotros.historia']?.imagenUrl == null}">
+                Foto: <a href="https://commons.wikimedia.org/wiki/File:Alpacas_in_the_mountains.jpg" target="_blank"
+                    rel="noopener">Alpacas in the mountains</a>,
+                Havardtl, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank"
+                    rel="noopener license">CC BY 4.0</a>
+            </p>
+
+            <div class="container hs-nosotros__contenido">
+                <!-- Tarjeta 3D (idea de la tarjeta "card3" de Smit Prajapati, MIT): aros concéntricos que
+                     asoman por la esquina; al pasar el cursor la tarjeta se inclina y los aros se despegan
+                     hacia el frente, uno tras otro. Capas: vidrio (fondo), aros y contenido (nosotros.css). -->
+                <div class="hs-nosotros__panel">
+                    <div class="hs-nosotros__vidrio" aria-hidden="true"></div>
+                    <div class="hs-aros" aria-hidden="true">
+                        <span class="hs-aros__aro hs-aros__aro--1"></span>
+                        <span class="hs-aros__aro hs-aros__aro--2"></span>
+                        <span class="hs-aros__aro hs-aros__aro--3"></span>
+                        <span class="hs-aros__aro hs-aros__aro--4"></span>
+                        <span class="hs-aros__aro hs-aros__aro--5"><i class="bi bi-casaca"></i></span>
+                    </div>
+
+                    <div class="hs-nosotros__panel-contenido">
+                        <!-- Chips de vidrio de la Home: anuncian los dos modelos que se explican más abajo -->
+                        <div class="d-flex flex-wrap gap-2 hs-entrada" style="--hs-i: 0">
+                            <span class="hs-chip-vidrio hs-chip-vidrio--terracota">Buy One, Give One</span>
+                            <span class="hs-chip-vidrio hs-chip-vidrio--salvia">Buy One, Plant One</span>
+                        </div>
+                        <p class="hs-kicker hs-entrada" style="--hs-i: 1">Nosotros</p>
+                        <h1 class="hs-nosotros__titulo hs-entrada" style="--hs-i: 2"
+                            th:text="${bloques['nosotros.historia']?.titulo ?: 'Abrigar también puede cambiar una historia'}">
+                            Abrigar también puede cambiar una historia</h1>
+                        <p class="hs-nosotros__bajada hs-entrada" style="--hs-i: 3"
+                            th:text="${bloques['nosotros.historia']?.cuerpo ?: 'HÖSÉG nació en Perú con una pregunta sencilla: ¿y si cada prenda de abrigo pudiera entregar calor más allá de quien la compra?'}">
+                            Historia</p>
+                        <a th:href="@{${rutaConsulta}}" class="hs-btn hs-btn--primario hs-brillo hs-nosotros__boton hs-entrada" style="--hs-i: 4">
+                            Consulta el impacto de tu compra <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: MODELOS DE TRIPLE IMPACTO -->
+        <!-- hs-aurora pone manchas de color tras las tarjetas para que el vidrio se note. Cada tarjeta:
+             barra que se extiende, icono que gira y borde del color de su modelo al pasar el cursor. -->
+        <section class="hs-seccion hs-aurora">
+            <div class="container hs-ancho-md">
+                <div class="text-center mb-4" data-revelar>
+                    <span class="hs-kicker">Triple Impacto</span>
+                    <h2 class="hs-h2 mt-1 mb-2">Una compra, una acción visible</h2>
+                    <p class="hs-texto-secundario mx-auto hs-ancho-texto mb-0">Un modelo simple de entender y exigente
+                        de cumplir junto a nuestra ONG aliada.</p>
+                </div>
+                <div class="row g-4">
+                    <!-- Modelo 1:1 Abrigo -->
+                    <div class="col-12 col-md-6" data-revelar style="--hs-i: 1">
+                        <div class="hs-modelo hs-modelo--abrigo">
+                            <i class="bi bi-casaca hs-modelo__marca" aria-hidden="true"></i>
+                            <div class="hs-modelo__cabecera">
+                                <div class="hs-modelo__icono"><i class="bi bi-casaca" aria-hidden="true"></i></div>
+                                <th:block th:replace="~{fragments/product-card :: badge(${tipoAbrigo})}" />
+                            </div>
+                            <h3 class="hs-modelo__titulo">Buy One, Give One</h3>
+                            <p class="hs-modelo__texto">Por cada prenda de abrigo elegible que compras, entregamos un
+                                abrigo de alta calidad a una persona en una comunidad vulnerable de Cusco.</p>
+                        </div>
+                    </div>
+                    <!-- Modelo 1:1 Árbol -->
+                    <div class="col-12 col-md-6" data-revelar style="--hs-i: 2">
+                        <div class="hs-modelo hs-modelo--arbol">
+                            <i class="bi bi-tree hs-modelo__marca" aria-hidden="true"></i>
+                            <div class="hs-modelo__cabecera">
+                                <div class="hs-modelo__icono"><i class="bi bi-tree" aria-hidden="true"></i></div>
+                                <th:block th:replace="~{fragments/product-card :: badge(${tipoArbol})}" />
+                            </div>
+                            <h3 class="hs-modelo__titulo">Buy One, Plant One</h3>
+                            <p class="hs-modelo__texto">Por cada accesorio o producto de café seleccionado, financiamos
+                                y gestionamos la plantación y el cuidado de un árbol nativo junto a familias locales.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 3: CIFRAS DE IMPACTO -->
+        <!-- Franja oscura con el fragmento contador de la Home (conteo animado de home.js), en cascada -->
+        <section class="hs-seccion hs-cifras hs-aurora">
+            <div class="container hs-ancho-md text-center">
+                <div class="mb-4" data-revelar>
+                    <h2 class="hs-h2 hs-cifras__titulo mb-2">Datos que nos comprometen</h2>
+                    <p class="hs-cifras__bajada">Los mostramos con orgullo porque cada cifra representa una acción real
+                        de nuestra base de datos.</p>
+                </div>
+
+                <div class="row row-cols-2 row-cols-md-4 g-3 justify-content-center" th:if="${impacto != null}">
+                    <div class="col" data-revelar style="--hs-i: 0">
+                        <th:block
+                            th:replace="~{fragments/impacto :: contador('bi-casaca', ${impacto.abrigosEntregados}, 'Abrigos entregados')}" />
+                    </div>
+                    <div class="col" data-revelar style="--hs-i: 1">
+                        <th:block
+                            th:replace="~{fragments/impacto :: contador('bi-tree', ${impacto.arbolesPlantados}, 'Árboles plantados')}" />
+                    </div>
+                    <div class="col" data-revelar style="--hs-i: 2">
+                        <th:block
+                            th:replace="~{fragments/impacto :: contador('bi-geo-alt', ${impacto.comunidadesAlcanzadas}, 'Comunidades')}" />
+                    </div>
+                    <div class="col" data-revelar style="--hs-i: 3">
+                        <th:block
+                            th:replace="~{fragments/impacto :: contador('bi-cart-check', ${impacto.pedidosConImpacto}, 'Pedidos con impacto')}" />
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 4: COMUNIDADES Y ONGS ALIADAS -->
+        <!-- Entrada desde los lados: comunidades desde la izquierda, la ONG desde la derecha;
+             las píldoras de las comunidades entran en cascada. -->
+        <section class="hs-seccion hs-aurora hs-aurora--inversa">
+            <div class="container hs-ancho-md">
+                <div class="row g-4 g-md-5 align-items-center">
+                    <div class="col-12 col-md-6" data-revelar="izquierda">
+                        <span class="hs-kicker">Con quiénes caminamos</span>
+                        <h2 class="hs-h2 my-2">Comunidades sostenidas</h2>
+                        <p class="hs-texto-secundario">Coordinamos cada jornada y entrega directamente en el territorio,
+                            respetando la organización local de Cusco.</p>
+
+                        <div class="mt-3 flex-wrap gap-2 d-flex" style="--hs-paso: 60ms">
+                            <span class="hs-chip hs-chip--vivo" th:each="c, n : ${comunidades}" data-revelar="escala"
+                                th:style="|--hs-i: ${n.index + 3}|" th:text="${c}">Omacha</span>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta de confianza .hs-aliada, de vidrio: salvia para la ONG y ámbar para el sello B Corp -->
+                    <div class="col-12 col-md-6" data-revelar="derecha" style="--hs-i: 1">
+                        <div class="hs-aliada">
+                            <h3 class="hs-aliada__etiqueta">ONG Aliada Principal</h3>
+                            <div th:each="o : ${ongs}" class="hs-aliada__fila">
+                                <span class="hs-aliada__icono"><i class="bi bi-shield-check"
+                                        aria-hidden="true"></i></span>
+                                <span class="hs-aliada__nombre" th:text="${o}">Pachamama Raymi</span>
+                            </div>
+                            <hr class="hs-aliada__separador">
+                            <div class="hs-aliada__fila">
+                                <span class="hs-aliada__icono hs-aliada__icono--sello"><i class="bi bi-patch-check-fill"
+                                        aria-hidden="true"></i></span>
+                                <p class="hs-aliada__sello">Empresa B Corp en proceso de certificación estándar.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 5: LOCALES -->
+        <!-- Escritorio: abanico de cartas (foto y nombre) que se abre al pasar el cursor o al
+             enfocar con Tab; al elegir un local, sus datos aparecen en la tarjeta de abajo.
+             Móvil: píldoras con los nombres y una sola tarjeta. Sin JS se ven todas las tarjetas.
+             Foto: /images/locales/<clave>.jpg; si aún no existe, queda el fondo con el icono. -->
+        <section class="hs-seccion" th:unless="${#lists.isEmpty(locales)}">
+            <div class="container hs-ancho-md">
+                <div class="text-center mb-4" data-revelar>
+                    <span class="hs-kicker">Dónde encontrarnos</span>
+                    <h2 class="hs-h2 mt-1 mb-2">Nuestros locales</h2>
+                    <p class="hs-texto-secundario mx-auto hs-ancho-texto mb-0">Nuestras tiendas y la cafetería de
+                        Höség Café. Elige un local para ver su dirección y horario.</p>
+                </div>
+
+                <div class="hs-locales" data-locales>
+                    <!-- Abanico (≥ 768 px); locales.js lo muestra -->
+                    <div class="hs-abanico" role="group" aria-label="Elige un local" hidden data-locales-abanico
+                         th:style="|--n: ${#lists.size(locales)}|">
+                        <button type="button" class="hs-abanico__carta" th:each="l, n : ${locales}"
+                                th:style="|--i: ${n.index}|" th:attr="data-local=${l.clave()}"
+                                th:aria-pressed="${n.first}" th:aria-controls="|local-${l.clave()}|">
+                            <span class="hs-abanico__foto">
+                                <i class="bi" th:classappend="${l.esCafe()} ? 'bi-cup-hot' : 'bi-shop'" aria-hidden="true"></i>
+                                <img th:src="@{|/images/locales/${l.clave()}.jpg|}" alt="" loading="lazy" onerror="this.remove()">
+                            </span>
+                            <span class="hs-abanico__nombre" th:text="${l.nombre}">Hoseg House</span>
+                        </button>
+                    </div>
+
+                    <!-- Píldoras (< 768 px); locales.js las muestra -->
+                    <div class="hs-locales__pildoras" role="group" aria-label="Elige un local" hidden data-locales-pildoras>
+                        <button type="button" class="hs-locales__pildora" th:each="l, n : ${locales}"
+                                th:attr="data-local=${l.clave()}" th:aria-pressed="${n.first}"
+                                th:aria-controls="|local-${l.clave()}|" th:text="${l.nombre}">Hoseg House</button>
+                    </div>
+
+                    <!-- Datos de cada local. Con JS solo se ve el elegido -->
+                    <div class="hs-locales__fichas" aria-live="polite">
+                        <article class="hs-ficha-local" th:each="l : ${locales}" th:id="|local-${l.clave()}|"
+                                 th:attr="data-ficha=${l.clave()}">
+                            <div class="hs-ficha-local__foto" aria-hidden="true">
+                                <i class="bi" th:classappend="${l.esCafe()} ? 'bi-cup-hot' : 'bi-shop'"></i>
+                                <img th:src="@{|/images/locales/${l.clave()}.jpg|}" alt="" loading="lazy" onerror="this.remove()">
+                            </div>
+                            <div class="hs-ficha-local__cuerpo">
+                                <span class="hs-ficha-local__tipo" th:text="${l.esCafe()} ? 'Höség Café' : 'Tienda HÖSÉG'">Tienda HÖSÉG</span>
+                                <h3 class="hs-ficha-local__nombre" th:text="${l.nombre}">Hoseg House</h3>
+                                <p class="hs-ficha-local__dato"><i class="bi bi-geo-alt" aria-hidden="true"></i><span th:text="${l.direccion}">Dirección</span></p>
+                                <p class="hs-ficha-local__dato" th:if="${l.horario}"><i class="bi bi-clock" aria-hidden="true"></i><span th:text="${l.horario}">Horario</span></p>
+                                <p class="hs-ficha-local__dato" th:if="${l.telefono}"><i class="bi bi-telephone" aria-hidden="true"></i><span th:text="${l.telefono}">999 999 999</span></p>
+                                <a th:if="${l.urlMapa}" th:href="${l.urlMapa}" target="_blank" rel="noopener"
+                                   class="hs-enlace-flecha">Cómo llegar <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 6: EVIDENCIA DE IMPACTO -->
+        <!-- Solo con fotos reales de entregas (static/images/evidencia/). Sin fotos propias la
+             sección no existe: fotos de banco presentadas como evidencia serían engañosas. -->
+        <section class="hs-seccion hs-seccion--alterna" th:unless="${#lists.isEmpty(evidencias)}">
+            <div class="container">
+                <div class="text-center mb-4" data-revelar>
+                    <span class="hs-kicker">Evidencia de impacto</span>
+                    <h2 class="hs-h2 mt-1 mb-2">Así llegan tus compras a Cusco</h2>
+                    <p class="hs-texto-secundario mx-auto hs-ancho-texto mb-0">Fotos de entregas reales junto a
+                        nuestra ONG aliada.</p>
+                </div>
+                <div class="hs-galeria-evidencia">
+                    <figure class="hs-evidencia" th:each="f, n : ${evidencias}" data-revelar="escala"
+                            th:style="|--hs-i: ${n.index % 6}|">
+                        <a class="hs-evidencia__enlace" th:href="@{${f.url}}" target="_blank" rel="noopener">
+                            <img th:src="@{${f.url}}" th:alt="${f.pie}" loading="lazy">
+                        </a>
+                        <figcaption class="hs-evidencia__pie" th:text="${f.pie}">Entrega de abrigos</figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    <!-- home.js: conteo animado de las cifras (data-contador). locales.js: abanico y píldoras. -->
+    <script th:src="@{/js/home.js}" defer></script>
+    <script th:src="@{/js/locales.js}" defer></script>
+</body>
+
+</html>

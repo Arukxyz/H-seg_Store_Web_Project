@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<!--
+  Bloque 3 · 3.4 Página legal (GET /terminos y /politica-rsu, InstitucionalController).
+  Una sola plantilla para ambas.
+  Modelo: bloque (BloqueContenido o null: titulo, cuerpo, imagenUrl, actualizadoEn), tituloPorDefecto.
+  Con imagen en el panel: banner con la foto; sin imagen: la cabecera común (fragments/cabecera).
+  Estilos en static/css/legal.css.
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: pagina(titulo=${bloque?.titulo ?: tituloPorDefecto} + ' · HÖSÉG', activa='',
+                                          transparente=false, contenido=~{::main}, estilos=~{::link}, scripts=~{})}">
+<head>
+    <link rel="stylesheet" th:href="@{/css/legal.css}">
+</head>
+<body>
+<main class="hs-main--bajo-nav hs-legal">
+
+    <!-- Banner con la imagen del panel (si la hay) -->
+    <div class="hs-legal__banner" th:if="${bloque?.imagenUrl}">
+        <img th:src="${bloque.imagenUrl}" alt="">
+        <div class="hs-legal__banner-velo" aria-hidden="true"></div>
+        <h1 class="hs-legal__banner-titulo hs-entrada" style="--hs-i: 0"
+            th:text="${bloque?.titulo ?: tituloPorDefecto}">Términos y condiciones</h1>
+    </div>
+
+    <!-- Sin imagen: la cabecera común de las páginas interiores -->
+    <th:block th:unless="${bloque?.imagenUrl}">
+        <th:block th:replace="~{fragments/cabecera :: cabecera('Documento oficial', ${bloque?.titulo ?: tituloPorDefecto}, null)}"/>
+    </th:block>
+
+    <section class="hs-seccion pt-0">
+        <div class="container">
+            <p th:if="${bloque?.actualizadoEn}" class="hs-legal__fecha hs-entrada" style="--hs-i: 2">
+                <i class="bi bi-clock" aria-hidden="true"></i>
+                <span th:text="'Actualizado el ' + ${#temporals.format(bloque.actualizadoEn, 'dd/MM/yyyy')}">Actualizado</span>
+            </p>
+
+            <div class="row g-4 g-lg-5">
+                <!-- Columna lateral (solo desde md): compromiso y contacto -->
+                <aside class="col-12 col-md-4 col-lg-3 d-none d-md-block">
+                    <div class="hs-legal__lateral hs-entrada" style="--hs-i: 3">
+                        <div class="hs-legal__tarjeta">
+                            <h2 class="hs-legal__tarjeta-titulo">
+                                <i class="bi bi-shield-check hs-legal__icono--salvia" aria-hidden="true"></i>Triple impacto
+                            </h2>
+                            <p class="hs-legal__tarjeta-texto">
+                                Cada donación es rastreable con el número de tu boleta. Somos empresa de triple
+                                impacto, con la certificación B Corp en proceso.
+                            </p>
+                        </div>
+
+                        <div class="hs-legal__tarjeta">
+                            <h2 class="hs-legal__tarjeta-titulo">
+                                <i class="bi bi-chat-left-text hs-legal__icono--terracota" aria-hidden="true"></i>¿Consultas?
+                            </h2>
+                            <p class="hs-legal__tarjeta-texto">
+                                Si tienes dudas sobre nuestras políticas, escríbenos a
+                                <a class="hs-enlace" href="mailto:hola@hoseg.pe">hola@hoseg.pe</a>.
+                            </p>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Documento -->
+                <div id="documento" class="col-12 col-md-8 col-lg-9">
+                    <div class="hs-legal__documento hs-entrada" style="--hs-i: 3"
+                         th:text="${bloque?.cuerpo ?: 'Contenido en preparación.'}">Texto</div>
+
+                    <div class="hs-legal__pie">
+                        <a class="hs-enlace-flecha" th:href="@{/}">
+                            <i class="bi bi-arrow-left" aria-hidden="true"></i> Volver al inicio
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

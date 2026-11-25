@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<!--
+  Navbar (desktop + barra superior móvil) y MobileNavPill (óvalo inferior).
+  Traducido de `Navbar` en design/figma-make/src/App.tsx. Lo incluye
+  layout/base.html; las páginas no lo llaman directamente.
+
+    activa       → inicio | tienda | cafe | impacto | nosotros | carrito | cuenta
+                   (carrito no marca ningún destino del óvalo: en móvil el
+                   carrito vive en la barra superior)
+    transparente → true solo en páginas con banner a pantalla completa: la barra
+                   arranca transparente con texto claro y se vuelve opaca al
+                   hacer scroll (navbar.js añade .is-scrolled).
+  Espera en el modelo `menuPrincipal` y `carritoUnidades` (AtributosGlobales).
+-->
+<body>
+
+<th:block th:fragment="navbar(activa, transparente)">
+
+    <!-- Barra superior: desktop (≥ 768 px) y móvil (solo logo + carrito) -->
+    <nav class="hs-nav" th:classappend="${transparente} ? 'hs-nav--transparente'" data-nav-scroll aria-label="Principal">
+        <a class="hs-logo" th:href="@{/}">HÖSÉG</a>
+
+        <ul class="hs-nav__enlaces d-none d-md-flex list-unstyled m-0">
+            <li th:each="e : ${menuPrincipal}">
+                <a th:href="@{${e.ruta}}" th:data-seccion="${e.seccion}"
+                   th:classappend="${activa == e.seccion} ? 'is-active'" th:text="${e.etiqueta}">Inicio</a>
+            </li>
+        </ul>
+
+        <div class="hs-nav__acciones">
+            <!--/* Tres casos: visitante (enlace al login), cliente (menú de su cuenta) y personal
+                 con sesión en el panel (enlace al panel; no tiene cuenta de cliente). */-->
+            <a class="hs-nav__cuenta d-none d-md-inline-flex" th:href="@{/login}" sec:authorize="isAnonymous()">
+                <i class="bi bi-person hs-icono" aria-hidden="true"></i>
+                <span class="d-none d-lg-inline">Ingresar</span>
+            </a>
+            <a class="hs-nav__cuenta d-none d-md-inline-flex" th:href="@{/admin/panel}" sec:authorize="hasRole('ADMINISTRADOR')">
+                <i class="bi bi-speedometer2 hs-icono" aria-hidden="true"></i>
+                <span class="d-none d-lg-inline">Panel</span>
+            </a>
+                        <a class="hs-nav__cuenta d-none d-md-inline-flex" th:href="@{/logistica/pedidos}" sec:authorize="hasRole('LOGISTICA')">
+                <i class="bi bi-truck hs-icono" aria-hidden="true"></i>
+                <span class="d-none d-lg-inline">Logística</span>
+            </a>
+            <a class="hs-nav__cuenta d-none d-md-inline-flex" th:href="@{/gestion-impacto/lotes}" sec:authorize="hasRole('GESTOR_IMPACTO')">
+                <i class="bi bi-heart hs-icono" aria-hidden="true"></i>
+                <span class="d-none d-lg-inline">Impacto</span>
+            </a>
+
+            <!-- Cliente: inicial de su nombre y menú con su cuenta y la salida -->
+            <div class="dropdown d-none d-md-block" sec:authorize="hasRole('CLIENTE')">
+                <button class="hs-nav__cuenta hs-nav__usuario" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="hs-avatar" aria-hidden="true" th:text="${#authentication.principal.inicial}">M</span>
+                    <span class="d-none d-lg-inline">Mi cuenta</span>
+                </button>
+                <ul th:replace="~{fragments/navbar :: menuCuenta}"></ul>
+            </div>
+            <!-- Icono de carrito con contador; el badge solo existe si hay ítems -->
+            <a class="hs-nav__carrito" th:href="@{/carrito}" aria-label="Carrito">
+                <span class="hs-carrito-icono">
+                    <i class="bi bi-cart hs-icono" aria-hidden="true"></i>
+                    <span class="hs-carrito-icono__badge" th:if="${carritoUnidades > 0}" th:text="${carritoUnidades}">2</span>
+                </span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- MobileNavPill: óvalo flotante inferior, solo < 768 px. Cinco destinos
+         como máximo para que entre en móviles de 360 px: los del menú con icono
+         y Cuenta. El carrito no está aquí porque la barra superior móvil ya lo
+         muestra con su contador. -->
+    <nav class="hs-pill d-md-none" data-pill aria-label="Navegación móvil">
+        <div class="hs-pill__interior">
+            <span class="hs-pill__indicador" aria-hidden="true"></span>
+
+            <a class="hs-pill__item" th:each="e : ${menuPrincipal}" th:if="${e.enOvalo()}"
+               th:href="@{${e.ruta}}" th:data-seccion="${e.seccion}"
+               th:classappend="${activa == e.seccion} ? 'is-active'">
+                <i class="bi hs-icono" th:classappend="${e.icono}" aria-hidden="true"></i>
+                <span th:text="${e.etiqueta}">Inicio</span>
+            </a>
+            <!-- Cliente con sesión: abre hacia arriba el mismo menú de cuenta del escritorio
+                 (sin él no tendría cómo cerrar sesión en el móvil). La separación la da
+                 data-bs-offset: Popper no toma en cuenta los márgenes del menú. -->
+            <th:block sec:authorize="hasRole('CLIENTE')">
+                <button class="hs-pill__item" th:classappend="${activa == 'cuenta'} ? 'is-active'" type="button"
+                        data-seccion="cuenta" data-bs-toggle="dropdown" data-bs-offset="0,14"
+                        data-bs-popper-config='{"placement":"top-end"}' aria-expanded="false">
+                    <i class="bi bi-person hs-icono" aria-hidden="true"></i>
+                    <span>Cuenta</span>
+                </button>
+                <ul th:replace="~{fragments/navbar :: menuCuenta}"></ul>
+            </th:block>
+                        <!-- Personal del panel: su panel; visitante: el login -->
+            <a class="hs-pill__item" th:classappend="${activa == 'cuenta'} ? 'is-active'" sec:authorize="hasRole('ADMINISTRADOR')"
+               th:href="@{/admin/panel}" data-seccion="cuenta">
+                <i class="bi bi-speedometer2 hs-icono" aria-hidden="true"></i>
+                <span>Panel</span>
+            </a>
+            <a class="hs-pill__item" th:classappend="${activa == 'cuenta'} ? 'is-active'" sec:authorize="hasRole('LOGISTICA')"
+               th:href="@{/logistica/pedidos}" data-seccion="cuenta">
+                <i class="bi bi-truck hs-icono" aria-hidden="true"></i>
+                <span>Panel</span>
+            </a>
+            <a class="hs-pill__item" th:classappend="${activa == 'cuenta'} ? 'is-active'" sec:authorize="hasRole('GESTOR_IMPACTO')"
+               th:href="@{/gestion-impacto/lotes}" data-seccion="cuenta">
+                <i class="bi bi-heart hs-icono" aria-hidden="true"></i>
+                <span>Panel</span>
+            </a>
+            <a class="hs-pill__item" th:classappend="${activa == 'cuenta'} ? 'is-active'" sec:authorize="isAnonymous()"
+               th:href="@{/login}" data-seccion="cuenta">
+                <i class="bi bi-person hs-icono" aria-hidden="true"></i>
+                <span>Cuenta</span>
+            </a>
+
+        </div>
+    </nav>
+</th:block>
+
+<!-- Opciones de la cuenta del cliente: las mismas en el menú del escritorio y en el óvalo móvil.
+     Cerrar sesión es POST: th:action añade el token CSRF. -->
+<ul class="dropdown-menu dropdown-menu-end hs-menu-cuenta" th:fragment="menuCuenta">
+    <li class="hs-menu-cuenta__quien" th:text="${#authentication.principal.nombre}">Ana</li>
+    <li><a class="dropdown-item" th:href="@{/cuenta}">Mis pedidos e impacto</a></li>
+    <li><a class="dropdown-item" th:href="@{/cuenta(seccion='datos')}">Mis datos</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li>
+        <form th:action="@{/logout}" method="post" class="m-0">
+            <button class="dropdown-item" type="submit">Cerrar sesión</button>
+        </form>
+    </li>
+</ul>
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<!--
+  Línea de tiempo de una donación: los cuatro pasos de EstadoDonacion, con los cumplidos marcados.
+  Es el mismo componente en "Detalle de pedido" (2.6) y en la consulta pública de impacto (3.1).
+  Uso: <th:block th:replace="~{fragments/donacion :: lineaTiempo(${d.estado})}"/>
+-->
+<body>
+<ol class="hs-linea-tiempo" th:fragment="lineaTiempo(estado)" aria-label="Etapas de la donación">
+    <li class="hs-linea-tiempo__paso"
+        th:each="e : ${T(pe.edu.utp.hoseg.web.model.EstadoDonacion).values()}"
+        th:classappend="${e.paso <= estado.paso} ? 'is-cumplido'"
+        th:attr="aria-current=${e == estado} ? 'step' : null">
+        <span class="hs-linea-tiempo__punto" th:text="${e.paso + 1}">1</span>
+        <span th:text="${e.etiqueta}">En espera de pago</span>
+    </li>
+</ol>
+</body>
+</html>
