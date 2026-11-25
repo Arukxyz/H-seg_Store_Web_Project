@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{layout/admin :: pagina(titulo='Logística y Despachos · HÖSÉG', activa='logistica', contenido=~{::main})}">
+
+<body>
+    <main class="hs-admin-page">
+        <div class="hs-page-heading">
+            <div>
+                <p class="hs-eyebrow">OPERACIONES · LOGÍSTICA</p>
+                <h1>Gestión de pedidos y despachos</h1>
+                <p class="hs-page-desc">Atiende pedidos pagados, prepara paquetes y actualiza el estado de entrega.</p>
+            </div>
+            <span class="hs-soft-label">
+                <i class="bi bi-shield-check" aria-hidden="true"></i> Vista operativa (mínimo privilegio)
+            </span>
+        </div>
+
+        <!-- Los avisos de éxito o error los muestra layout/admin.html: no repetirlos aquí -->
+
+        <section class="hs-admin-card">
+            <div class="hs-card-head hs-card-head--wrap">
+                <div>
+                    <h2>Pedidos listos para atención</h2>
+                    <p>Selecciona la modalidad para empacar y despachar o entregar en tienda.</p>
+                </div>
+            </div>
+
+            <!-- Pestañas Delivery / Recojo en tienda -->
+            <div class="hs-tab-strip mb-3" role="tablist">
+                <a class="hs-tab text-decoration-none" th:classappend="${tab == 'DELIVERY'} ? 'is-active'"
+                    th:href="@{/logistica/pedidos(tab='DELIVERY')}">
+                    <i class="bi bi-truck me-1" aria-hidden="true"></i> Delivery a domicilio
+                </a>
+                <a class="hs-tab text-decoration-none" th:classappend="${tab == 'RECOJO'} ? 'is-active'"
+                    th:href="@{/logistica/pedidos(tab='RECOJO')}">
+                    <i class="bi bi-shop me-1" aria-hidden="true"></i> Recojo en tienda
+                </a>
+            </div>
+
+            <p class="hs-aviso-deslizar d-md-none px-3 pt-2 mb-1"><span>Desliza la tabla para ver acciones</span><i
+                    class="bi bi-arrow-right hs-aviso-deslizar__flecha" aria-hidden="true"></i></p>
+
+            <div class="hs-table-scroll">
+                <table class="hs-admin-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Comprobante</th>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Receptor y destino</th>
+                            <th scope="col">Prendas a empacar</th>
+                            <th scope="col">Estado envío</th>
+                            <th scope="col">Acción logística</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="p : ${pedidos}">
+                            <td class="hs-cell-strong" th:text="${p.codigoComprobante}">WEB-000126</td>
+                            <td th:text="${#temporals.format(p.fechaVenta, 'dd/MM/yyyy HH:mm')}">15/11/2026 03:30</td>
+                            <td>
+                                <div class="fw-semibold" th:text="${p.nombreReceptor}">Juan Pérez</div>
+                                <div class="small text-muted" th:if="${p.telefonoReceptor != null}">
+                                    <i class="bi bi-telephone me-1"></i><span
+                                        th:text="${p.telefonoReceptor}">987654321</span>
+                                </div>
+                                <div class="small text-muted" th:text="${p.destinoResumen}">Av. El Sol 123, Cusco</div>
+                            </td>
+                            <td>
+                                <ul class="list-unstyled mb-0 small">
+                                    <li th:each="l : ${p.lineas}">
+                                        <strong th:text="${l.cantidad} + '×'">1×</strong>
+                                        <span th:text="${l.nombreProducto}">Casaca</span>
+                                        <span class="text-muted" th:if="${l.talla != null}"
+                                            th:text="'(' + ${l.talla} + ')'">(M)</span>
+                                    </li>
+                                </ul>
+                            </td>
+                            <td>
+                                <span class="hs-op-badge"
+                                    th:classappend="${p.estadoEnvio.name() == 'ENTREGADO'} ? 'hs-op-badge--ok' : (${p.estadoEnvio.name() == 'EN_CAMINO'} ? 'hs-op-badge--ruta' : 'hs-op-badge--alerta')"
+                                    th:text="${p.estadoEnvio.etiqueta}">Preparando</span>
+
+                                <div class="small text-muted mt-1" th:if="${p.courier != null}">
+                                    <span th:text="${p.courier}">Olva</span>
+                                    <span th:if="${p.codigoSeguimiento != null}"
+                                        th:text="' · Guía: ' + ${p.codigoSeguimiento}"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <!-- Acción 1: Despachar Delivery (PREPARANDO -> EN_CAMINO) -->
+                                <form th:if="${p.puedeDespachar()}" method="post"
+                                    th:action="@{/logistica/pedidos/{id}/estado(id=${p.idEnvio})}"
+                                    class="d-flex flex-column gap-1">
+                                    <input type="hidden" name="estado" value="EN_CAMINO">
+                                    <input type="hidden" name="tab" th:value="${tab}">
+                                    <input type="text" name="courier" class="hs-admin-input form-control-sm"
+                                        placeholder="Courier (ej. Olva / Shalom)" required>
+                                    <input type="text" name="codigoSeguimiento" class="hs-admin-input form-control-sm"
+                                        placeholder="Código guía (opcional)">
+                                    <button type="submit" class="hs-admin-btn hs-admin-btn--primary btn-sm mt-1">
+                                        <i class="bi bi-send me-1"></i> Despachar
+                                    </button>
+                                </form>
+
+                                <!-- Acción 2: Marcar como Entregado -->
+                                <form th:if="${p.puedeEntregar()}" method="post"
+                                    th:action="@{/logistica/pedidos/{id}/estado(id=${p.idEnvio})}">
+                                    <input type="hidden" name="estado" value="ENTREGADO">
+                                    <input type="hidden" name="tab" th:value="${tab}">
+                                    <button type="submit" class="hs-admin-btn hs-admin-btn--primary btn-sm">
+                                        <i class="bi bi-check2-circle me-1"></i> Marcar Entregado
+                                    </button>
+                                </form>
+
+                                <span class="small text-success fw-semibold"
+                                    th:if="${p.estadoEnvio.name() == 'ENTREGADO'}">
+                                    <i class="bi bi-check-all"></i> Completado
+                                </span>
+                            </td>
+                        </tr>
+                        <tr th:if="${pedidos.isEmpty()}">
+                            <td colspan="6" class="hs-empty-row">No hay pedidos pagados en esta modalidad por el
+                                momento.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- >>> Aviso de stock bajo al entrar (Pedidos es la primera pantalla de Logística).
+             Es el fragmento compartido con Inventario; el controlador ya envía 'productosCriticos'. -->
+        <th:block th:replace="~{logistica/fragmentos :: avisoStock}" />
+        <!-- <<< Mejora -->
+
+    </main>
+</body>
+
+</html>

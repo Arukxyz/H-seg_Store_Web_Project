@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://thymeleaf.org"
+    th:replace="~{layout/admin :: pagina(titulo='Inventario · Logística HÖSÉG', activa='inventario', contenido=~{::main})}">
+
+<body>
+    <main class="hs-admin-page">
+        <div class="hs-page-heading">
+            <div>
+                <p class="hs-eyebrow">LOGÍSTICA · ALMACÉN</p>
+                <h1>Control de inventario</h1>
+                <p class="hs-page-desc">Supervisa el stock comercial, registra prendas nuevas o solicita reposición a
+                    talleres.</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <span class="hs-soft-label" th:if="${totalCriticos > 0}">
+                    <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                    <span th:text="${totalCriticos} + ' crítico(s)'">0 críticos</span>
+                </span>
+                <button type="button" class="hs-admin-btn hs-admin-btn--primary" data-bs-toggle="modal"
+                    data-bs-target="#modal-nuevo-producto">
+                    <i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo producto
+                </button>
+            </div>
+        </div>
+
+        <section class="hs-admin-card">
+            <div class="hs-card-head hs-card-head--wrap">
+                <div>
+                    <h2>Existencias por variante</h2>
+                    <p>Cuando el stock comercial es menor o igual al mínimo, puedes solicitar reposición a un taller.
+                    </p>
+                </div>
+                <span class="hs-soft-label" th:text="${#lists.size(productos)} + ' variantes activas'">0
+                    variantes</span>
+            </div>
+
+            <div class="hs-tab-strip" role="group" aria-label="Filtrar inventario">
+                <button type="button" class="hs-tab is-active" data-inv-filter="TODOS">Todos</button>
+                <button type="button" class="hs-tab" data-inv-filter="CRITICO">
+                    Stock crítico (<span th:text="${totalCriticos}">0</span>)
+                </button>
+            </div>
+
+            <p class="hs-aviso-deslizar d-md-none px-3 pt-2 mb-1">
+                <span>Desliza la tabla para ver acciones</span>
+                <i class="bi bi-arrow-right hs-aviso-deslizar__flecha" aria-hidden="true"></i>
+            </p>
+
+            <p class="hs-aviso-deslizar d-md-none px-3 pt-2 mb-1">
+                <span>Desliza la tabla para ver más</span>
+                <i class="bi bi-arrow-right hs-aviso-deslizar__flecha" aria-hidden="true"></i>
+            </p>
+
+            <div class="hs-table-scroll">
+                <table class="hs-admin-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Código</th>
+                            <th scope="col">Producto</th>
+                            <th scope="col">Talla</th>
+                            <th scope="col">Stock comercial</th>
+                            <th scope="col">Comprometido</th>
+                            <th scope="col">Mínimo</th>
+                            <th scope="col">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="p : ${productos}" class="hs-inv-row"
+                            th:classappend="${p.stockComercial <= p.stockMinimo} ? 'is-critico'"
+                            th:attr="data-critico=${p.stockComercial <= p.stockMinimo}">
+                            <td><span class="hs-code-pill" th:text="${p.codigo}">HSG-001</span></td>
+
+                            <td>
+                                <strong th:text="${p.nombre}">Casaca</strong>
+                                <span class="hs-table-sub" th:text="${p.categoria}">Categoría</span>
+                            </td>
+                            <td><span class="hs-talla-badge" th:text="${p.tallaMostrada}">M</span></td>
+                            <td>
+                                <span class="hs-op-badge"
+                                    th:classappend="${p.stockComercial <= p.stockMinimo} ? 'hs-op-badge--critico' : 'hs-op-badge--ok'">
+                                    <i class="bi"
+                                        th:classappend="${p.stockComercial <= p.stockMinimo} ? 'bi-exclamation-circle' : 'bi-check-circle'"></i>
+                                    <span th:text="${p.stockComercial} + ' u.'">10 u.</span>
+                                </span>
+                            </td>
+                            <td th:text="${p.stockComprometido} + ' u.'">0 u.</td>
+                            <td th:text="${p.stockMinimo} + ' u.'">3 u.</td>
+                            <td>
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <!-- Abre el modal de edición; logistica.js lo llena con estos data-* -->
+                                    <button type="button" class="hs-admin-btn hs-admin-btn--ghost"
+                                        data-bs-toggle="modal" data-bs-target="#modal-editar-producto"
+                                        th:data-codigo="${p.codigo}" th:data-nombre="${p.nombre}"
+                                        th:data-categoria="${p.categoria}" th:data-coleccion="${p.coleccion}"
+                                        th:data-talla="${p.talla}" th:data-precio="${p.precio}"
+                                        th:data-minimo="${p.stockMinimo}" th:data-compromiso="${p.tipoCompromiso}"
+                                        th:aria-label="|Editar ${p.codigo}|" title="Editar producto">
+                                        <i class="bi bi-pencil" aria-hidden="true"></i> Editar
+                                    </button>
+                                    <form method="post" th:action="@{/logistica/inventario/{c}/reponer(c=${p.codigo})}"
+                                        class="d-flex align-items-center gap-1">
+                                        <input type="number" name="cantidad" min="1" max="500" value="5"
+                                            class="hs-admin-input" style="width: 68px;" aria-label="Cantidad a ingresar"
+                                            required>
+                                        <button type="submit" class="hs-admin-btn hs-admin-btn--secondary"
+                                            title="Ingreso directo a almacén">
+                                            <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                                        </button>
+                                    </form>
+                                    <a class="hs-admin-btn hs-admin-btn--ghost"
+                                        th:href="@{/logistica/proveedores(producto=${p.codigo})}"
+                                        title="Solicitar lote a taller proveedor">
+                                        <i class="bi bi-building" aria-hidden="true"></i> Pedir a taller
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${productos.isEmpty()}">
+                            <td colspan="7" class="hs-empty-row">No hay productos activos en el inventario.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="hs-pagination" id="inv-paginacion" hidden>
+                <span class="hs-pagination__info" id="inv-paginacion-info">Mostrando 1–10</span>
+                <div class="hs-pagination__controls">
+                    <button type="button" class="hs-admin-btn hs-admin-btn--ghost hs-admin-btn--sm" id="inv-prev">
+                        <i class="bi bi-chevron-left" aria-hidden="true"></i> Anterior
+                    </button>
+                    <span class="hs-pagination__page" id="inv-paginacion-num">1 / 1</span>
+                    <button type="button" class="hs-admin-btn hs-admin-btn--ghost hs-admin-btn--sm" id="inv-next">
+                        Siguiente <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Modal: Registrar nuevo producto en inventario -->
+        <div class="modal fade hs-admin-modal" id="modal-nuevo-producto" tabindex="-1"
+            aria-labelledby="titulo-modal-prod" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title" id="titulo-modal-prod">Registrar nuevo producto</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <form method="post" th:action="@{/logistica/inventario/nuevo}">
+                        <div class="modal-body">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6">
+                                    <div class="hs-field">
+                                        <label for="prod-codigo">CÓDIGO *</label>
+                                        <input id="prod-codigo" name="codigo" class="hs-admin-input w-100"
+                                            placeholder="Ej. HSG-PON-001" required maxlength="30">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="hs-field">
+                                        <label for="prod-talla">TALLA</label>
+                                        <input id="prod-talla" name="talla" class="hs-admin-input w-100"
+                                            placeholder="S, M, L o Única" maxlength="10">
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="hs-field">
+                                        <label for="prod-nombre">NOMBRE DEL PRODUCTO *</label>
+                                        <input id="prod-nombre" name="nombre" class="hs-admin-input w-100"
+                                            placeholder="Ej. Poncho Andino Alpaca" required maxlength="150">
+                                    </div>
+                                </div>
+
+                                <!-- categoria y coleccion son claves foráneas: solo valores de sus tablas -->
+                                <div class="col-12 col-md-6">
+                                    <div class="hs-field">
+                                        <label for="prod-cat">CATEGORÍA *</label>
+                                        <select id="prod-cat" name="categoria" class="hs-admin-input w-100" required>
+                                            <option value="" disabled selected>Elige una categoría</option>
+                                            <option th:each="c : ${categorias}" th:value="${c}" th:text="${c}">Casacas</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="hs-field">
+                                        <label for="prod-col">COLECCIÓN</label>
+                                        <select id="prod-col" name="coleccion" class="hs-admin-input w-100">
+                                            <option value="">Sin colección</option>
+                                            <option th:each="c : ${colecciones}" th:value="${c}" th:text="${c}">Älpafill</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="hs-field">
+                                        <label for="prod-precio">PRECIO (S/) *</label>
+                                        <input id="prod-precio" name="precio" type="number" step="0.01" min="1"
+                                            class="hs-admin-input w-100" placeholder="189.90" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-6 col-md-3">
+                                    <div class="hs-field">
+                                        <label for="prod-stock">STOCK INICIAL *</label>
+                                        <input id="prod-stock" name="stockInicial" type="number" min="0" value="10"
+                                            class="hs-admin-input w-100" required>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="hs-field">
+                                        <label for="prod-min">MÍNIMO *</label>
+                                        <input id="prod-min" name="stockMinimo" type="number" min="0" value="3"
+                                            class="hs-admin-input w-100" required>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="hs-field">
+                                        <label for="prod-impacto">COMPROMISO SOCIAL</label>
+                                        <select id="prod-impacto" name="tipoCompromiso" class="hs-admin-input w-100">
+                                            <option value="">Sin compromiso</option>
+                                            <option value="ABRIGO">ABRIGO (1 compra = 1 abrigo)</option>
+                                            <option value="ARBOL">ÁRBOL (1 compra = 1 árbol)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="hs-admin-btn hs-admin-btn--ghost"
+                                data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="hs-admin-btn hs-admin-btn--primary">
+                                <i class="bi bi-check2" aria-hidden="true"></i> Guardar producto
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Editar producto (uno solo; logistica.js lo llena con la fila elegida) -->
+        <div class="modal fade hs-admin-modal" id="modal-editar-producto" tabindex="-1"
+            aria-labelledby="titulo-modal-editar" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title" id="titulo-modal-editar">
+                            Editar producto <span class="hs-code-pill" data-editar-codigo>HSG-001</span>
+                        </h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <form method="post" th:action="@{/logistica/inventario}"
+                        th:data-accion-base="@{/logistica/inventario/}" data-form-editar>
+                        <div class="modal-body">
+                            <p class="hs-page-desc mb-3">
+                                El código y el stock no se editan aquí: el stock se mueve con
+                                <strong>reponer</strong> o con las órdenes a talleres.
+                            </p>
+                            <div class="row g-3">
+                                <div class="col-12 col-md-8">
+                                    <div class="hs-field">
+                                        <label for="edit-nombre">NOMBRE DEL PRODUCTO *</label>
+                                        <input id="edit-nombre" name="nombre" class="hs-admin-input w-100"
+                                            required maxlength="150" aria-describedby="edit-nombre-ayuda">
+                                        <small id="edit-nombre-ayuda" class="hs-table-sub">
+                                            Las tallas de un modelo comparten el nombre. Si lo cambias, cámbialo
+                                            también en sus otras tallas para que sigan juntas en la tienda y
+                                            conserven sus reseñas.
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <div class="hs-field">
+                                        <label for="edit-talla">TALLA</label>
+                                        <input id="edit-talla" name="talla" class="hs-admin-input w-100"
+                                            placeholder="S, M, L o Única" maxlength="10">
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6">
+                                    <div class="hs-field">
+                                        <label for="edit-cat">CATEGORÍA *</label>
+                                        <select id="edit-cat" name="categoria" class="hs-admin-input w-100" required>
+                                            <option th:each="c : ${categorias}" th:value="${c}" th:text="${c}">Casacas</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <div class="hs-field">
+                                        <label for="edit-col">COLECCIÓN</label>
+                                        <select id="edit-col" name="coleccion" class="hs-admin-input w-100">
+                                            <option value="">Sin colección</option>
+                                            <option th:each="c : ${colecciones}" th:value="${c}" th:text="${c}">Älpafill</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-6 col-md-4">
+                                    <div class="hs-field">
+                                        <label for="edit-precio">PRECIO (S/) *</label>
+                                        <input id="edit-precio" name="precio" type="number" step="0.01" min="0.01"
+                                            class="hs-admin-input w-100" required>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <div class="hs-field">
+                                        <label for="edit-min">STOCK MÍNIMO *</label>
+                                        <input id="edit-min" name="stockMinimo" type="number" min="0" max="10000"
+                                            class="hs-admin-input w-100" required>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-5">
+                                    <div class="hs-field">
+                                        <label for="edit-impacto">COMPROMISO SOCIAL</label>
+                                        <select id="edit-impacto" name="tipoCompromiso" class="hs-admin-input w-100">
+                                            <option value="">Sin compromiso</option>
+                                            <option th:each="t : ${compromisos}" th:value="${t}"
+                                                th:text="|${t} (1 compra = ${t.etiqueta})|">ABRIGO (1 compra = 1 abrigo)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="hs-admin-btn hs-admin-btn--ghost"
+                                data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="hs-admin-btn hs-admin-btn--primary">
+                                <i class="bi bi-check2" aria-hidden="true"></i> Guardar cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- >>> El aviso de stock bajo ahora es el fragmento compartido con Pedidos
+             (logistica/fragmentos.html). -->
+        <th:block th:replace="~{logistica/fragmentos :: avisoStock}" />
+        <!-- <<<  -->
+
+    </main>
+
+</body>
+
+</html>

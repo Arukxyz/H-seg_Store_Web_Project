@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<!-- =========================================================================
+  Bloque 3 · 3.1 Consulta de impacto (GET /consulta-impacto, ImpactoController).
+  Pública y sin datos personales. Acepta ?boleta=WEB-000110 (también "110") y ?donacion=id (QR de la boleta).
+  También en JSON: GET /api/impacto?boleta=… (404 si no existe), para buscar sin recargar.
+  Modelo:
+    boleta       String buscado (para rellenar el campo)
+    consulta     ConsultaImpacto o null: codigoComprobante, fechaCompra, estadoVenta, porQr,
+                 donaciones List<DonacionVista> (tipo, unidades, producto, estado [etiqueta, paso 0-3],
+                 comunidad, ong, fechaDespacho, fechaEntrega)
+    noEncontrado boolean (variante "Código no encontrado")
+  La línea de tiempo usa EstadoDonacion: En espera de pago → Pendiente de asignar → Lote asignado → Entregada.
+
+  Usa los estilos compartidos de Nosotros (nosotros.css: tarjeta del resultado y aparición
+  al scroll) y el propio de esta página (consulta-impacto.css).
+
+  Encabezado centrado de un solo color de la paleta, formulario en tarjeta y tres pistas de
+  lo que el cliente verá al consultar. Chips y pistas en un tono neutro; el resultado va
+  sin manchas.
+========================================================================= -->
+<!-- estilos=~{::link} carga solo nosotros.css (tarjeta del resultado, aparición) y consulta-impacto.css;
+     home.css no hace falta: solo tiene los pasos y el crédito de la foto de la Home -->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{layout/base :: pagina(titulo='Consulta tu impacto · HÖSÉG', activa='impacto',
+                                          transparente=false, contenido=~{::main}, estilos=~{::link}, scripts=~{})}">
+
+<head>
+    <!-- nosotros.css: tarjeta del resultado (hs-resultado) y aparición al scroll -->
+    <link rel="stylesheet" th:href="@{/css/nosotros.css}">
+    <link rel="stylesheet" th:href="@{/css/consulta-impacto.css}">
+</head>
+
+<body>
+    <!-- hs-nosotros: estilos compartidos con Nosotros (tarjeta del resultado); hs-consulta, los propios. Entrada escalonada con hs-entrada (--hs-i) y aparición al scroll con data-revelar (revelar.js) -->
+    <main class="hs-main--bajo-nav hs-nosotros hs-consulta">
+
+        <!-- encabezado de color sólido (sin manchas ni iconos de fondo). Si ya hay un resultado, el
+             encabezado se compacta para que se vea pronto. -->
+        <section class="hs-consulta__hero" th:classappend="${consulta == null} ? 'hs-consulta__hero--completo'">
+
+            <div class="container hs-consulta__contenido">
+                <!-- los dos chips usan el mismo tono neutro -->
+                <div class="d-flex flex-wrap justify-content-center gap-2 hs-entrada" style="--hs-i: 0">
+                    <span class="hs-consulta__chip"><i class="bi bi-casaca" aria-hidden="true"></i> Buy One, Give
+                        One</span>
+                    <span class="hs-consulta__chip"><i class="bi bi-tree" aria-hidden="true"></i> Buy One, Plant
+                        One</span>
+                </div>
+                <!-- se quitó el texto "Trazabilidad 1:1" que iba sobre el título -->
+                <h1 class="hs-consulta__titulo mt-4 hs-entrada" style="--hs-i: 1">Consulta tu impacto</h1>
+                <p class="hs-consulta__bajada hs-entrada" style="--hs-i: 2">Escribe el código de tu boleta (está en la boleta
+                    impresa o escanea
+                    su QR).</p>
+
+                <!-- FORMULARIO: Conserva el Context Path de manera nativa usando la variable oficial -->
+                <!-- formulario en tarjeta, con icono dentro del campo; mismo name="boleta" y mismo GET -->
+                <form class="hs-consulta__form hs-entrada" style="--hs-i: 3" method="get" th:action="@{${rutaConsulta}}">
+                    <label for="boletaInput" class="visually-hidden">Código de boleta</label>
+                    <div class="hs-consulta__campo">
+                        <i class="bi bi-receipt" aria-hidden="true"></i>
+                        <input class="hs-input" id="boletaInput" name="boleta" th:value="${boleta}"
+                            placeholder="WEB-000110" autocomplete="off" required>
+                    </div>
+                    <button class="hs-btn hs-btn--primario hs-brillo" type="submit">Consultar <i class="bi bi-arrow-right"
+                            aria-hidden="true"></i></button>
+                </form>
+
+                <!-- Alerta para código no encontrado -->
+                <!-- Aviso ámbar de la paleta, junto al campo -->
+                <div th:if="${noEncontrado}" class="hs-consulta__aviso" role="alert">
+                    <i class="bi bi-shield-exclamation" aria-hidden="true"></i>
+                    <span>No encontramos ese código. Por favor, revisa tu boleta.</span>
+                </div>
+
+                <!-- pistas de lo que se verá al consultar (los mismos datos del resultado: tipo de
+                     donación, recorrido y destino). Solo antes de consultar, para no repetir lo que ya se muestra abajo. -->
+                <ul class="hs-consulta__ver" th:if="${consulta == null}"
+                    aria-label="Qué verás al consultar">
+                    <li class="hs-consulta__ver-item hs-entrada" style="--hs-i: 4">
+                        <span class="hs-consulta__ver-icono"><i class="bi bi-casaca" aria-hidden="true"></i></span>
+                        <span>Tu abrigo o tu árbol</span>
+                    </li>
+                    <li class="hs-consulta__ver-item hs-entrada" style="--hs-i: 5">
+                        <span class="hs-consulta__ver-icono"><i class="bi bi-check2-circle"
+                                aria-hidden="true"></i></span>
+                        <span>Cada etapa, hasta la entrega</span>
+                    </li>
+                    <li class="hs-consulta__ver-item hs-entrada" style="--hs-i: 6">
+                        <span class="hs-consulta__ver-icono"><i class="bi bi-geo-alt" aria-hidden="true"></i></span>
+                        <span>La comunidad y la ONG aliada</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Bloque de resultados públicos -->
+        <!-- sin manchas de color queda el fondo liso de la página con la tarjeta
+             del resultado. El estado de la compra y las donaciones usan los colores de la marca. -->
+        <section class="hs-seccion" th:if="${consulta != null}">
+            <div class="container hs-ancho-md">
+                <div class="hs-resultado" data-revelar>
+                    <div class="hs-resultado__cabecera">
+                        <h2 class="hs-resultado__codigo" th:text="${consulta.codigoComprobante}">WEB-000110</h2>
+                        <span class="hs-estado"
+                            th:classappend="|hs-estado--${consulta.estadoVenta.name().toLowerCase()}|"
+                            th:text="${consulta.estadoVenta.etiqueta}">Pagado</span>
+                    </div>
+
+                    <p class="hs-resultado__fecha"
+                        th:text="'Compra del ' + ${#temporals.format(consulta.fechaCompra, 'dd/MM/yyyy')}"></p>
+
+                    <div th:unless="${consulta.tieneDonaciones()}" class="hs-resultado__vacio">
+                        <i class="bi bi-info-circle" aria-hidden="true"></i>
+                        <span>Esta compra no generó donaciones asociadas.</span>
+                    </div>
+
+                    <!-- Iteración de Donaciones -->
+                    <!-- El icono (bi-casaca / bi-tree) y el color salen del enum del tipo (icono y clave), sin los dos th:if -->
+                    <div class="hs-donacion" th:each="d, n : ${consulta.donaciones}" data-revelar th:style="|--hs-i: ${n.index + 1}|"
+                        th:classappend="|hs-donacion--${d.tipo.clave}|">
+                        <div class="hs-donacion__icono">
+                            <i class="bi" th:classappend="${d.tipo.icono}" aria-hidden="true"></i>
+                        </div>
+
+                        <div class="hs-donacion__cuerpo">
+                            <p class="hs-donacion__titulo">
+                                <strong class="hs-donacion__unidades" th:text="${d.unidades}">1 abrigo</strong> ·
+                                <strong th:text="${d.producto}">Casaca Älpafill Cusco</strong>
+                            </p>
+
+                            <!-- Línea de tiempo: el mismo componente que "Detalle de pedido" (bloque 2) -->
+                            <th:block th:replace="~{fragments/donacion :: lineaTiempo(${d.estado})}" />
+
+                            <!-- Detalles de Destino -->
+                            <p class="hs-donacion__destino" th:if="${d.comunidad}">
+                                <i class="bi bi-geo-alt" aria-hidden="true"></i>
+                                <span>
+                                    <span th:text="${d.comunidad} + ' · ONG: ' + ${d.ong}">Omacha · Pachamama
+                                        Raymi</span>
+                                    <span th:if="${d.fechaEntrega}"
+                                        th:text="' · Entregado el ' + ${#temporals.format(d.fechaEntrega, 'dd/MM/yyyy')}">fecha</span>
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Se eliminó la sección que repetía los pasos de la Home -->
+    </main>
+</body>
+
+</html>

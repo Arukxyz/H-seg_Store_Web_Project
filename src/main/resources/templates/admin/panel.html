@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://thymeleaf.org"
+    th:replace="~{layout/admin :: pagina(titulo='Panel · HÖSÉG', activa='panel', contenido=~{::main})}">
+
+<body>
+    <!--
+  La tabla de pedidos está en la sección "Pedidos" del menú (/admin/pedidos).
+  Los gráficos siguen funcionando con los datos ocultos de #datos-pedidos (ver el final de esta plantilla).
+-->
+    <main class="hs-admin-page hs-panel-page">
+        <div class="hs-page-heading">
+            <div>
+                <p class="hs-eyebrow">RESUMEN GENERAL · HÖSÉG</p>
+                <h1>Panel de control</h1>
+                <p class="hs-page-desc">Monitorea ventas, entregas e impacto social de la tienda web.</p>
+            </div>
+            <form method="get" th:action="@{/admin/panel}" class="hs-date-filter"
+                aria-label="Filtrar indicadores y gráficos por fecha">
+                <div class="hs-field">
+                    <label for="desde">Desde</label>
+                    <input class="hs-admin-input" id="desde" type="date" name="desde" th:value="${desde}" required>
+                </div>
+                <div class="hs-field">
+                    <label for="hasta">Hasta</label>
+                    <input class="hs-admin-input" id="hasta" type="date" name="hasta" th:value="${hasta}" required>
+                </div>
+                <button class="hs-admin-btn hs-admin-btn--primary" type="submit">
+                    <i class="bi bi-funnel" aria-hidden="true"></i> Aplicar
+                </button>
+            </form>
+        </div>
+
+        <!-- Tarjetas de KPIs con acentos dinámicos según estado -->
+        <div class="hs-metrics" aria-label="Indicadores del negocio">
+            <article class="hs-metric">
+                <span class="hs-metric-icon"><i class="bi bi-bag-check" aria-hidden="true"></i></span>
+                <span class="hs-metric-label">Pedidos de hoy</span>
+                <strong th:text="${indicadores.pedidosHoy}">0</strong>
+                <!-- Enlaza a la pantalla Pedidos con el mismo rango de fechas, igual que las tarjetas
+                 de Mensajes y Reclamos (patrón hs-metric-link). -->
+                <a th:href="@{/admin/pedidos(desde=${desde},hasta=${hasta})}" class="hs-metric-link">
+                    Ver pedidos <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+                </a>
+            </article>
+
+            <article class="hs-metric" th:classappend="${indicadores.pendientesDePago > 0} ? 'hs-metric--alerta'">
+                <span class="hs-metric-icon"><i class="bi bi-hourglass-split" aria-hidden="true"></i></span>
+                <span class="hs-metric-label">Pendientes de pago</span>
+                <strong th:text="${indicadores.pendientesDePago}">0</strong>
+                <span class="hs-metric-note">En proceso de validación</span>
+            </article>
+
+            <article class="hs-metric">
+                <span class="hs-metric-icon"><i class="bi bi-cash-stack" aria-hidden="true"></i></span>
+                <span class="hs-metric-label">Monto vendido</span>
+                <strong class="hs-metric-money"
+                    th:text="'S/ ' + ${#numbers.formatDecimal(indicadores.montoVendido, 1, 'COMMA', 2, 'POINT')}">S/
+                    0.00</strong>
+                <span class="hs-metric-note">Ventas pagadas en pasarela</span>
+            </article>
+
+            <article class="hs-metric hs-metric--impacto">
+                <span class="hs-metric-icon"><i class="bi bi-tree" aria-hidden="true"></i></span>
+                <span class="hs-metric-label">Impacto generado</span>
+                <strong class="hs-metric-impact"
+                    th:text="${indicadores.impactoGenerado.tieneImpacto()} ? ${indicadores.impactoGenerado.texto} : 'Sin impacto aún'">Sin
+                    impacto</strong>
+                <span class="hs-metric-note">Compromisos del periodo</span>
+            </article>
+
+            <article class="hs-metric">
+                <span class="hs-metric-icon"><i class="bi bi-envelope" aria-hidden="true"></i></span>
+                <span class="hs-metric-label">Mensajes nuevos</span>
+                <strong th:text="${indicadores.mensajesNuevos}">0</strong>
+                <a th:href="@{/admin/mensajes}" class="hs-metric-link">
+                    Ir a bandeja <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+                </a>
+            </article>
+
+            <article class="hs-metric" th:classappend="${indicadores.reclamosSinResponder > 0} ? 'hs-metric--alerta'">
+                <span class="hs-metric-icon"><i class="bi bi-journal-text" aria-hidden="true"></i></span>
+                <span class="hs-metric-label">Reclamos sin responder</span>
+                <strong th:text="${indicadores.reclamosSinResponder}">0</strong>
+                <a th:href="@{/admin/mensajes(pestana='reclamaciones')}" class="hs-metric-link">
+                    Ver reclamaciones <i class="bi bi-arrow-up-right" aria-hidden="true"></i>
+                </a>
+            </article>
+        </div>
+
+        <!-- Tablero Gráfico Ejecutivo (CEO · CFO · COO · CRO) -->
+        <section class="row g-3 mb-4" aria-label="Analítica gerencial">
+            <div class="col-12 col-lg-5">
+                <article class="hs-admin-card h-100 p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <p class="hs-eyebrow mb-1">CEO &amp; CRO · INGRESOS</p>
+                            <h2 class="h5 mb-0 d-flex align-items-center gap-2">Ventas por fecha
+                                <!-- Popover de ayuda (Bootstrap). Se activa en admin.js; trigger "focus" cierra al hacer clic fuera;
+                             container="body" evita que la tarjeta lo recorte. -->
+                                <a tabindex="0" role="button" class="text-muted fs-6" data-bs-toggle="popover"
+                                    data-bs-trigger="focus" data-bs-placement="bottom" data-bs-container="body"
+                                    data-bs-title="¿Qué muestra?"
+                                    data-bs-content="Ventas pagadas por día (hasta los últimos 7 días con ventas del periodo). El ticket promedio es el monto pagado dividido entre los pedidos pagados."
+                                    aria-label="Qué muestra este gráfico"><i class="bi bi-info-circle"
+                                        aria-hidden="true"></i></a>
+                            </h2>
+                        </div>
+                        <div class="text-end">
+                            <span class="hs-metric-label d-block">Ticket promedio</span>
+                            <strong id="kpi-ticket-promedio" class="hs-metric-money">S/ 0.00</strong>
+                        </div>
+                    </div>
+                    <div style="height: 210px;">
+                        <canvas id="chartVentasFecha"></canvas>
+                    </div>
+                </article>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-3">
+                <article class="hs-admin-card h-100 p-3">
+                    <p class="hs-eyebrow mb-1">CFO · FLUJO</p>
+                    <h2 class="h5 mb-2 d-flex align-items-center gap-2">Estado de pedidos
+                        <!-- Popover de ayuda (Bootstrap). Se activa en admin.js; trigger "focus" cierra al hacer clic fuera;
+                             container="body" evita que la tarjeta lo recorte. -->
+                        <a tabindex="0" role="button" class="text-muted fs-6" data-bs-toggle="popover"
+                            data-bs-trigger="focus" data-bs-placement="bottom" data-bs-container="body"
+                            data-bs-title="¿Qué muestra?"
+                            data-bs-content="Reparto de los pedidos del periodo según su estado: pagados, pendientes de pago y anulados."
+                            aria-label="Qué muestra este gráfico"><i class="bi bi-info-circle"
+                                aria-hidden="true"></i></a>
+                    </h2>
+                    <div style="height: 210px;">
+                        <canvas id="chartEstadosPedidos"></canvas>
+                    </div>
+                </article>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4">
+                <article class="hs-admin-card h-100 p-3">
+                    <p class="hs-eyebrow mb-1">COO · OPERACIONES</p>
+                    <h2 class="h5 mb-2 d-flex align-items-center gap-2">Entregas y modalidad
+                        <!-- Popover de ayuda (Bootstrap). Se activa en admin.js; trigger "focus" cierra al hacer clic fuera;
+                             container="body" evita que la tarjeta lo recorte. -->
+                        <a tabindex="0" role="button" class="text-muted fs-6" data-bs-toggle="popover"
+                            data-bs-trigger="focus" data-bs-placement="bottom" data-bs-container="body"
+                            data-bs-title="¿Qué muestra?"
+                            data-bs-content="Pedidos por modalidad (delivery o recojo en tienda) y cuántos están entregados o aún en proceso."
+                            aria-label="Qué muestra este gráfico"><i class="bi bi-info-circle"
+                                aria-hidden="true"></i></a>
+                    </h2>
+                    <div style="height: 210px;">
+                        <canvas id="chartOperacionEnvios"></canvas>
+                    </div>
+                </article>
+            </div>
+        </section>
+        <div hidden aria-hidden="true" id="datos-pedidos">
+            <span th:each="p : ${pedidos}" data-pedido
+                th:attr="data-estado=${p.estado.name()},
+                       data-fecha=${#temporals.format(p.fecha, 'dd/MM/yyyy')},
+                       data-total=${p.total},
+                       data-envio=${p.tipoEnvio != null} ? ${p.tipoEnvio.etiqueta} + (${p.estadoEnvio != null} ? ' · ' + ${p.estadoEnvio.etiqueta} : '') : ''"></span>
+        </div>
+    </main>
+</body>
+
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://thymeleaf.org"
+    th:replace="~{layout/base :: pagina(titulo='Pasarela de pago · HÖSÉG', activa='carrito',
+                                          transparente=false, contenido=~{::main}, estilos=~{::link}, scripts=~{::script})}">
+
+<head>
+    <link rel="stylesheet" th:href="@{/css/tienda.css}">
+    <!-- estilos del indicador de pasos -->
+    <link rel="stylesheet" th:href="@{/css/pasos-compra.css}">
+</head>
+
+<body>
+    <main class="hs-main--bajo-nav hs-pagina">
+        <th:block th:replace="~{fragments/avisos :: avisos}" />
+
+        <header class="hs-pagina-cabecera hs-entrada" style="--hs-i: 0">
+            <div class="container">
+                <!-- indicador de pasos (fragments/pasos-compra) -->
+                <th:block th:replace="~{fragments/pasos-compra :: pasos(2)}" />
+                <h1 class="hs-pagina-cabecera__titulo">Pasarela de pago</h1>
+            </div>
+        </header>
+
+        <div class="container">
+            <div class="alert alert-danger d-flex align-items-center mb-4" role="alert" th:if="${errorPago}">
+                <i class="bi bi-exclamation-triangle-fill me-2" aria-hidden="true"></i>
+                <span th:text="${errorPago}">Pago rechazado.</span>
+            </div>
+
+            <div class="row g-4 g-lg-5 hs-entrada" style="--hs-i: 1">
+                <!-- Columna izquierda: Acordeón de medios de pago -->
+                <div class="col-12 col-lg-7">
+                    <h2 class="hs-paso mb-3"><span class="hs-paso__numero">2</span> Elige tu medio de pago</h2>
+
+                    <div class="accordion" id="acordeonPago">
+                        <!-- OPCIÓN A: TARJETA -->
+                        <div class="accordion-item border rounded-3 mb-3 overflow-hidden">
+                            <h3 class="accordion-header" id="headingTarjeta">
+                                <button class="accordion-button fw-semibold" type="button"
+                                    th:classappend="${medioActivo == 'BILLETERA'} ? 'collapsed'"
+                                    data-bs-toggle="collapse" data-bs-target="#collapseTarjeta"
+                                    th:aria-expanded="${medioActivo != 'BILLETERA'}" aria-controls="collapseTarjeta">
+                                    <i class="bi bi-credit-card me-2" aria-hidden="true"></i>
+                                    Tarjeta de Crédito o Débito (Visa / Mastercard)
+                                </button>
+                            </h3>
+                            <div id="collapseTarjeta" class="accordion-collapse collapse"
+                                th:classappend="${medioActivo != 'BILLETERA'} ? 'show'" aria-labelledby="headingTarjeta"
+                                data-bs-parent="#acordeonPago">
+                                <div class="accordion-body p-4">
+                                    <form th:object="${tarjetaForm}" method="post" th:action="@{/carrito/procesar-pago}"
+                                        class="needs-validation" novalidate>
+                                        <input type="hidden" name="medioPago" value="TARJETA">
+
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                <label class="hs-label" for="numeroTarjeta">Número de tarjeta *</label>
+                                                <input class="form-control hs-input" id="numeroTarjeta"
+                                                    th:field="*{numeroTarjeta}" th:errorclass="is-invalid"
+                                                    maxlength="19" inputmode="numeric" placeholder="4557 8800 1234 5678"
+                                                    autocomplete="off" required>
+                                                <div class="invalid-feedback">Ingresa los 16 dígitos de tu tarjeta.
+                                                </div>
+                                                <p class="hs-campo-error" th:if="${#fields.hasErrors('numeroTarjeta')}"
+                                                    th:errors="*{numeroTarjeta}">Número inválido.</p>
+                                                <small class="hs-texto-secundario">Demo: cualquier número Luhn válido
+                                                    aprueba; terminado en <code>0000</code> simula rechazo.</small>
+                                            </div>
+
+                                            <div class="col-6">
+                                                <label class="hs-label" for="vencimiento">Vencimiento (MM/AA) *</label>
+                                                <input class="form-control hs-input" id="vencimiento"
+                                                    th:field="*{vencimiento}" th:errorclass="is-invalid" maxlength="5"
+                                                    placeholder="08/28" pattern="(0[1-9]|1[0-2])/[0-9]{2}"
+                                                    autocomplete="off" required>
+                                                <div class="invalid-feedback">Ingresa mes y año (MM/AA).</div>
+                                                <p class="hs-campo-error" th:if="${#fields.hasErrors('vencimiento')}"
+                                                    th:errors="*{vencimiento}">Formato MM/AA.</p>
+                                            </div>
+
+                                            <div class="col-6">
+                                                <label class="hs-label d-flex align-items-center gap-1" for="cvv">
+                                                    <span>Código CVV *</span>
+                                                    <button type="button" class="hs-btn-icono hs-btn-icono--sm" aria-label="Ayuda sobre CVV"
+                                                        data-bs-toggle="popover" data-bs-trigger="hover focus click"
+                                                        data-bs-placement="top" data-bs-title="¿Qué es el CVV?"
+                                                        data-bs-content="Son los 3 dígitos de seguridad ubicados al reverso de tu tarjeta.">
+                                                        <i class="bi bi-question-circle" aria-hidden="true"></i>
+                                                    </button>
+                                                </label>
+                                                <input class="form-control hs-input" id="cvv" type="password"
+                                                    th:field="*{cvv}" th:errorclass="is-invalid" maxlength="3"
+                                                    pattern="[0-9]{3}" inputmode="numeric" placeholder="123"
+                                                    autocomplete="off" required>
+                                                <div class="invalid-feedback">Ingresa los 3 dígitos del CVV.</div>
+                                                <p class="hs-campo-error" th:if="${#fields.hasErrors('cvv')}"
+                                                    th:errors="*{cvv}">3 dígitos.</p>
+                                            </div>
+
+                                            <div class="col-12 col-sm-7">
+                                                <label class="hs-label" for="titular">Nombre del titular *</label>
+                                                <input class="form-control hs-input" id="titular" th:field="*{titular}"
+                                                    th:errorclass="is-invalid" placeholder="Como figura en la tarjeta"
+                                                    required>
+                                                <div class="invalid-feedback">Ingresa el nombre del titular.</div>
+                                                <p class="hs-campo-error" th:if="${#fields.hasErrors('titular')}"
+                                                    th:errors="*{titular}">Ingresa el titular.</p>
+                                            </div>
+
+                                            <div class="col-12 col-sm-5">
+                                                <label class="hs-label" for="dniTitular">DNI del titular *</label>
+                                                <input class="form-control hs-input" id="dniTitular"
+                                                    th:field="*{dniTitular}" th:errorclass="is-invalid" maxlength="8"
+                                                    pattern="[0-9]{8}" inputmode="numeric" placeholder="8 dígitos"
+                                                    required>
+                                                <div class="invalid-feedback">Ingresa un DNI válido de 8 dígitos.</div>
+                                                <p class="hs-campo-error" th:if="${#fields.hasErrors('dniTitular')}"
+                                                    th:errors="*{dniTitular}">8 dígitos.</p>
+                                            </div>
+                                        </div>
+
+                                        <button class="hs-btn hs-btn--primario hs-brillo w-100 mt-4" type="submit">
+                                            <i class="bi bi-shield-lock me-1" aria-hidden="true"></i>
+                                            Pagar S/ <span
+                                                th:text="${#numbers.formatDecimal(totalConEnvio, 1, 'COMMA', 2, 'POINT')}">259.90</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- OPCIÓN B: YAPE / PLIN -->
+                        <div class="accordion-item border rounded-3 overflow-hidden">
+                            <h3 class="accordion-header" id="headingBilletera">
+                                <button class="accordion-button fw-semibold" type="button"
+                                    th:classappend="${medioActivo != 'BILLETERA'} ? 'collapsed'"
+                                    data-bs-toggle="collapse" data-bs-target="#collapseBilletera"
+                                    th:aria-expanded="${medioActivo == 'BILLETERA'}" aria-controls="collapseBilletera">
+                                    <i class="bi bi-qr-code-scan me-2" aria-hidden="true"></i>
+                                    Billetera Digital (Yape / Plin)
+                                </button>
+                            </h3>
+                            <div id="collapseBilletera" class="accordion-collapse collapse"
+                                th:classappend="${medioActivo == 'BILLETERA'} ? 'show'"
+                                aria-labelledby="headingBilletera" data-bs-parent="#acordeonPago">
+                                <div class="accordion-body p-4">
+                                    <form th:object="${billeteraForm}" method="post"
+                                        th:action="@{/carrito/procesar-pago}" class="needs-validation" novalidate>
+                                        <input type="hidden" name="medioPago" value="BILLETERA">
+
+                                        <div class="hs-pago-qr mb-3">
+                                            <i class="bi bi-qr-code" aria-hidden="true"></i>
+                                            <p class="mb-1 mt-2 fw-semibold">Escanea o yapea a HÖSÉG Store</p>
+                                            <p class="mb-0 hs-texto-secundario">
+                                                Monto exacto: <strong>S/ <span
+                                                        th:text="${#numbers.formatDecimal(totalConEnvio, 1, 'COMMA', 2, 'POINT')}">259.90</span></strong>
+                                            </p>
+                                        </div>
+
+                                        <div class="row g-3">
+                                            <div class="col-12 col-sm-5">
+                                                <label class="hs-label" for="billetera">Billetera</label>
+                                                <select class="hs-select" id="billetera"
+                                                    th:field="*{billetera}">
+                                                    <option value="YAPE">Yape</option>
+                                                    <option value="PLIN">Plin</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-12 col-sm-7">
+                                                <label class="hs-label" for="celularBilletera">Celular asociado
+                                                    *</label>
+                                                <input class="form-control hs-input" id="celularBilletera" type="tel"
+                                                    th:field="*{celular}" th:errorclass="is-invalid" maxlength="9"
+                                                    pattern="9[0-9]{8}" inputmode="numeric" placeholder="987654321"
+                                                    required>
+                                                <div class="invalid-feedback">Ingresa un número de celular válido de 9
+                                                    dígitos.</div>
+                                                <p class="hs-campo-error" th:if="${#fields.hasErrors('celular')}"
+                                                    th:errors="*{celular}">Celular inválido.</p>
+                                            </div>
+                                        </div>
+
+                                        <button class="hs-btn hs-btn--primario hs-brillo w-100 mt-4" type="submit">
+                                            <i class="bi bi-check-circle me-1" aria-hidden="true"></i>
+                                            Confirmar pago con billetera
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna derecha: Resumen fijo -->
+                <aside class="col-12 col-lg-5">
+                    <div class="hs-resumen">
+                        <h2 class="h5 mb-3">Resumen del pedido</h2>
+
+                        <div class="hs-resumen__entrega mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-semibold" th:text="${envioForm.tipo.etiqueta}">Recojo en tienda</span>
+                                <a class="hs-enlace" th:href="@{/carrito/entrega}">Cambiar</a>
+                            </div>
+                            <div class="hs-texto-secundario">
+                                Receptor: <span th:text="${envioForm.nombreReceptor}">Cliente</span>
+                                <span th:if="${envioForm.esDelivery()}"> · <span
+                                        th:text="${envioForm.direccion + ', ' + envioForm.distrito}">Dirección</span></span>
+                            </div>
+                        </div>
+
+                        <div class="hs-mini-linea" th:each="i : ${items}">
+                            <span th:text="${i.cantidad} + ' × ' + ${i.nombre} + ' (' + ${i.talla} + ')'">1 × Casaca
+                                (M)</span>
+                            <span class="text-nowrap"
+                                th:text="'S/ ' + ${#numbers.formatDecimal(i.subtotal(), 1, 'COMMA', 2, 'POINT')}">S/
+                                259.90</span>
+                        </div>
+
+                        <div class="hs-resumen__fila mt-3">
+                            <span>Productos</span>
+                            <span th:text="'S/ ' + ${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}">S/
+                                259.90</span>
+                        </div>
+                        <div class="hs-resumen__fila">
+                            <span>Envío</span>
+                            <span
+                                th:text="${costoEnvio.compareTo(T(java.math.BigDecimal).ZERO) > 0} ? 'S/ ' + ${#numbers.formatDecimal(costoEnvio, 1, 'COMMA', 2, 'POINT')} : 'Gratis'">Gratis</span>
+                        </div>
+                        <div class="hs-resumen__total mb-3">
+                            <span>Total a pagar</span>
+                            <span th:text="'S/ ' + ${#numbers.formatDecimal(totalConEnvio, 1, 'COMMA', 2, 'POINT')}">S/
+                                259.90</span>
+                        </div>
+
+                        <div class="hs-impacto-caja mb-2" th:if="${impacto.tieneImpacto()}"
+                            th:classappend="${impacto.abrigos == 0} ? 'hs-impacto-caja--arbol'">
+                            <span class="hs-impacto-caja__icono">
+                                <i class="bi" th:classappend="${impacto.abrigos > 0} ? 'bi-casaca-fill' : 'bi-tree-fill'"
+                                    aria-hidden="true"></i>
+                            </span>
+                            <span>Con esta compra generas <strong th:text="${impacto.texto}">1 abrigo</strong>.</span>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </main>
+    <script th:src="@{/js/pago.js}" defer></script>
+</body>
+
+</html>

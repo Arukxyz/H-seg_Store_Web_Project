@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<!--
+  Bloque 2 · 2.4 Nueva contraseña (GET/POST /restablecer?token=…, AuthController).
+  Modelo:
+    vencido         boolean: el enlace venció o ya se usó (variante "Enlace vencido")
+    restablecerForm RestablecerContrasenaForm (token oculto, nueva, confirmacion; global contrasenasCoinciden)
+  Éxito: redirige a /login?restablecida.
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout/base :: pagina(titulo='Nueva contraseña · HÖSÉG', activa='cuenta',
+                                          transparente=false, contenido=~{::main}, estilos=~{::link}, scripts=~{::script})}">
+<link rel="stylesheet" th:href="@{/css/cuenta.css}">
+<body>
+<main class="hs-main--bajo-nav">
+    <th:block th:replace="~{fragments/avisos :: avisos}"/>
+
+    <section class="hs-cuenta hs-cuenta--atmosferica">
+        <!-- Mismo fondo atmosférico consistente -->
+        <div class="hs-cuenta__fondo" aria-hidden="true">
+            <img th:src="@{/images/comunidad-cusco.jpg}" alt="" class="hs-cuenta__fondo-img">
+            <div class="hs-cuenta__fondo-capa"></div>
+        </div>
+
+        <div class="hs-cuenta__contenedor hs-cuenta__contenedor--glass">
+
+            <!-- ESTADO 1: Enlace vencido o ya usado -->
+            <div th:if="${vencido}" class="hs-cuenta__exito" role="alert">
+                <div class="hs-cuenta__emblema hs-cuenta__emblema--alerta" aria-hidden="true">
+                    <i class="bi bi-hourglass-bottom"></i>
+                </div>
+
+                <p class="hs-cuenta__eyebrow text-center">SEGURIDAD DE CUENTA</p>
+                <h1 class="hs-h2 hs-cuenta__titulo">Enlace vencido</h1>
+                <p class="hs-cuenta__intro">
+                    Este enlace ya venció o fue utilizado anteriormente.<br>
+                    Solicita uno nuevo para restablecer tu clave.
+                </p>
+
+                <a class="hs-btn hs-btn--primario hs-cuenta__boton mt-3" th:href="@{/recuperar}">
+                    <span>Pedir otro enlace</span>
+                    <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </a>
+            </div>
+
+            <!-- ESTADO 2: Formulario de nueva contraseña -->
+            <div th:unless="${vencido}">
+                <div class="hs-cuenta__emblema" aria-hidden="true">
+                    <i class="bi bi-shield-lock"></i>
+                </div>
+
+                <p class="hs-cuenta__eyebrow text-center">SEGURIDAD DE CUENTA</p>
+                <h1 class="hs-h2 hs-cuenta__titulo">Nueva contraseña</h1>
+                <p class="hs-cuenta__intro">
+                    Elige una contraseña segura para volver<br>
+                    a acceder a tu cuenta de HÖSÉG.
+                </p>
+
+                <form th:object="${restablecerForm}" method="post" th:action="@{/restablecer}">
+                    <input type="hidden" th:field="*{token}">
+
+                    <label class="hs-cuenta__campo" for="nueva">
+                        <span>Contraseña nueva</span>
+                        <div class="hs-cuenta__input-wrap">
+                            <i class="bi bi-lock hs-cuenta__input-icono" aria-hidden="true"></i>
+                            <input class="hs-input hs-cuenta__input--icono hs-cuenta__input--pass"
+                                   id="nueva" type="password" th:field="*{nueva}"
+                                   placeholder="Mínimo 8 caracteres" autocomplete="new-password" required>
+                            <button type="button" class="hs-cuenta__ojo hs-btn-icono" data-toggle-pass="nueva"
+                                    aria-label="Mostrar u ocultar contraseña nueva">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </label>
+                    <div class="text-danger hs-cuenta__error" th:errors="*{nueva}"></div>
+
+                    <label class="hs-cuenta__campo" for="confirmacion">
+                        <span>Repite la contraseña</span>
+                        <div class="hs-cuenta__input-wrap">
+                            <i class="bi bi-lock-fill hs-cuenta__input-icono" aria-hidden="true"></i>
+                            <input class="hs-input hs-cuenta__input--icono hs-cuenta__input--pass"
+                                   id="confirmacion" type="password" th:field="*{confirmacion}"
+                                   placeholder="Vuelve a escribir tu clave" autocomplete="new-password" required>
+                            <button type="button" class="hs-cuenta__ojo hs-btn-icono" data-toggle-pass="confirmacion"
+                                    aria-label="Mostrar u ocultar confirmación">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </label>
+                    <div class="text-danger hs-cuenta__error" th:errors="*{confirmacion}"></div>
+                    <div class="text-danger hs-cuenta__error" th:errors="*{contrasenasCoinciden}"></div>
+
+                    <!-- Indicador visual en vivo de coincidencia -->
+                    <p class="hs-cuenta__match" id="pass-match-msg" hidden>
+                        <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+                        <span>Las contraseñas coinciden</span>
+                    </p>
+
+                    <button class="hs-btn hs-btn--primario hs-cuenta__boton mt-4" type="submit">
+                        <span>Guardar contraseña</span>
+                        <i class="bi bi-check2" aria-hidden="true"></i>
+                    </button>
+                </form>
+            </div>
+
+            <div class="hs-cuenta__pie">
+                <a th:href="@{/login}" class="hs-cuenta__cta-registro hs-enlace">
+                    <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Volver a iniciar sesión
+                </a>
+            </div>
+        </div>
+    </section>
+</main>
+<script th:src="@{/js/cuenta.js}" defer></script>
+
+</body>
+</html>
