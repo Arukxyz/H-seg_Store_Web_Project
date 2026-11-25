@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,400;1,9..144,600&family=Outfit:wght@300;400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+@theme inline {
+  --color-cream: #F5F0E8;
+  --color-cream-dark: #EDE6D6;
+  --color-sand: #D9CEB8;
+  --color-bark: #2C1810;
+  --color-bark-light: #4A2E20;
+  --color-terracotta: #C4622D;
+  --color-terracotta-hover: #A8501E;
+  --color-sage: #5A7A5C;
+  --color-sage-light: #E8F0E8;
+  --color-amber: #D4820A;
+  --color-amber-light: #FEF3DC;
+  --font-display: 'Fraunces', serif;
+  --font-body: 'Outfit', sans-serif;
+}
+
+:root {
+  --background: #F5F0E8;
+  --foreground: #2C1810;
+  --card: #FDFAF5;
+  --primary: #C4622D;
+  --primary-foreground: #FDFAF5;
+  --secondary: #EDE6D6;
+  --muted: #D9CEB8;
+  --muted-foreground: #7A6152;
+  --accent: #5A7A5C;
+  --border: #D9CEB8;
+  --radius: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Hide scrollbars by default, show while scrolling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 3px;
+  opacity: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.count-animate {
+  animation: countUp 0.6s ease forwards;
+}
+
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeSlide 0.7s ease forwards;
+}
