@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Configuración de Logback (Spring Boot la toma sola por llamarse logback-spring.xml).
+  - hoseg-web.log : registro general, rota por día y por tamaño (30 días, tope 300 MB).
+  - auditoria.log : solo eventos de seguridad (logger "hoseg.auditoria"), se conserva 90 días.
+  Los niveles de application-dev.properties (logging.level.*) siguen funcionando encima de esto.
+-->
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <property name="CARPETA_LOGS" value="${LOG_DIR:-logs}"/>
+
+    <appender name="CONSOLA" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="GENERAL" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${CARPETA_LOGS}/hoseg-web.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${CARPETA_LOGS}/hoseg-web.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>300MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="AUDITORIA" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${CARPETA_LOGS}/auditoria.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${CARPETA_LOGS}/auditoria.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>90</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- Eventos de seguridad: a su propio archivo y también a la consola -->
+    <logger name="hoseg.auditoria" level="INFO" additivity="false">
+        <appender-ref ref="AUDITORIA"/>
+        <appender-ref ref="CONSOLA"/>
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLA"/>
+        <appender-ref ref="GENERAL"/>
+    </root>
+</configuration>
