@@ -1,0 +1,300 @@
+/* =====================================================================
+   HÖSÉG Web · Sección de reseñas del detalle de producto
+   Se carga DESPUÉS de tienda.css y todo está bajo .hs-resenas, así que
+   no cambia otras páginas. Sin colores literales: todo sale de tokens.css.
+   Usa componentes de Bootstrap (row/col, progress) y añade lo propio.
+   ===================================================================== */
+
+.hs-resenas__cabecera {
+    margin-bottom: 1.5rem;
+}
+
+/* ---------- Columna izquierda: resumen + formulario ------------------- */
+@media (min-width: 992px) {
+    .hs-resenas__lateral {
+        position: sticky;
+        top: 88px;
+    }
+}
+
+.hs-resenas__panel,
+.hs-resenas .hs-caja {
+    border: 1px solid var(--hs-sand);
+    border-radius: 20px;
+    background: var(--hs-card);
+    box-shadow: var(--hs-shadow-card-reposo);
+}
+
+.hs-resenas__panel {
+    margin-bottom: 1.25rem;
+    padding: 1.5rem;
+}
+
+.hs-resenas__resumen {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 1.25rem;
+}
+
+.hs-resenas__promedio {
+    font-size: 3.5rem;
+}
+
+/* Barras por calificación (progress de Bootstrap con la paleta) */
+.hs-resenas__barras {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.hs-resenas__barras li {
+    display: grid;
+    grid-template-columns: 2.25rem 1fr 1.5rem;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.8125rem;
+    color: var(--hs-muted);
+}
+
+.hs-resenas__barra-n {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+    color: var(--hs-bark-light);
+}
+.hs-resenas__barra-n .bi {
+    color: var(--hs-amber);
+    font-size: 0.7rem;
+}
+.hs-resenas__barra-c {
+    text-align: right;
+}
+
+.hs-resenas .progress {
+    height: 8px;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-cream-dark);
+}
+.hs-resenas .progress-bar {
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-amber);
+    transform-origin: left;
+    transition: transform 0.8s var(--hs-ease-seda);
+}
+
+/* Las barras crecen desde la izquierda cuando el resumen entra en pantalla
+   (revelar.js marca .is-visible), una tras otra */
+.hs-revelar .hs-resenas__barras:not(.is-visible) .progress-bar {
+    transform: scaleX(0);
+}
+
+.hs-resenas__barras li:nth-child(2) .progress-bar { transition-delay: 0.08s; }
+.hs-resenas__barras li:nth-child(3) .progress-bar { transition-delay: 0.16s; }
+.hs-resenas__barras li:nth-child(4) .progress-bar { transition-delay: 0.24s; }
+.hs-resenas__barras li:nth-child(5) .progress-bar { transition-delay: 0.32s; }
+
+/* ---------- Formulario -------------------------------------------------- */
+.hs-resenas .hs-caja {
+    padding: 1.5rem;
+}
+
+.hs-resenas__form-titulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 1.25rem;
+    font-family: var(--hs-font-display);
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--hs-bark);
+}
+.hs-resenas__form-titulo .bi {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--hs-terracotta-light);
+    color: var(--hs-terracotta);
+    font-size: 1rem;
+}
+
+.hs-resenas .hs-label {
+    margin-bottom: 8px;
+    color: var(--hs-bark-light);
+}
+
+.hs-resenas .hs-input {
+    border-radius: 12px;
+    background: var(--hs-cream);
+    transition:
+        border-color var(--hs-t-fast),
+        box-shadow var(--hs-t-fast),
+        background var(--hs-t-fast);
+}
+.hs-resenas .hs-input:focus {
+    background: var(--hs-card);
+    border-color: var(--hs-terracotta);
+    box-shadow: var(--hs-anillo-foco);
+    outline: 0;
+}
+.hs-resenas textarea.hs-input {
+    min-height: 7rem;
+    resize: vertical;
+}
+
+/* Estrellas para calificar: más grandes y con un pequeño salto al pasar el cursor */
+.hs-resenas .hs-estrellas-input {
+    gap: 6px;
+}
+.hs-resenas .hs-estrellas-input label {
+    font-size: 2.25rem;
+    line-height: 1;
+    transition:
+        color var(--hs-t-fast),
+        transform var(--hs-t-fast);
+}
+.hs-resenas .hs-estrellas-input label:hover {
+    transform: scale(1.15);
+}
+
+.hs-resenas__guia {
+    display: flex;
+    justify-content: space-between;
+    margin: 6px 0 0;
+    max-width: 14.5rem;
+    color: var(--hs-muted);
+    font-size: 0.6875rem;
+}
+
+.hs-resenas .hs-btn .bi {
+    margin-right: 6px;
+}
+
+/* Aviso de "inicia sesión" / "espera tu pago" */
+.hs-resenas__aviso {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 0;
+    padding: 16px;
+    border: 1px dashed var(--hs-sand);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--hs-card) 60%, transparent);
+    color: var(--hs-muted);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+.hs-resenas__aviso .bi {
+    flex: 0 0 auto;
+    color: var(--hs-sage);
+    font-size: 1.25rem;
+}
+
+/* ---------- Lista de reseñas ---------------------------------------------- */
+.hs-resenas .hs-vacio {
+    border-radius: 20px;
+    background: color-mix(in srgb, var(--hs-card) 55%, transparent);
+}
+
+.hs-resenas .hs-resena {
+    margin-bottom: 14px;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--hs-sand);
+    border-radius: 18px;
+    background: var(--hs-card);
+    box-shadow: var(--hs-shadow-card-reposo);
+    /* `backwards`: al terminar no deja transform, así funciona la elevación
+       de .hs-elevable (hoseg.css) al pasar el cursor */
+    animation: hsFadeSlide 0.5s var(--hs-ease-seda) backwards;
+}
+
+.hs-resena__cabecera {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.hs-resena__avatar {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--hs-terracotta-light);
+    color: var(--hs-terracotta-hover);
+    font-family: var(--hs-font-display);
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.hs-resena__quien {
+    flex: 1;
+    min-width: 0;
+}
+
+.hs-resena__nombre {
+    font-weight: 600;
+    color: var(--hs-bark);
+}
+
+.hs-resena__fecha {
+    color: var(--hs-muted);
+    font-size: 0.8125rem;
+}
+
+.hs-resena__estrellas {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.hs-resena__editada {
+    color: var(--hs-muted);
+    font-size: 0.75rem;
+    font-style: italic;
+}
+
+.hs-resena__titulo {
+    margin: 0 0 4px;
+    color: var(--hs-bark);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.hs-resena__texto {
+    margin: 0 0 12px;
+    color: var(--hs-bark-light);
+    line-height: 1.65;
+}
+
+.hs-resenas .hs-chip-talla {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: var(--hs-radius-pill);
+    font-size: 0.6875rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hs-resenas .hs-resena,
+    .hs-resenas .progress-bar,
+    .hs-resenas .hs-estrellas-input label {
+        animation: none;
+        transition: none;
+    }
+    .hs-resenas .hs-resena:hover,
+    .hs-resenas .hs-estrellas-input label:hover {
+        transform: none;
+    }
+}

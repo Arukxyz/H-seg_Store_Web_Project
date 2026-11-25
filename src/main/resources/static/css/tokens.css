@@ -1,0 +1,217 @@
+/* =====================================================================
+   HÖSÉG Web · Tokens de diseño
+   Extraídos del export de Figma Make (design/figma-make/src/index.css) y
+   traducidos a CSS estándar: aquí no hay Tailwind, solo variables que
+   consumen las plantillas Thymeleaf y los estilos propios.
+
+   Fuente de verdad del color y la tipografía. Si el diseño cambia, se
+   cambia aquí, no en cada plantilla.
+   ===================================================================== */
+
+:root {
+    /* ---------- Paleta de marca ---------- */
+    --hs-cream:             #F5F0E8;   /* fondo general */
+    --hs-cream-dark:        #EDE6D6;   /* fondo secundario, franjas */
+    --hs-card:              #FDFAF5;   /* fondo de tarjetas */
+    --hs-sand:              #D9CEB8;   /* bordes, apagado */
+    --hs-bark:              #2C1810;   /* texto principal */
+    --hs-bark-light:        #4A2E20;
+    --hs-muted:             #7A6152;   /* texto secundario */
+
+    /* Acento cálido: botones primarios, badge ABRIGO, indicador activo */
+    --hs-terracotta:        #C4622D;
+    --hs-terracotta-hover:  #A8501E;
+
+    /* Acento frío: badge ARBOL, impacto ambiental */
+    --hs-sage:              #5A7A5C;
+    --hs-sage-light:        #E8F0E8;
+
+    /* Complementario: destacados, cifras */
+    --hs-amber:             #D4820A;
+    --hs-amber-light:       #FEF3DC;
+
+    /* Derivados que el export usa como literales */
+    --hs-terracotta-light:  #FEF0E8;   /* fondo de cajas de icono (pasos, contadores) */
+    --hs-footer-text:       #A08878;   /* texto y enlaces del footer */
+    --hs-footer-border:     #4A3830;   /* borde de las píldoras de redes */
+    --hs-footer-line:       #3D2820;   /* línea sobre el copyright */
+    --hs-footer-copy:       #5A4038;   /* texto del copyright */
+    --hs-cream-82:          rgba(245, 240, 232, 0.82); /* texto claro sobre foto */
+    --hs-cream-75:          rgba(245, 240, 232, 0.75);
+    --hs-sobre-acento:      #FFFFFF;   /* texto sobre terracota en piezas pequeñas (contador del carrito) */
+
+    /* ---------- Transparencias ---------- */
+    /* Barra superior opaca (vidrio crema) */
+    --hs-nav-bg:            rgba(245, 240, 232, 0.72);
+    --hs-nav-borde:         rgba(217, 206, 184, 0.5);
+
+    /* Vidrio sobre fotografía (botón y chips del hero) */
+    --hs-vidrio-bg:         rgba(245, 240, 232, 0.12);
+    --hs-vidrio-bg-hover:   rgba(245, 240, 232, 0.22);
+    --hs-vidrio-borde:      rgba(245, 240, 232, 0.28);
+    --hs-vidrio-borde-suave: rgba(245, 240, 232, 0.2);
+    --hs-chip-terracota-bg: rgba(196, 98, 45, 0.45);
+    --hs-chip-salvia-bg:    rgba(90, 122, 92, 0.45);
+
+    /* Badges de impacto sobre la foto del producto */
+    --hs-badge-abrigo-bg:    rgba(254, 240, 232, 0.72);
+    --hs-badge-abrigo-borde: rgba(245, 205, 179, 0.6);
+    --hs-badge-arbol-bg:     rgba(232, 240, 232, 0.72);
+    --hs-badge-arbol-borde:  rgba(181, 208, 184, 0.6);
+
+    /* Velos */
+    --hs-velo-agotado:      rgba(245, 240, 232, 0.55);
+    --hs-etiqueta-agotado:  rgba(44, 24, 16, 0.75);
+    --hs-velo-hero:         linear-gradient(to bottom,
+                                rgba(28, 12, 6, 0.55) 0%,
+                                rgba(28, 12, 6, 0.25) 50%,
+                                rgba(28, 12, 6, 0.70) 100%);
+
+    /* ---------- Tipografía ---------- */
+    /* Ambas familias tienen soporte de Ö, É y Ä (HÖSÉG, Älpafill). */
+    --hs-font-display: 'Fraunces', Georgia, serif;
+    --hs-font-body:    'Outfit', system-ui, -apple-system, sans-serif;
+
+    /* ---------- Formas y elevación ---------- */
+    --hs-radius:       14px;
+    --hs-radius-pill:  999px;
+    --hs-shadow-card:  0 2px 16px rgba(44, 24, 16, 0.07);
+    --hs-shadow-card-reposo: 0 1px 4px rgba(44, 24, 16, 0.06);
+    --hs-shadow-card-hover:  0 8px 32px rgba(44, 24, 16, 0.12);
+    --hs-shadow-nav:   0 2px 24px rgba(44, 24, 16, 0.08);
+    --hs-brillo-vidrio: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    --hs-brillo-badge:  inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    --hs-anillo-foco:        0 0 0 3px rgba(196, 98, 45, 0.15);
+    --hs-anillo-foco-oscuro: 0 0 0 3px rgba(196, 98, 45, 0.25);
+    --hs-shadow-pill:  0 12px 40px rgba(44, 24, 16, 0.4),
+                       inset 0 1px 0 rgba(245, 240, 232, 0.12);
+
+    /* ---------- Óvalo de navegación móvil ---------- */
+    --hs-pill-bg:      rgba(30, 14, 6, 0.55);
+    --hs-pill-border:  rgba(245, 240, 232, 0.14);
+    --hs-pill-blur:    blur(24px) saturate(180%);
+    --hs-pill-inactive: rgba(217, 206, 184, 0.6);
+
+    /* ---------- Derivados para animaciones ----------
+       Todos salen de un color de la paleta con otra opacidad:
+       terracota = 196, 98, 45 · salvia = 90, 122, 92 · corteza = 44, 24, 16 ·
+       crema = 245, 240, 232 · tarjeta = 253, 250, 245. */
+    --hs-destello:          rgba(253, 250, 245, 0.38);  /* franja del brillo diagonal (.hs-brillo) */
+    --hs-destello-suave:    rgba(253, 250, 245, 0.22);  /* brillo de los chips del hero */
+    --hs-sombra-titulo:     0 2px 24px rgba(44, 24, 16, 0.45);  /* titular sobre foto */
+    --hs-sombra-boton:      0 10px 24px rgba(196, 98, 45, 0.28); /* botón primario elevado */
+    --hs-terracota-06:      rgba(196, 98, 45, 0.06);
+    --hs-terracota-12:      rgba(196, 98, 45, 0.12);
+    --hs-terracota-22:      rgba(196, 98, 45, 0.22);  /* aros del panel de Nosotros: se superponen y se oscurecen */
+    --hs-sombra-aro:        -10px 10px 20px rgba(44, 24, 16, 0.28);
+    --hs-terracota-35:      rgba(196, 98, 45, 0.35);
+    --hs-salvia-10:         rgba(90, 122, 92, 0.10);
+    --hs-corteza-08:        rgba(44, 24, 16, 0.08);
+    --hs-corteza-50:        rgba(44, 24, 16, 0.50);    /* velo de la tarjeta apilada que queda detrás */
+    --hs-crema-60:          rgba(245, 240, 232, 0.60);
+    --hs-arena-50:          rgba(217, 206, 184, 0.50);
+
+    /* ---------- Transiciones ---------- */
+    --hs-ease:       cubic-bezier(0.4, 0, 0.2, 1);
+    --hs-ease-seda:  cubic-bezier(0.16, 1, 0.3, 1);   /* sale rápido y frena suave */
+    --hs-t-fast:     0.18s;
+    --hs-t-pill:     0.22s;
+    --hs-t-medio:    0.35s;
+    --hs-t-lento:    0.6s;
+    --hs-t-carousel: 0.5s;
+
+    /* Alto de la barra superior (56 px móvil, 64 px desde md): lo usan los
+       elementos fijos (sticky) para no quedar debajo de ella. */
+    --hs-nav-alto:   56px;
+}
+
+@media (min-width: 768px) {
+    :root { --hs-nav-alto: 64px; }
+}
+
+/* ---------- Mapeo a las variables de Bootstrap 5 ----------
+   Permite que los componentes de Bootstrap tomen la paleta de HÖSÉG sin
+   reescribir sus estilos. Ampliar conforme se usen más componentes. */
+:root {
+    --bs-body-bg:          var(--hs-cream);
+    --bs-body-color:       var(--hs-bark);
+    --bs-body-font-family: var(--hs-font-body);
+    --bs-border-color:     var(--hs-sand);
+    --bs-border-radius:    var(--hs-radius);
+    --bs-primary:          var(--hs-terracotta);
+    --bs-link-color:       var(--hs-terracotta);
+    --bs-link-hover-color: var(--hs-terracotta-hover);
+
+    /* Éxito = salvia y error = terracota: avisos (.alert), .text-danger,
+       .invalid-feedback y la validación de formularios de Bootstrap dejan
+       de usar su verde y su rojo. Los -rgb repiten el color de la paleta en
+       números porque Bootstrap los usa dentro de rgba(). */
+    --bs-success:                   var(--hs-sage);
+    --bs-success-rgb:               90, 122, 92;
+    --bs-success-text-emphasis:     var(--hs-sage);
+    --bs-success-bg-subtle:         var(--hs-sage-light);
+    --bs-success-border-subtle:     var(--hs-badge-arbol-borde);
+    --bs-danger:                    var(--hs-terracotta-hover);
+    --bs-danger-rgb:                168, 80, 30;
+    --bs-danger-text-emphasis:      var(--hs-terracotta-hover);
+    --bs-danger-bg-subtle:          var(--hs-terracotta-light);
+    --bs-danger-border-subtle:      var(--hs-badge-abrigo-borde);
+    --bs-form-valid-color:          var(--hs-sage);
+    --bs-form-valid-border-color:   var(--hs-sage);
+    --bs-form-invalid-color:        var(--hs-terracotta-hover);
+    --bs-form-invalid-border-color: var(--hs-terracotta);
+
+    /* .text-muted y los textos secundarios de Bootstrap: el marrón apagado de la paleta */
+    --bs-secondary-color:           var(--hs-muted);
+}
+
+/* ---------- Base ---------- */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Red de seguridad contra el scroll horizontal en móvil (sombras, filas
+   con gutter grande). `clip` no crea contenedor de scroll, así que no
+   afecta a la barra ni al óvalo fijos. */
+html, body {
+    overflow-x: clip;
+}
+
+body {
+    background-color: var(--hs-cream);
+    color: var(--hs-bark);
+    font-family: var(--hs-font-body);
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .hs-display {
+    font-family: var(--hs-font-display);
+}
+
+/* ---------- Animaciones del diseño ---------- */
+@keyframes hsCountUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hsFadeSlide {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Aparición con rebote para un icono de resultado (éxito, alerta) */
+@keyframes hsPopExito {
+    0%   { opacity: 0; transform: scale(0.7); }
+    70%  { transform: scale(1.08); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.hs-count-animate { animation: hsCountUp 0.6s ease forwards; }
+.hs-fade-in       { animation: hsFadeSlide 0.7s ease forwards; }
+
+/* Respetar a quien pide menos movimiento (accesibilidad). */
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .hs-count-animate,
+    .hs-fade-in { animation: none; opacity: 1; transform: none; }
+}

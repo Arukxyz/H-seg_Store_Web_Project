@@ -1,0 +1,207 @@
+/* =====================================================================
+   HÖSÉG Admin · Panel de control: pestañas, indicadores y franja de atención
+   Se carga solo en /admin/panel (desde panel.html) DESPUÉS de admin.css,
+   y todo está bajo .hs-panel-page, así que no cambia otras páginas del admin.
+   Sin colores literales: todo sale de tokens.css.
+   ===================================================================== */
+
+/* ---------- Pestañas (nav + tab de Bootstrap) ------------------------- */
+.hs-panel-page .hs-panel-tabs {
+    display: inline-flex;
+    gap: 4px;
+    margin: 0 0 24px;
+    padding: 5px;
+    border: 1px solid var(--hs-sand);
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-card);
+    box-shadow: var(--hs-shadow-card-reposo);
+    list-style: none;
+}
+
+.hs-panel-page .hs-panel-tabs .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 20px;
+    border: 0;
+    border-radius: var(--hs-radius-pill);
+    background: transparent;
+    color: var(--hs-muted);
+    font-size: 13px;
+    font-weight: 600;
+    transition:
+        background var(--hs-t-fast),
+        color var(--hs-t-fast);
+}
+
+.hs-panel-page .hs-panel-tabs .nav-link:hover {
+    color: var(--hs-terracotta);
+}
+
+.hs-panel-page .hs-panel-tabs .nav-link.active {
+    background: var(--hs-terracotta);
+    color: var(--hs-sobre-acento);
+}
+
+.hs-panel-tabs__contador {
+    padding: 1px 8px;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-cream-dark);
+    color: var(--hs-bark-light);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.hs-panel-page .hs-panel-tabs .nav-link.active .hs-panel-tabs__contador {
+    background: color-mix(in srgb, var(--hs-sobre-acento) 25%, transparent);
+    color: var(--hs-sobre-acento);
+}
+
+/* En móvil las pestañas ocupan todo el ancho */
+@media (max-width: 575.98px) {
+    .hs-panel-page .hs-panel-tabs {
+        display: flex;
+        width: 100%;
+    }
+    .hs-panel-page .hs-panel-tabs li {
+        flex: 1;
+    }
+    .hs-panel-page .hs-panel-tabs .nav-link {
+        justify-content: center;
+        width: 100%;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}
+
+/* ---------- Indicadores: 4 en una fila -------------------------------- */
+.hs-panel-page .hs-metrics--cuatro {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-bottom: 22px;
+}
+
+@media (max-width: 1199.98px) {
+    .hs-panel-page .hs-metrics--cuatro {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575.98px) {
+    .hs-panel-page .hs-metrics--cuatro {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---------- Franja "Requiere atención" -------------------------------- */
+.hs-atencion {
+    margin: 0 0 22px;
+}
+
+.hs-atencion__titulo {
+    margin: 0 0 10px;
+    color: var(--hs-muted);
+    font-family: var(--hs-font-body);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.hs-atencion__lista {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+@media (max-width: 767.98px) {
+    .hs-atencion__lista {
+        grid-template-columns: 1fr;
+    }
+}
+
+.hs-atencion__item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border: 1px solid var(--hs-sand);
+    border-radius: 12px;
+    background: var(--hs-card);
+    color: var(--hs-bark);
+    text-decoration: none;
+    box-shadow: var(--hs-shadow-card-reposo);
+    transition:
+        transform var(--hs-t-fast),
+        box-shadow var(--hs-t-fast),
+        border-color var(--hs-t-fast);
+}
+
+.hs-atencion__item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--hs-shadow-card);
+    border-color: var(--hs-terracotta);
+    color: var(--hs-bark);
+}
+
+.hs-atencion__icono {
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--hs-sage-light);
+    color: var(--hs-sage);
+    font-size: 1.125rem;
+}
+
+.hs-atencion__texto {
+    display: flex;
+    flex: 1;
+    align-items: baseline;
+    gap: 10px;
+    min-width: 0;
+    font-size: 13px;
+    color: var(--hs-muted);
+}
+
+.hs-atencion__texto strong {
+    color: var(--hs-bark);
+    font-family: var(--hs-font-display);
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.hs-atencion__ir {
+    flex: 0 0 auto;
+    color: var(--hs-terracotta);
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Hay algo por atender: tono ámbar */
+.hs-atencion__item--alerta {
+    border-color: var(--hs-badge-abrigo-borde);
+    background: var(--hs-amber-light);
+}
+
+.hs-atencion__item--alerta .hs-atencion__icono {
+    background: var(--hs-card);
+    color: var(--hs-terracotta);
+}
+
+/* ---------- Contenido de las pestañas ---------------------------------- */
+.hs-panel-page .tab-pane:focus {
+    outline: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hs-panel-page .hs-panel-tabs .nav-link,
+    .hs-atencion__item {
+        transition: none;
+    }
+    .hs-atencion__item:hover {
+        transform: none;
+    }
+}

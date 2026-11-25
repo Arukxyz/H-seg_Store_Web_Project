@@ -1,0 +1,331 @@
+/* =====================================================================
+   HÖSÉG Web · Libro de Reclamaciones (institucional/libro-reclamaciones.html)
+   Solo lo usa esta página, por eso vive aparte de hoseg.css.
+   Todo sale de tokens.css: colores, radios, sombras, tipografía y
+   transiciones. No hay colores ni fuentes nuevos.
+   ===================================================================== */
+
+/* ---------- Fondo de página: mismo degradado suave que las páginas de cuenta ---------- */
+.hs-rec-pagina {
+    background:
+        radial-gradient(
+            circle at 12% 35%,
+            var(--hs-terracotta-light) 0%,
+            transparent 45%
+        ),
+        radial-gradient(
+            circle at 88% 75%,
+            var(--hs-sage-light) 0%,
+            transparent 50%
+        ),
+        linear-gradient(180deg, var(--hs-cream) 0%, var(--hs-cream-dark) 100%);
+}
+
+/* ---------- Banner: foto de la comunidad + velo de marca ---------- */
+.hs-rec-banner {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: 2.25rem 0 5.5rem;
+}
+
+.hs-rec-banner__img {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hs-rec-banner__velo {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    /* el velo de marca dos veces: así el texto claro se lee sobre cualquier parte de la foto */
+    background: var(--hs-velo-hero), var(--hs-velo-hero);
+}
+
+.hs-rec-banner .hs-kicker,
+.hs-rec-banner .hs-texto-secundario {
+    color: var(--hs-cream-82);
+}
+.hs-rec-banner .hs-h2 {
+    color: var(--hs-cream);
+}
+.hs-rec-banner .hs-kicker,
+.hs-rec-banner .hs-h2,
+.hs-rec-banner .hs-texto-secundario {
+    text-shadow: 0 1px 12px var(--hs-etiqueta-agotado);
+}
+
+.hs-rec-icono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 1rem;
+    border: 1px solid var(--hs-vidrio-borde);
+    border-radius: 50%;
+    background: var(--hs-vidrio-bg-hover);
+    box-shadow: var(--hs-brillo-vidrio);
+    backdrop-filter: blur(8px);
+    color: var(--hs-cream);
+    font-size: 1.5rem;
+}
+
+/* Las tarjetas suben y se montan sobre el banner */
+.hs-rec-cuerpo {
+    position: relative;
+    margin-top: -3.5rem;
+    padding-bottom: 4rem;
+}
+
+@media (min-width: 768px) {
+    .hs-rec-banner {
+        padding: 3rem 0 6.5rem;
+    }
+    .hs-rec-cuerpo {
+        margin-top: -4.5rem;
+        padding-bottom: 5rem;
+    }
+}
+
+/* ---------- Tarjeta de sección (Tus datos / Tu reclamo / Cuéntanos) --- */
+.hs-rec-seccion {
+    margin-bottom: 1.25rem;
+    padding: 1.5rem 1.25rem;
+    border: 1px solid var(--hs-sand);
+    border-radius: 16px;
+    background: var(--hs-card);
+    box-shadow: var(--hs-shadow-card);
+}
+
+@media (min-width: 768px) {
+    .hs-rec-seccion {
+        padding: 2rem;
+    }
+}
+
+.hs-rec-seccion__titulo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 1.25rem;
+    font-family: var(--hs-font-display);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--hs-bark);
+}
+
+.hs-rec-numero {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--hs-terracotta);
+    color: var(--hs-sobre-acento);
+    font-family: var(--hs-font-body);
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+/* ---------- Rejilla de campos: 1 columna en móvil, 2 desde tablet ----- */
+.hs-rec-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+@media (min-width: 768px) {
+    .hs-rec-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .hs-rec-grid .hs-rec-completo {
+        grid-column: 1 / -1;
+    }
+}
+
+.hs-rec-campo > label,
+.hs-rec-etiqueta {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--hs-bark-light);
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.hs-rec-opcional {
+    margin-left: 4px;
+    color: var(--hs-muted);
+    font-weight: 400;
+}
+
+/* El <select> es .hs-select (hoseg.css), el mismo de toda la web. Los
+   mensajes de error y el borde del campo con error también son comunes
+   (hoseg.css, "Formularios"). */
+.hs-rec-campo textarea.hs-input {
+    resize: vertical;
+    min-height: 7rem;
+}
+
+/* ---------- Opciones tipo tarjeta (Reclamo/Queja, Producto/Servicio) --- */
+.hs-rec-opciones {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+@media (min-width: 576px) {
+    .hs-rec-opciones {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.hs-rec-opcion {
+    position: relative;
+    display: block;
+    margin: 0;
+    cursor: pointer;
+}
+
+/* El radio sigue existiendo (para el formulario y el teclado); solo se oculta a la vista */
+.hs-rec-opcion input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    cursor: pointer;
+}
+
+.hs-rec-opcion__cuerpo {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    height: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--hs-sand);
+    border-radius: var(--hs-radius);
+    background: var(--hs-card);
+    transition:
+        border-color var(--hs-t-fast),
+        background var(--hs-t-fast),
+        box-shadow var(--hs-t-fast);
+}
+
+.hs-rec-opcion:hover .hs-rec-opcion__cuerpo {
+    border-color: var(--hs-terracotta);
+}
+
+.hs-rec-opcion__icono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--hs-cream-dark);
+    color: var(--hs-bark-light);
+    font-size: 1.1rem;
+    transition:
+        background var(--hs-t-fast),
+        color var(--hs-t-fast);
+}
+
+.hs-rec-opcion__nombre {
+    display: block;
+    color: var(--hs-bark);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.hs-rec-opcion__detalle {
+    display: block;
+    color: var(--hs-muted);
+    font-size: 0.8125rem;
+    line-height: 1.4;
+}
+
+/* Seleccionada */
+.hs-rec-opcion input:checked + .hs-rec-opcion__cuerpo {
+    border-color: var(--hs-terracotta);
+    background: var(--hs-terracotta-light);
+    box-shadow: var(--hs-anillo-foco);
+}
+
+.hs-rec-opcion input:checked + .hs-rec-opcion__cuerpo .hs-rec-opcion__icono {
+    background: var(--hs-terracotta);
+    color: var(--hs-sobre-acento);
+}
+
+/* Foco con teclado */
+.hs-rec-opcion input:focus-visible + .hs-rec-opcion__cuerpo {
+    box-shadow: var(--hs-anillo-foco-oscuro);
+}
+
+/* ---------- Botón de enviar ----------------------------------------- */
+.hs-rec-enviar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding-top: 14px;
+    padding-bottom: 14px;
+}
+
+.hs-rec-nota {
+    margin-top: 0.75rem;
+    text-align: center;
+}
+
+/* ---------- Pantalla de éxito (?registrado) ------------------------- */
+.hs-rec-exito {
+    padding: 2.5rem 1.5rem;
+    border: 1px solid var(--hs-sand);
+    border-radius: 16px;
+    background: var(--hs-card);
+    box-shadow: var(--hs-shadow-card);
+    text-align: center;
+}
+
+.hs-rec-exito__icono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    margin-bottom: 1rem;
+    border-radius: 50%;
+    background: var(--hs-sage-light);
+    color: var(--hs-sage);
+    font-size: 2rem;
+}
+
+.hs-rec-hoja {
+    display: inline-block;
+    margin: 0.75rem 0 1rem;
+    padding: 8px 20px;
+    border: 1px dashed var(--hs-sage);
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-sage-light);
+    color: var(--hs-sage);
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hs-rec-opcion__cuerpo,
+    .hs-rec-opcion__icono {
+        transition: none;
+    }
+}

@@ -1,0 +1,415 @@
+/* =====================================================================
+   HÖSÉG Web · Consulta de impacto (/consulta-impacto)
+   Reutiliza lo de Nosotros (tarjeta del resultado hs-resultado y
+   aparición al scroll). Aquí solo está lo propio de esta
+   página. Sin colores literales: todo sale de tokens.css.
+
+   Sin fotografía: formulario en tarjeta y tres pistas de lo que se verá.
+   Aspecto sobrio: encabezado de un solo color de la paleta, sin manchas
+   ni iconos de fondo; chips y pistas en un tono neutro.
+   ===================================================================== */
+
+/* ---------- Encabezado (sin foto) ------------------------------------ */
+/* Color sólido (crema oscuro de la paleta) y una línea fina inferior que lo separa del resultado */
+.hs-consulta__hero {
+    position: relative;
+    padding: 3.5rem 0 3rem;
+    /* Dos resplandores muy suaves (terracota arriba, salvia abajo) sobre el crema oscuro */
+    background:
+        radial-gradient(ellipse 55% 60% at 50% 0%, var(--hs-terracota-12) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 50% at 85% 100%, var(--hs-salvia-10) 0%, transparent 70%),
+        var(--hs-cream-dark);
+    border-bottom: 1px solid var(--hs-sand);
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .hs-consulta__hero {
+        padding: 5rem 0 4rem;
+    }
+
+    /* Antes de consultar el encabezado ocupa más, para que la página no quede vacía */
+    .hs-consulta__hero--completo {
+        padding: 6.5rem 0 6rem;
+    }
+}
+
+.hs-consulta__contenido {
+    position: relative;
+    z-index: 1;
+    max-width: 40rem;
+}
+
+/* Chips en un solo tono neutro */
+.hs-consulta__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border: 1px solid var(--hs-sand);
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-card);
+    color: var(--hs-bark-light);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.hs-consulta__chip .bi {
+    color: var(--hs-terracotta);
+}
+
+.hs-consulta__titulo {
+    margin: 0.5rem 0 1rem;
+    font-size: clamp(2.25rem, 5vw, 3.25rem);
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--hs-bark);
+}
+
+/* Trazo terracota que se dibuja bajo el titular (mismo detalle que Nosotros) */
+.hs-consulta__titulo::after {
+    content: "";
+    display: block;
+    width: 72px;
+    height: 3px;
+    margin: 1.25rem auto 0;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-terracotta);
+    transform-origin: center;
+    animation: hsTrazo 0.8s var(--hs-ease) 0.7s both;
+}
+
+.hs-consulta__bajada {
+    max-width: 30rem;
+    margin: 0 auto 1.75rem;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--hs-muted);
+}
+
+/* ---------- Formulario en tarjeta ------------------------------------ */
+.hs-consulta__form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid var(--hs-sand);
+    border-radius: 20px;
+    background: var(--hs-card);
+    box-shadow: var(--hs-shadow-card);
+    transition: border-color var(--hs-t-fast), box-shadow var(--hs-t-fast);
+}
+
+/* Al escribir, el borde de la tarjeta se enciende (no el del campo, que se funde con ella) */
+.hs-consulta__form:focus-within {
+    border-color: var(--hs-terracotta);
+    box-shadow: var(--hs-shadow-card), var(--hs-anillo-foco);
+}
+
+.hs-consulta__form .hs-input,
+.hs-consulta__form .hs-input:focus {
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.hs-consulta__form:focus-within .hs-consulta__campo .bi {
+    color: var(--hs-terracotta);
+}
+
+/* Campo con icono dentro: flexible; el botón mantiene su tamaño */
+.hs-consulta__campo {
+    position: relative;
+    flex: 1 1 12rem;
+    min-width: 0;
+}
+
+.hs-consulta__campo .bi {
+    position: absolute;
+    top: 50%;
+    left: 16px;
+    transform: translateY(-50%);
+    color: var(--hs-muted);
+    font-size: 1.125rem;
+    pointer-events: none;
+}
+
+.hs-consulta__campo .hs-input {
+    padding: 14px 16px 14px 46px;
+    font-size: 1rem;
+    text-align: left;
+}
+
+.hs-consulta__form .hs-btn {
+    flex: 0 0 auto;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+/* Móvil: el botón baja y ocupa todo el ancho de la tarjeta */
+@media (max-width: 575.98px) {
+    .hs-consulta__form .hs-btn {
+        flex: 1 1 100%;
+    }
+}
+
+/* Aviso de código no encontrado */
+.hs-consulta__aviso {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 1rem 0 0;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: var(--hs-amber-light);
+    color: var(--hs-bark);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    text-align: left;
+}
+
+.hs-consulta__aviso .bi {
+    flex: 0 0 auto;
+    color: var(--hs-amber);
+    font-size: 1.125rem;
+}
+
+/* ---------- Pistas de lo que se verá (un solo tono) ----------------- */
+.hs-consulta__ver {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 18px;
+    margin: 1.75rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.hs-consulta__ver-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--hs-bark-light);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.hs-consulta__ver-icono {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--hs-sand);
+    background: var(--hs-card);
+    color: var(--hs-terracotta);
+    font-size: 1rem;
+    transition: background var(--hs-t-fast), color var(--hs-t-fast), border-color var(--hs-t-fast),
+                transform var(--hs-t-medio) var(--hs-ease-seda);
+}
+
+/* Indicadores: el icono se enciende y gira un poco al pasar el cursor */
+.hs-consulta__ver-item:hover .hs-consulta__ver-icono {
+    border-color: var(--hs-terracotta);
+    background: var(--hs-terracotta);
+    color: var(--hs-sobre-acento);
+    transform: rotate(-8deg) scale(1.08);
+}
+
+/* ---------- Resultado ------------------------------------------------ */
+.hs-resultado {
+    padding: 28px;
+}
+
+@media (min-width: 768px) {
+    .hs-resultado {
+        padding: 36px;
+    }
+}
+
+.hs-resultado__cabecera {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.hs-resultado__codigo {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--hs-bark);
+}
+
+.hs-resultado__fecha {
+    margin: 0 0 8px;
+    font-size: 0.875rem;
+    color: var(--hs-muted);
+}
+
+/* Estado de la compra: chip con los colores de la marca */
+.hs-estado {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 14px;
+    border-radius: var(--hs-radius-pill);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.hs-estado--pagado {
+    background: var(--hs-sage-light);
+    color: var(--hs-sage);
+}
+.hs-estado--pendiente {
+    background: var(--hs-amber-light);
+    color: var(--hs-amber);
+}
+.hs-estado--anulado {
+    background: var(--hs-terracotta-light);
+    color: var(--hs-terracotta);
+}
+
+.hs-resultado__vacio {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 0 0;
+    color: var(--hs-muted);
+}
+
+/* Cada donación de la compra */
+.hs-donacion {
+    display: flex;
+    gap: 16px;
+    padding: 24px 0 4px;
+}
+
+.hs-donacion + .hs-donacion {
+    margin-top: 20px;
+    border-top: 1px solid var(--hs-sand);
+}
+
+.hs-donacion--abrigo {
+    --hs-acento: var(--hs-terracotta);
+    --hs-acento-suave: var(--hs-terracotta-light);
+}
+.hs-donacion--arbol {
+    --hs-acento: var(--hs-sage);
+    --hs-acento-suave: var(--hs-sage-light);
+}
+
+.hs-donacion__icono {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: var(--hs-acento-suave);
+    color: var(--hs-acento);
+    font-size: 24px;
+}
+
+@media (min-width: 576px) {
+    .hs-donacion__icono {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        font-size: 28px;
+    }
+}
+
+.hs-donacion__cuerpo {
+    flex: 1;
+    min-width: 0;
+}
+
+.hs-donacion__titulo {
+    margin: 0 0 16px;
+    font-size: 1rem;
+    color: var(--hs-bark);
+}
+
+.hs-donacion__unidades {
+    color: var(--hs-acento);
+    font-weight: 700;
+}
+
+.hs-donacion__destino {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 16px 0 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--hs-muted);
+}
+
+.hs-donacion__destino .bi {
+    color: var(--hs-sage);
+}
+
+/* Línea de tiempo (componente compartido, hoseg.css): se une con una barra
+   que pasa a terracota hasta el paso en el que va la donación. */
+.hs-resultado .hs-linea-tiempo__paso {
+    position: relative;
+}
+
+.hs-resultado .hs-linea-tiempo__punto {
+    position: relative;
+    z-index: 1;
+    transition:
+        background var(--hs-t-fast),
+        border-color var(--hs-t-fast);
+}
+
+.hs-resultado .hs-linea-tiempo__paso + .hs-linea-tiempo__paso::before {
+    content: "";
+    position: absolute;
+    top: 0.95rem;
+    left: calc(-50% - 0.25rem);
+    width: calc(100% + 0.5rem);
+    height: 2px;
+    background: var(--hs-sand);
+}
+
+.hs-resultado .hs-linea-tiempo__paso.is-cumplido::before {
+    background: var(--hs-terracotta);
+}
+
+/* Al aparecer cada donación (revelar.js), su línea de tiempo se dibuja de
+   izquierda a derecha: cada tramo cumplido crece después del anterior. */
+.hs-revelar .hs-donacion .hs-linea-tiempo__paso.is-cumplido::before {
+    transform-origin: left;
+    transform: scaleX(0);
+    transition: transform 0.5s var(--hs-ease-seda);
+}
+
+.hs-revelar .hs-donacion.is-visible .hs-linea-tiempo__paso.is-cumplido::before {
+    transform: scaleX(1);
+}
+
+.hs-revelar .hs-donacion.is-visible .hs-linea-tiempo__paso:nth-child(2)::before { transition-delay: 0.35s; }
+.hs-revelar .hs-donacion.is-visible .hs-linea-tiempo__paso:nth-child(3)::before { transition-delay: 0.6s; }
+.hs-revelar .hs-donacion.is-visible .hs-linea-tiempo__paso:nth-child(4)::before { transition-delay: 0.85s; }
+
+@media (prefers-reduced-motion: reduce) {
+    .hs-resultado .hs-linea-tiempo__punto,
+    .hs-consulta__form,
+    .hs-consulta__ver-icono {
+        transition: none;
+    }
+
+    .hs-consulta__ver-item:hover .hs-consulta__ver-icono {
+        transform: none;
+    }
+
+    .hs-consulta__titulo::after {
+        animation: none;
+    }
+}

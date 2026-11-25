@@ -1,0 +1,108 @@
+/* =====================================================================
+   HÖSÉG Web · Páginas legales (/terminos, /politica-rsu)
+   templates/institucional/legal.html. Sin colores literales: todo sale
+   de tokens.css; la cabecera sin imagen es la común (hoseg.css).
+   ===================================================================== */
+
+/* Deja libre el óvalo de navegación móvil al final de la página */
+.hs-legal {
+    padding-bottom: 4rem;
+}
+
+/* Banner con la imagen que se cargó desde el panel */
+.hs-legal__banner {
+    position: relative;
+    display: grid;
+    place-items: center;
+    height: 250px;
+    margin-bottom: 2.5rem;
+    overflow: hidden;
+    background: var(--hs-bark);
+}
+
+.hs-legal__banner img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hs-legal__banner-velo {
+    position: absolute;
+    inset: 0;
+    background: var(--hs-velo-hero);
+}
+
+.hs-legal__banner-titulo {
+    position: relative;
+    margin: 0;
+    padding: 0 1rem;
+    font-size: clamp(1.875rem, 5vw, 2.75rem);
+    font-weight: 600;
+    color: var(--hs-cream);
+    text-align: center;
+    text-shadow: var(--hs-sombra-titulo);
+}
+
+.hs-legal__fecha {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 0 0 2rem;
+    font-size: 0.8125rem;
+    color: var(--hs-muted);
+}
+
+/* Columna lateral: acompaña al leer, bajo la barra fija */
+.hs-legal__lateral {
+    position: sticky;
+    top: calc(var(--hs-nav-alto) + 24px);
+    display: grid;
+    gap: 1rem;
+}
+
+.hs-legal__tarjeta {
+    padding: 1.25rem;
+    border: 1px solid var(--hs-sand);
+    border-radius: var(--hs-radius);
+    background: var(--hs-card);
+}
+
+.hs-legal__tarjeta-titulo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 0.75rem;
+    font-family: var(--hs-font-body);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--hs-bark);
+}
+
+.hs-legal__icono--salvia    { color: var(--hs-sage); font-size: 1rem; }
+.hs-legal__icono--terracota { color: var(--hs-terracotta); font-size: 1rem; }
+
+.hs-legal__tarjeta-texto {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--hs-muted);
+}
+
+/* El texto viene del panel en párrafos separados por saltos de línea */
+.hs-legal__documento {
+    color: var(--hs-bark-light);
+    font-size: 0.9375rem;
+    line-height: 1.8;
+    white-space: pre-line;
+}
+
+.hs-legal__pie {
+    margin-top: 3rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--hs-sand);
+}

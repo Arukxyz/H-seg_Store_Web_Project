@@ -1,0 +1,1620 @@
+/* =====================================================================
+   HÖSÉG Web · Componentes compartidos
+   Navbar, óvalo móvil, botones, badges, chips, tarjeta de producto y
+   footer. Traducidos del export de Figma Make (design/figma-make/src/
+   App.tsx) a CSS estándar sobre la grilla de Bootstrap 5. Todo color y
+   medida de marca viene de tokens.css.
+   ===================================================================== */
+
+/* ---------- Iconos (Bootstrap Icons) ---------------------------------
+   Son una fuente: toman el color del texto y su tamaño es font-size. Las
+   cajas de icono de cada componente fijan su propio tamaño; para iconos
+   sueltos se usan estas dos medidas del diseño. */
+.hs-icono    { font-size: 22px; line-height: 1; }
+.hs-icono-sm { font-size: 18px; line-height: 1; }
+
+/* Icono propio "casaca" para el compromiso ABRIGO (Bootstrap Icons no trae
+   prendas). Se escribe igual que cualquier icono: <i class="bi bi-casaca">
+   o "bi-casaca-fill". El SVG es una máscara y el color sale de currentColor,
+   así que toma el color y el tamaño del texto como los demás iconos. */
+.bi-casaca::before,
+.bi-casaca-fill::before {
+    content: "";
+    width: 1em;
+    height: 1em;
+    background-color: currentColor;
+    -webkit-mask: url("../images/iconos/casaca.svg") center / contain no-repeat;
+    mask: url("../images/iconos/casaca.svg") center / contain no-repeat;
+}
+
+.bi-casaca-fill::before {
+    -webkit-mask-image: url("../images/iconos/casaca-fill.svg");
+    mask-image: url("../images/iconos/casaca-fill.svg");
+}
+
+/* ---------- Barra superior (Navbar) ----------------------------------
+   Fija. Por defecto es opaca (páginas interiores). Con .hs-nav--transparente
+   arranca transparente con texto claro sobre el banner y navbar.js le
+   añade .is-scrolled al bajar más de 60 px. */
+.hs-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    padding: 0 20px;
+    color: var(--hs-bark);
+    background: var(--hs-nav-bg);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--hs-nav-borde);
+    box-shadow: var(--hs-shadow-nav);
+    transition: background 0.3s, box-shadow 0.3s, border-color 0.3s, color 0.3s,
+                height var(--hs-t-medio) var(--hs-ease-seda);
+}
+
+@media (min-width: 768px) {
+    .hs-nav {
+        height: 64px;
+        padding: 0 32px;
+    }
+
+    /* Al bajar, la barra se encoge a 56 px y el logo a 0,95. Es el único
+       elemento que cambia de alto, una vez por cruce del umbral. */
+    .hs-nav.is-scrolled {
+        height: 56px;
+    }
+
+    .hs-nav.is-scrolled .hs-logo {
+        transform: scale(0.95);
+    }
+}
+
+.hs-nav--transparente:not(.is-scrolled) {
+    color: var(--hs-cream);
+    background: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border-bottom-color: transparent;
+    box-shadow: none;
+}
+
+.hs-logo {
+    font-family: var(--hs-font-display);
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: inherit;
+    text-decoration: none;
+    transform-origin: left center;
+    transition: transform var(--hs-t-medio) var(--hs-ease-seda);
+}
+
+@media (min-width: 768px) {
+    .hs-logo { font-size: 1.25rem; }
+}
+
+.hs-nav__enlaces {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+.hs-nav__enlaces a {
+    position: relative;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: inherit;
+    text-decoration: none;
+    opacity: 0.75;
+    transition: color var(--hs-t-fast), opacity var(--hs-t-fast);
+}
+
+.hs-nav__enlaces a:hover,
+.hs-nav__enlaces a.is-active {
+    opacity: 1;
+}
+
+.hs-nav:not(.hs-nav--transparente) .hs-nav__enlaces a,
+.hs-nav.is-scrolled .hs-nav__enlaces a {
+    opacity: 1;
+}
+
+.hs-nav:not(.hs-nav--transparente) .hs-nav__enlaces a.is-active,
+.hs-nav.is-scrolled .hs-nav__enlaces a.is-active {
+    color: var(--hs-terracotta);
+}
+
+/* Subrayado que nace del centro: entero en el enlace activo, al pasar el
+   cursor en los demás. Terracota sobre la barra clara, crema sobre la foto. */
+.hs-nav__enlaces a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -4px;
+    height: 1px;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-terracotta);
+    transform: scaleX(0);
+    transition: transform var(--hs-t-medio) var(--hs-ease-seda);
+}
+
+.hs-nav__enlaces a:hover::after,
+.hs-nav__enlaces a:focus-visible::after,
+.hs-nav__enlaces a.is-active::after {
+    transform: scaleX(1);
+}
+
+.hs-nav--transparente:not(.is-scrolled) .hs-nav__enlaces a::after {
+    background: var(--hs-cream);
+}
+
+.hs-nav__acciones {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.hs-nav__cuenta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Ingresar / Panel / Logística / Impacto en píldora (el botón del cliente
+   con su avatar no lleva borde: el avatar ya es la pieza visible). */
+a.hs-nav__cuenta {
+    padding: 5px 14px 5px 10px;
+    border: 1px solid var(--hs-sand);
+    border-radius: var(--hs-radius-pill);
+    transition: background var(--hs-t-fast), border-color var(--hs-t-fast), color var(--hs-t-fast);
+}
+
+a.hs-nav__cuenta:hover,
+a.hs-nav__cuenta:focus-visible {
+    border-color: var(--hs-terracotta);
+    background: var(--hs-terracotta-light);
+    color: var(--hs-terracotta-hover);
+}
+
+.hs-nav--transparente:not(.is-scrolled) a.hs-nav__cuenta {
+    border-color: var(--hs-vidrio-borde);
+}
+
+.hs-nav--transparente:not(.is-scrolled) a.hs-nav__cuenta:hover,
+.hs-nav--transparente:not(.is-scrolled) a.hs-nav__cuenta:focus-visible {
+    border-color: var(--hs-cream);
+    background: var(--hs-vidrio-bg-hover);
+    color: var(--hs-cream);
+}
+
+/* Solo icono (md): la píldora se vuelve círculo */
+@media (max-width: 991.98px) {
+    a.hs-nav__cuenta {
+        padding: 5px;
+    }
+}
+
+.hs-nav__carrito {
+    display: inline-flex;
+    color: inherit;
+}
+
+/* El carrito se inclina al pasar el cursor */
+.hs-nav__carrito .bi {
+    transition: transform var(--hs-t-medio) var(--hs-ease-seda);
+}
+
+.hs-nav__carrito:hover .bi,
+.hs-nav__carrito:focus-visible .bi {
+    transform: rotate(-8deg);
+}
+
+/* Con sesión iniciada: botón con la inicial del cliente y menú desplegable */
+.hs-nav__usuario {
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+}
+
+.hs-avatar {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-terracotta);
+    color: var(--hs-card);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+/* Halo del avatar: un anillo que aparece y crece al pasar el cursor o
+   mientras el menú está abierto. */
+.hs-avatar::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border: 2px solid var(--hs-terracota-35);
+    border-radius: inherit;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity var(--hs-t-medio) var(--hs-ease), transform var(--hs-t-medio) var(--hs-ease-seda);
+}
+
+.hs-nav__usuario:hover .hs-avatar::after,
+.hs-nav__usuario:focus-visible .hs-avatar::after,
+.hs-nav__usuario[aria-expanded="true"] .hs-avatar::after {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* El menú de la cuenta baja deslizándose (sube, desde el óvalo móvil).
+   Popper ya usa `transform` para colocarlo: aquí se anima `translate`,
+   que es otra propiedad y se suma sin pisarla. */
+@keyframes hsMenuBaja {
+    from { opacity: 0; translate: 0 -8px; }
+    to   { opacity: 1; translate: 0 0; }
+}
+
+@keyframes hsMenuSube {
+    from { opacity: 0; translate: 0 8px; }
+    to   { opacity: 1; translate: 0 0; }
+}
+
+.hs-menu-cuenta.show {
+    animation: hsMenuBaja var(--hs-t-medio) var(--hs-ease-seda);
+}
+
+.hs-pill .hs-menu-cuenta.show {
+    animation-name: hsMenuSube;
+}
+
+.hs-menu-cuenta {
+    --bs-dropdown-link-active-bg: var(--hs-terracotta);
+    --bs-dropdown-link-hover-bg: var(--hs-cream-dark);
+    min-width: 14rem;
+    margin-top: 12px !important;
+    border-color: var(--hs-sand);
+    border-radius: var(--hs-radius);
+    background: var(--hs-card);
+    box-shadow: var(--hs-shadow-card);
+    font-size: 0.875rem;
+}
+
+.hs-menu-cuenta__quien {
+    padding: 4px 16px 8px;
+    overflow: hidden;
+    color: var(--hs-muted);
+    font-size: 0.75rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Icono de carrito con contador. El badge solo se renderiza si hay ítems. */
+.hs-carrito-icono {
+    position: relative;
+    display: inline-flex;
+}
+
+.hs-carrito-icono__badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-terracotta);
+    color: var(--hs-sobre-acento);
+    font-size: 9px;
+    font-weight: 600;
+    line-height: 1;
+}
+
+/* Latido del contador: navbar.js lo pide cuando el número creció desde la
+   página anterior (es decir, al volver después de agregar al carrito). */
+@keyframes hsLatido {
+    0%, 100% { transform: scale(1); }
+    30%      { transform: scale(1.35); }
+    60%      { transform: scale(0.92); }
+}
+
+.hs-carrito-icono__badge.is-latido {
+    animation: hsLatido 0.6s var(--hs-ease-seda) 0.25s 2;
+}
+
+/* Páginas sin banner: la barra es fija, así que el contenido principal
+   necesita un hueco arriba del mismo alto que la barra (56 / 64 px). La
+   Home no lo usa porque su banner ocupa toda la pantalla. */
+.hs-main--bajo-nav {
+    padding-top: 56px;
+}
+
+@media (min-width: 768px) {
+    .hs-main--bajo-nav {
+        padding-top: 64px;
+    }
+}
+
+/* ---------- Óvalo de navegación móvil (MobileNavPill) ---------------- */
+.hs-pill {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    z-index: 1030;
+    transform: translateX(-50%);
+    padding: 8px;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-pill-bg);
+    -webkit-backdrop-filter: var(--hs-pill-blur);
+    backdrop-filter: var(--hs-pill-blur);
+    border: 1px solid var(--hs-pill-border);
+    box-shadow: var(--hs-shadow-pill);
+}
+
+.hs-pill__interior {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+/* Indicador que se desliza hasta el destino activo (lo mueve navbar.js) */
+.hs-pill__indicador {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 56px;
+    opacity: 0;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-terracotta);
+    pointer-events: none;
+    transition: left var(--hs-t-pill) var(--hs-ease), width var(--hs-t-pill) var(--hs-ease);
+}
+
+.hs-pill__indicador.sin-transicion {
+    transition: none;
+}
+
+.hs-pill__item {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-width: 52px;
+    padding: 6px 12px;
+    border-radius: var(--hs-radius-pill);
+    color: var(--hs-pill-inactive);
+    text-decoration: none;
+    transition: color var(--hs-t-fast);
+}
+
+.hs-pill__item span {
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1;
+}
+
+.hs-pill__item.is-active {
+    color: var(--hs-card);
+}
+
+/* "Cuenta" del cliente es un botón que abre su menú hacia arriba */
+button.hs-pill__item {
+    border: 0;
+    background: none;
+}
+
+/* Hacia arriba el margen superior del escritorio lo encimaría sobre el
+   óvalo: la separación la da data-bs-offset. */
+.hs-pill .hs-menu-cuenta {
+    margin: 0 !important;
+}
+
+/* ---------- Botones ------------------------------------------------- */
+.hs-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background var(--hs-t-fast), color var(--hs-t-fast), border-color var(--hs-t-fast),
+                transform var(--hs-t-medio) var(--hs-ease-seda);
+}
+
+.hs-btn--primario {
+    background: var(--hs-terracotta);
+    color: var(--hs-card);
+}
+
+/* Todos los botones activos se elevan 2 px al pasar el cursor (primario,
+   secundario y vidrio por igual: van juntos en muchas pantallas) */
+.hs-btn--primario:hover,
+.hs-btn--secundario:hover,
+.hs-btn--vidrio:hover {
+    transform: translateY(-2px);
+}
+
+.hs-btn--primario:active,
+.hs-btn--secundario:active,
+.hs-btn--vidrio:active {
+    transform: translateY(0);
+}
+
+/* Flecha que avanza dentro de un botón o enlace; la de "Volver" retrocede */
+.hs-btn .bi-arrow-right,
+.hs-btn .bi-arrow-left,
+.hs-enlace-flecha .bi-arrow-right,
+.hs-enlace-flecha .bi-arrow-left {
+    transition: transform var(--hs-t-medio) var(--hs-ease-seda);
+}
+
+.hs-btn:hover .bi-arrow-right,
+.hs-enlace-flecha:hover .bi-arrow-right {
+    transform: translateX(4px);
+}
+
+.hs-btn:hover .bi-arrow-left,
+.hs-enlace-flecha:hover .bi-arrow-left {
+    transform: translateX(-4px);
+}
+
+.hs-btn--primario:hover,
+.hs-btn--primario:focus-visible {
+    background: var(--hs-terracotta-hover);
+    color: var(--hs-card);
+}
+
+.hs-btn--secundario {
+    background: var(--hs-cream-dark);
+    color: var(--hs-bark);
+    border-color: var(--hs-sand);
+}
+
+.hs-btn--secundario:hover,
+.hs-btn--secundario:focus-visible {
+    background: var(--hs-sand);
+    color: var(--hs-bark);
+}
+
+/* Botón de vidrio sobre fotografía (hero) */
+.hs-btn--vidrio {
+    background: var(--hs-vidrio-bg);
+    color: var(--hs-cream);
+    border-color: var(--hs-vidrio-borde);
+    box-shadow: var(--hs-brillo-vidrio);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    backdrop-filter: blur(16px) saturate(160%);
+}
+
+.hs-btn--vidrio:hover,
+.hs-btn--vidrio:focus-visible {
+    background: var(--hs-vidrio-bg-hover);
+    color: var(--hs-cream);
+}
+
+.hs-btn--deshabilitado {
+    background: var(--hs-sand);
+    color: var(--hs-muted);
+    cursor: default;
+}
+
+/* Botón circular (controles del carrusel) */
+.hs-btn-redondo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--hs-sand);
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-card);
+    color: var(--hs-bark);
+    font-size: 20px;
+    transition: background var(--hs-t-fast), border-color var(--hs-t-fast), color var(--hs-t-fast);
+}
+
+.hs-btn-redondo:hover {
+    border-color: var(--hs-terracotta);
+    background: var(--hs-terracotta-light);
+    color: var(--hs-terracotta);
+}
+
+.hs-btn-redondo:focus-visible {
+    outline: none;
+    box-shadow: var(--hs-anillo-foco-oscuro);
+}
+
+/* ---------- Brillo diagonal (.hs-brillo) ----------------------------
+   Una franja clara cruza el elemento al pasar el cursor. Solo en los
+   botones principales y en la foto de la tarjeta de producto. En la
+   tarjeta lo dispara el contenedor: .hs-brillo-grupo:hover .hs-brillo.
+   La franja sale por la derecha y vuelve sin transición (fuera de la
+   vista), así el efecto se repite en cada pasada. */
+.hs-brillo {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.hs-brillo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(115deg, transparent 35%, var(--hs-destello) 50%, transparent 65%);
+    transform: translateX(-110%);
+    pointer-events: none;
+}
+
+.hs-brillo:hover::after,
+.hs-brillo:focus-visible::after,
+.hs-brillo-grupo:hover .hs-brillo::after {
+    transform: translateX(110%);
+    transition: transform 0.9s var(--hs-ease-seda);
+}
+
+/* ---------- Elevación con sombra (.hs-elevable) ----------------------
+   Sube unos píxeles y gana sombra al pasar el cursor. La sombra vive en
+   un ::after y se anima su opacidad (no box-shadow). La usan la tarjeta
+   de producto, los pasos, las cifras y las tarjetas de otras páginas.
+   --hs-elevar cambia cuánto sube (por defecto 4 px). */
+.hs-elevable {
+    position: relative;
+    isolation: isolate;
+    transition: transform var(--hs-t-medio) var(--hs-ease-seda), border-color var(--hs-t-fast);
+}
+
+.hs-elevable::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    box-shadow: var(--hs-shadow-card-hover);
+    opacity: 0;
+    transition: opacity var(--hs-t-medio) var(--hs-ease);
+    pointer-events: none;
+}
+
+.hs-elevable:hover {
+    transform: translateY(var(--hs-elevar, -4px));
+}
+
+.hs-elevable:hover::after {
+    opacity: 1;
+}
+
+/* ---------- Badges y chips ------------------------------------------ */
+/* Badge de impacto sobre la foto del producto */
+.hs-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border: 1px solid transparent;
+    border-radius: var(--hs-radius-pill);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.5;
+    box-shadow: var(--hs-brillo-badge);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    backdrop-filter: blur(10px) saturate(160%);
+}
+
+.hs-badge--abrigo {
+    background: var(--hs-badge-abrigo-bg);
+    color: var(--hs-terracotta);
+    border-color: var(--hs-badge-abrigo-borde);
+}
+
+.hs-badge--arbol {
+    background: var(--hs-badge-arbol-bg);
+    color: var(--hs-sage);
+    border-color: var(--hs-badge-arbol-borde);
+}
+
+/* Chip neutro (comunidades, etiquetas de "Nosotros") */
+.hs-chip {
+    display: inline-block;
+    padding: 6px 16px;
+    border: 1px solid var(--hs-sand);
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-cream-dark);
+    color: var(--hs-bark);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.hs-chip--pequeno {
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Chip translúcido sobre fotografía (hero) */
+.hs-chip-vidrio {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border: 1px solid var(--hs-vidrio-borde-suave);
+    border-radius: var(--hs-radius-pill);
+    color: var(--hs-cream);
+    font-size: 11px;
+    font-weight: 600;
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    backdrop-filter: blur(12px) saturate(160%);
+}
+
+.hs-chip-vidrio--terracota { background: var(--hs-chip-terracota-bg); }
+.hs-chip-vidrio--salvia    { background: var(--hs-chip-salvia-bg); }
+
+/* Chip de talla dentro de la tarjeta */
+.hs-chip-talla {
+    padding: 2px 6px;
+    border: 1px solid var(--hs-sand);
+    border-radius: 4px;
+    background: var(--hs-cream-dark);
+    color: var(--hs-muted);
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+/* ---------- Secciones de página ------------------------------------- */
+.hs-seccion {
+    padding: 4rem 0;
+}
+
+.hs-seccion--alterna {
+    background: var(--hs-cream-dark);
+}
+
+@media (min-width: 768px) {
+    .hs-seccion        { padding: 6rem 0; }
+    .hs-seccion--corta { padding: 5rem 0; }
+}
+
+/* Anchos de lectura del diseño (max-w-5xl / max-w-2xl) sobre .container */
+.container.hs-ancho-md { max-width: 1024px; }
+.container.hs-ancho-sm { max-width: 672px; }
+
+/* ---------- Tipografía de sección ----------------------------------- */
+.hs-kicker {
+    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--hs-muted);
+}
+
+.hs-kicker--estrecho {
+    letter-spacing: 0.15em;
+}
+
+.hs-h2 {
+    font-family: var(--hs-font-display);
+    font-size: clamp(1.875rem, 4vw, 2.25rem);
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.hs-texto-secundario {
+    color: var(--hs-muted);
+    font-size: 0.875rem;
+    line-height: 1.65;
+}
+
+.hs-enlace-flecha {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--hs-terracotta);
+    text-decoration: none;
+    transition: color var(--hs-t-fast);
+}
+
+.hs-enlace-flecha:hover {
+    color: var(--hs-terracotta-hover);
+}
+
+.hs-enlace-flecha .bi {
+    font-size: 16px;
+}
+
+/* ---------- Cabecera de página interior ------------------------------
+   fragments/cabecera :: cabecera(kicker, titulo, bajada) la arma completa:
+   centrada, con "HÖSÉG" enorme de fondo como marca de agua y entrada
+   escalonada. Las páginas del flujo de compra usan la versión simple
+   (.hs-pagina-cabecera sin --marca) junto al indicador de pasos. */
+.hs-pagina-cabecera {
+    padding: 2.5rem 0 1.5rem;
+}
+
+.hs-pagina-cabecera__titulo {
+    font-family: var(--hs-font-display);
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    font-weight: 600;
+    line-height: 1.15;
+    margin: 0;
+}
+
+/* Palabra destacada del titular: Fraunces cursiva en terracota */
+.hs-acento {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--hs-terracotta);
+}
+
+.hs-pagina-cabecera--marca {
+    position: relative;
+    padding: 3rem 0 2rem;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.hs-pagina-cabecera--marca::before {
+    content: "HÖSÉG";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: -1;
+    font-family: var(--hs-font-display);
+    font-size: clamp(6rem, 22vw, 15rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    color: var(--hs-cream-dark);
+    white-space: nowrap;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    user-select: none;
+}
+
+@media (min-width: 768px) {
+    .hs-pagina-cabecera--marca {
+        padding: 4rem 0 2.5rem;
+    }
+}
+
+/* Anchos de bloques sueltos: párrafo de lectura y formulario corto */
+.hs-ancho-texto { max-width: 36rem; }
+.hs-ancho-form  { max-width: 24rem; }
+
+/* ---------- Campo de texto ------------------------------------------ */
+.hs-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--hs-sand);
+    border-radius: 12px;
+    background: var(--hs-card);
+    color: var(--hs-bark);
+    font-family: var(--hs-font-body);
+    font-size: 0.875rem;
+    transition: border-color var(--hs-t-fast), box-shadow var(--hs-t-fast);
+}
+
+.hs-input:focus {
+    outline: none;
+    border-color: var(--hs-terracotta);
+    box-shadow: var(--hs-anillo-foco);
+}
+
+/* ---------- Formularios (comunes a todas las páginas) ---------------- */
+.hs-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+/* <select> nativo con estilo propio: conserva el teclado, los lectores de
+   pantalla y el selector del celular. La flecha se dibuja con dos
+   degradados (un chevrón) en el color de la paleta. */
+.hs-select {
+    width: 100%;
+    padding: 12px 40px 12px 16px;
+    border: 1px solid var(--hs-sand);
+    border-radius: 12px;
+    background-color: var(--hs-card);
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--hs-muted) 50%),
+        linear-gradient(135deg, var(--hs-muted) 50%, transparent 50%);
+    background-position:
+        calc(100% - 21px) 50%,
+        calc(100% - 16px) 50%;
+    background-size: 5px 5px;
+    background-repeat: no-repeat;
+    color: var(--hs-bark);
+    font-family: var(--hs-font-body);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    box-shadow: var(--hs-shadow-card-reposo);
+    transition: border-color var(--hs-t-fast), box-shadow var(--hs-t-fast);
+}
+
+.hs-select:hover {
+    border-color: var(--hs-terracotta);
+}
+
+.hs-select:focus {
+    outline: none;
+    border-color: var(--hs-terracotta);
+    box-shadow: var(--hs-anillo-foco);
+}
+
+.hs-select:hover,
+.hs-select:focus {
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--hs-terracotta) 50%),
+        linear-gradient(135deg, var(--hs-terracotta) 50%, transparent 50%);
+}
+
+.hs-select option {
+    background: var(--hs-card);
+    color: var(--hs-bark);
+}
+
+/* Mensaje de error de un campo. Los th:errors que aún usan .text-danger
+   toman el mismo color por el mapeo de --bs-danger en tokens.css. */
+.hs-campo-error,
+.text-danger:not(:empty) {
+    margin-top: 6px;
+    font-size: 0.8125rem;
+}
+
+.hs-campo-error {
+    color: var(--hs-terracotta-hover);
+}
+
+.hs-campo-error:empty {
+    display: none;
+}
+
+/* Campo con error: borde terracota (el mensaje va justo después del campo) */
+.hs-input.is-invalid,
+.hs-select.is-invalid,
+.hs-input:has(+ .text-danger:not(:empty)),
+.hs-select:has(+ .text-danger:not(:empty)),
+.hs-input:has(+ .hs-campo-error:not(:empty)),
+.hs-select:has(+ .hs-campo-error:not(:empty)) {
+    border-color: var(--hs-terracotta);
+}
+
+/* Validación en el navegador (needs-validation / was-validated de
+   Bootstrap): colores de la paleta y sin los iconos verdes y rojos que
+   Bootstrap dibuja dentro del campo. */
+.was-validated .hs-input:valid,
+.was-validated .hs-input:invalid,
+.hs-input.is-valid,
+.hs-input.is-invalid {
+    padding-right: 16px;
+    background-image: none;
+}
+
+.was-validated .hs-input:valid,
+.hs-input.is-valid {
+    border-color: var(--hs-sage);
+}
+
+.was-validated .hs-input:invalid {
+    border-color: var(--hs-terracotta);
+}
+
+.was-validated .hs-input:valid:focus,
+.was-validated .hs-input:invalid:focus {
+    box-shadow: var(--hs-anillo-foco);
+}
+
+/* ---------- Avisos (alert de Bootstrap con la paleta) ----------------
+   Los colores salen del mapeo de --bs-success-* / --bs-danger-* en
+   tokens.css; aquí solo la forma y una entrada suave. */
+.alert {
+    border-radius: var(--hs-radius);
+    font-size: 0.875rem;
+    animation: hsFadeSlide 0.4s var(--hs-ease-seda) backwards;
+}
+
+/* ---------- Acordeones (Bootstrap) con la paleta ---------------------
+   Bootstrap pinta de azul el acordeón abierto y su foco. */
+.accordion {
+    --bs-accordion-bg: var(--hs-card);
+    --bs-accordion-border-color: var(--hs-sand);
+    --bs-accordion-btn-color: var(--hs-bark);
+    --bs-accordion-active-color: var(--hs-bark);
+    --bs-accordion-active-bg: var(--hs-terracotta-light);
+    --bs-accordion-btn-focus-box-shadow: var(--hs-anillo-foco);
+    --bs-accordion-btn-active-icon: var(--bs-accordion-btn-icon);
+}
+
+/* ---------- Botón de solo icono (mostrar clave, copiar, ver CVV) ------ */
+.hs-btn-icono {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--hs-muted);
+    cursor: pointer;
+    transition: background var(--hs-t-fast), color var(--hs-t-fast);
+}
+
+.hs-btn-icono:hover {
+    background: var(--hs-cream-dark);
+    color: var(--hs-bark);
+}
+
+.hs-btn-icono:focus-visible {
+    outline: none;
+    box-shadow: var(--hs-anillo-foco-oscuro);
+}
+
+/* Dentro de una etiqueta de campo (ayuda del CVV) */
+.hs-btn-icono--sm {
+    width: 24px;
+    height: 24px;
+    font-size: 0.875rem;
+}
+
+/* ---------- Enlaces ---------------------------------------------------
+   Dos tipos en todo el sitio:
+     .hs-enlace        dentro del texto: subrayado que nace del centro
+     .hs-enlace-flecha "ir a…": la flecha avanza (← retrocede en "Volver")
+   El subrayado es un fondo de 1 px (funciona aunque el enlace ocupe dos
+   líneas); solo cambia su ancho, en un elemento pequeño. */
+.hs-enlace {
+    padding-bottom: 1px;
+    background: linear-gradient(currentColor, currentColor) 50% 100% / 0 1px no-repeat;
+    color: var(--hs-terracotta);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color var(--hs-t-fast), background-size var(--hs-t-medio) var(--hs-ease-seda);
+}
+
+.hs-enlace:hover,
+.hs-enlace:focus-visible {
+    background-size: 100% 1px;
+    color: var(--hs-terracotta-hover);
+}
+
+/* ---------- Tarjeta de producto (ProductCard) ----------------------- */
+/* Sube 6 px con sombra (.hs-elevable en el fragmento), la foto se acerca y
+   la cruza el brillo, el badge resalta y "Ver detalle" pasa a terracota.
+   Sin overflow en la tarjeta: la sombra del ::after queda por fuera; las
+   esquinas de la foto las recorta la propia foto. */
+.hs-card {
+    --hs-elevar: -6px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border: 1px solid var(--hs-sand);
+    border-radius: 16px;
+    background: var(--hs-card);
+    box-shadow: var(--hs-shadow-card-reposo);
+}
+
+.hs-card--agotado {
+    opacity: 0.65;
+}
+
+.hs-card--agotado.hs-elevable:hover {
+    transform: none;
+}
+
+.hs-card--agotado.hs-elevable:hover::after,
+.hs-card--agotado .hs-brillo::after {
+    display: none;
+}
+
+.hs-card__imagen {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 15px 15px 0 0;
+    background: var(--hs-cream-dark);
+}
+
+.hs-card__imagen img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--hs-t-lento) var(--hs-ease-seda);
+}
+
+.hs-card:not(.hs-card--agotado):hover .hs-card__imagen img {
+    transform: scale(1.05);
+}
+
+/* Sin foto: degradado suave de la paleta, el icono del compromiso y el
+   nombre de la colección como marca de agua. */
+.hs-card__sin-imagen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background:
+        radial-gradient(circle at 30% 20%, var(--hs-card) 0%, transparent 60%),
+        linear-gradient(160deg, var(--hs-cream-dark) 0%, var(--hs-sand) 140%);
+    color: var(--hs-muted);
+    transition: transform var(--hs-t-lento) var(--hs-ease-seda);
+}
+
+.hs-card__sin-imagen .bi {
+    font-size: 64px;
+    opacity: 0.45;
+}
+
+.hs-card__sin-imagen-marca {
+    font-family: var(--hs-font-display);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    opacity: 0.55;
+}
+
+.hs-card:not(.hs-card--agotado):hover .hs-card__sin-imagen {
+    transform: scale(1.04);
+}
+
+.hs-card__badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 2;
+}
+
+.hs-card__badge .hs-badge {
+    transition: transform var(--hs-t-medio) var(--hs-ease-seda);
+    transform-origin: left center;
+}
+
+.hs-card:not(.hs-card--agotado):hover .hs-card__badge .hs-badge {
+    transform: scale(1.08);
+}
+
+/* "Ver detalle" se vuelve botón principal al pasar sobre la tarjeta */
+.hs-card:hover .hs-btn--secundario {
+    border-color: var(--hs-terracotta);
+    background: var(--hs-terracotta);
+    color: var(--hs-card);
+}
+
+.hs-card__velo {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    background: var(--hs-velo-agotado);
+}
+
+.hs-card__agotado-etiqueta {
+    padding: 4px 12px;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-etiqueta-agotado);
+    color: var(--hs-cream);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.hs-card__cuerpo {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+}
+
+.hs-card__coleccion {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--hs-muted);
+}
+
+.hs-card__nombre {
+    margin: 2px 0 0;
+    font-family: var(--hs-font-display);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--hs-bark);
+}
+
+.hs-card__fila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 4px;
+}
+
+.hs-card__precio {
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.hs-card__tallas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px;
+}
+
+.hs-card .hs-btn {
+    margin-top: 4px;
+    padding: 8px 16px;
+}
+
+/* ---------- Footer -------------------------------------------------- */
+.hs-footer {
+    position: relative;     /* el divisor orgánico (::before) sube sobre el final de la sección anterior */
+    padding: 40px 0 7rem;   /* abajo: hueco para el óvalo de navegación */
+    background: var(--hs-bark);
+    color: var(--hs-sand);
+}
+
+@media (min-width: 768px) {
+    .hs-footer {
+        padding: 64px 0;
+    }
+}
+
+/* Divisor orgánico sobre el footer: una loma suave del mismo color corteza.
+   El SVG es solo la forma (máscara); el color sale de --hs-bark. */
+.hs-footer::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(100% - 1px);
+    height: 40px;
+    background: var(--hs-bark);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 40' preserveAspectRatio='none'%3E%3Cpath d='M0 40V22C180 6 360 0 560 10s420 30 620 22S1380 8 1440 4V40Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 40' preserveAspectRatio='none'%3E%3Cpath d='M0 40V22C180 6 360 0 560 10s420 30 620 22S1380 8 1440 4V40Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    pointer-events: none;
+}
+
+/* Móvil: menos aire y letra un punto menor para que el pie no ocupe tres pantallas */
+@media (max-width: 575.98px) {
+    .hs-footer .row {
+        --bs-gutter-y: 1.75rem;
+        margin-bottom: 2rem !important;
+    }
+
+    .hs-footer__lema,
+    .hs-footer ul a {
+        font-size: 0.8125rem;
+    }
+
+    .hs-footer ul {
+        gap: 0.375rem !important;
+    }
+
+    .hs-footer__pie {
+        gap: 1rem !important;
+        padding-top: 20px;
+    }
+}
+
+.hs-footer__logo {
+    font-family: var(--hs-font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--hs-cream);
+}
+
+.hs-footer__lema {
+    max-width: 20rem;
+    font-size: 0.875rem;
+    line-height: 1.65;
+    color: var(--hs-footer-text);
+}
+
+.hs-footer__red {
+    padding: 4px 12px;
+    border: 1px solid var(--hs-footer-border);
+    border-radius: var(--hs-radius-pill);
+    color: var(--hs-footer-text);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background var(--hs-t-fast), color var(--hs-t-fast), border-color var(--hs-t-fast),
+                transform var(--hs-t-medio) var(--hs-ease-seda);
+}
+
+.hs-footer__red:hover,
+.hs-footer__red:focus-visible {
+    border-color: var(--hs-terracotta);
+    background: var(--hs-terracotta);
+    color: var(--hs-cream);
+    transform: translateY(-2px);
+}
+
+.hs-footer__titulo {
+    margin-bottom: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--hs-muted);
+}
+
+/* Enlaces del pie: se aclaran y avanzan un poco, con un trazo terracota a la izquierda */
+.hs-footer ul a {
+    position: relative;
+    display: inline-block;
+    font-size: 0.875rem;
+    color: var(--hs-footer-text);
+    text-decoration: none;
+    transition: color var(--hs-t-fast), transform var(--hs-t-medio) var(--hs-ease-seda);
+}
+
+.hs-footer ul a::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -12px;
+    width: 6px;
+    height: 1px;
+    background: var(--hs-terracotta);
+    opacity: 0;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: opacity var(--hs-t-fast), transform var(--hs-t-medio) var(--hs-ease-seda);
+}
+
+.hs-footer ul a:hover,
+.hs-footer ul a:focus-visible {
+    color: var(--hs-cream);
+    transform: translateX(6px);
+}
+
+.hs-footer ul a:hover::before,
+.hs-footer ul a:focus-visible::before {
+    opacity: 1;
+    transform: scaleX(1);
+}
+
+.hs-footer__pie {
+    padding-top: 24px;
+    border-top: 1px solid var(--hs-footer-line);
+    font-size: 0.75rem;
+    color: var(--hs-footer-copy);
+}
+
+/* Sello de Empresa B (texto e icono, no el logotipo oficial) */
+.hs-footer__sello {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 8px;
+    padding: 6px 14px;
+    border: 1px solid var(--hs-footer-border);
+    border-radius: var(--hs-radius-pill);
+    color: var(--hs-cream);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Boletín: campo y botón en línea; en pantallas muy angostas se apilan */
+.hs-footer__boletin {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Resultado de suscribirse, encima del formulario (flash "boletin" / "boletinError") */
+.hs-footer__aviso {
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: var(--hs-sage);
+    color: var(--hs-cream);
+    font-size: 0.875rem;
+}
+
+.hs-footer__aviso--error {
+    background: var(--hs-terracotta);
+}
+
+.hs-footer__boletin-campo {
+    flex: 1 1 12rem;
+    min-width: 0;
+    padding: 12px 16px;
+    border: 1px solid var(--hs-footer-border);
+    border-radius: 12px;
+    background: var(--hs-bark-light);
+    color: var(--hs-cream);
+    font-family: var(--hs-font-body);
+    font-size: 0.875rem;
+    transition: border-color var(--hs-t-fast), box-shadow var(--hs-t-fast);
+}
+
+.hs-footer__boletin-campo::placeholder {
+    color: var(--hs-footer-text);
+}
+
+.hs-footer__boletin-campo:focus {
+    outline: none;
+    border-color: var(--hs-terracotta);
+    box-shadow: var(--hs-anillo-foco-oscuro);
+}
+
+.hs-footer__boletin-campo:focus::placeholder {
+    color: var(--hs-footer-copy);
+}
+
+.hs-footer__boletin .hs-btn {
+    flex: 0 0 auto;
+    padding: 12px 20px;
+}
+
+/* Libro de Reclamaciones: la ley pide que sea visible, por eso va enmarcado */
+.hs-footer__reclamaciones {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 8px;
+    padding: 8px 16px;
+    border: 1px solid var(--hs-footer-border);
+    border-radius: 12px;
+    color: var(--hs-cream);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background var(--hs-t-fast), border-color var(--hs-t-fast);
+}
+
+.hs-footer__reclamaciones .bi {
+    transition: transform var(--hs-t-medio) var(--hs-ease-seda);
+}
+
+.hs-footer__reclamaciones:hover,
+.hs-footer__reclamaciones:focus-visible {
+    border-color: var(--hs-terracotta);
+    background: var(--hs-bark-light);
+    color: var(--hs-cream);
+}
+
+/* El libro "se abre" un poco */
+.hs-footer__reclamaciones:hover .bi,
+.hs-footer__reclamaciones:focus-visible .bi {
+    transform: rotate(-10deg) scale(1.1);
+}
+
+/* Aviso "Desliza hacia los lados" sobre tablas anchas de los paneles (solo móvil, d-md-none) */
+.hs-aviso-deslizar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    margin-bottom: .75rem;
+    font-size: .85rem;
+    color: var(--hs-muted);
+}
+
+.hs-aviso-deslizar__flecha {
+    color: var(--hs-terracotta);
+    animation: hsDeslizar 1.6s var(--hs-ease) infinite;
+}
+
+@keyframes hsDeslizar {
+    0%, 100% { transform: translateX(0); }
+    50%      { transform: translateX(6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hs-aviso-deslizar__flecha { animation: none; }
+}
+
+/* ---------- Línea de tiempo de la donación ---------------------------
+   fragments/donacion :: lineaTiempo. La comparten "Detalle de pedido"
+   (cuenta) y la consulta pública de impacto: los pasos cumplidos llevan
+   .is-cumplido y el actual, aria-current="step". */
+.hs-linea-tiempo {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.hs-linea-tiempo__paso {
+    display: grid;
+    justify-items: center;
+    align-content: start;
+    gap: .5rem;
+    min-width: 0;
+    color: var(--hs-muted);
+    font-size: .75rem;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.hs-linea-tiempo__punto {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border: 1px solid var(--hs-sand);
+    border-radius: 50%;
+    background: var(--hs-card);
+    font-weight: 700;
+}
+
+.hs-linea-tiempo__paso.is-cumplido {
+    color: var(--hs-bark);
+}
+
+.hs-linea-tiempo__paso.is-cumplido .hs-linea-tiempo__punto {
+    border-color: var(--hs-terracotta);
+    background: var(--hs-terracotta);
+    color: var(--hs-sobre-acento);
+}
+
+.hs-linea-tiempo__paso[aria-current="step"] {
+    font-weight: 600;
+}
+
+@media (max-width: 540px) {
+    .hs-linea-tiempo { gap: .25rem; }
+    .hs-linea-tiempo__paso { font-size: .68rem; }
+    .hs-linea-tiempo__punto { width: 1.75rem; height: 1.75rem; }
+}
+/* ---------- Aparición al entrar en pantalla (revelar.js) -------------
+   Un solo mecanismo para todo el sitio. El script del <head> de
+   layout/base.html añade .hs-revelar al <html> solo si hay
+   IntersectionObserver y no se pidió menos movimiento; sin eso (o sin JS)
+   todo se ve desde el inicio. revelar.js marca .is-visible una sola vez.
+     data-revelar             sube 24 px
+     data-revelar="izquierda" entra desde la izquierda
+     data-revelar="derecha"   entra desde la derecha
+     data-revelar="escala"    crece desde 0,96
+   El retraso en cascada sale de --hs-i (0, 1, 2…) por el paso --hs-paso. */
+.hs-revelar [data-revelar] {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity var(--hs-t-lento) var(--hs-ease-seda),
+                transform var(--hs-t-lento) var(--hs-ease-seda);
+    transition-delay: calc(var(--hs-i, 0) * var(--hs-paso, 90ms));
+}
+
+.hs-revelar [data-revelar="izquierda"] { transform: translateX(-32px); }
+.hs-revelar [data-revelar="derecha"]   { transform: translateX(32px); }
+.hs-revelar [data-revelar="escala"]    { transform: scale(0.96); }
+
+.hs-revelar [data-revelar].is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+/* ---------- Entrada escalonada al cargar (.hs-entrada) ---------------
+   Para la cabecera de una página: cada pieza entra un poco después de la
+   anterior según --hs-i (80 ms por paso). Es CSS puro: no espera a JS.
+   `backwards`: oculto durante su retraso y, al terminar, sin ningún
+   transform puesto (un transform rompería hijos fixed, como los modales). */
+.hs-entrada {
+    animation: hsFadeSlide 0.55s var(--hs-ease-seda) backwards;
+    animation-delay: calc(var(--hs-i, 0) * 80ms);
+}
+
+/* ---------- Píldoras con hover (comunidades, etiquetas) -------------- */
+.hs-chip--vivo {
+    transition: transform var(--hs-t-medio) var(--hs-ease-seda),
+                background var(--hs-t-fast), border-color var(--hs-t-fast), color var(--hs-t-fast);
+}
+
+.hs-chip--vivo:hover {
+    transform: translateY(-2px);
+    border-color: var(--hs-terracotta);
+    background: var(--hs-terracotta-light);
+    color: var(--hs-terracotta-hover);
+}
+
+/* ---------- Menos movimiento ----------------------------------------
+   Con "reducir movimiento" todo queda completo y quieto: sin desplazamientos,
+   sin brillos y sin latidos. Los cambios de color se mantienen. */
+@media (prefers-reduced-motion: reduce) {
+    .hs-nav,
+    .hs-logo,
+    .hs-nav__enlaces a::after,
+    .hs-nav__carrito .bi,
+    .hs-avatar::after,
+    .hs-btn,
+    .hs-btn .bi-arrow-right,
+    .hs-btn .bi-arrow-left,
+    .hs-enlace-flecha .bi-arrow-left,
+    .hs-enlace,
+    .hs-btn-icono,
+    .hs-enlace-flecha .bi-arrow-right,
+    .hs-elevable,
+    .hs-card__imagen img,
+    .hs-card__sin-imagen,
+    .hs-card__badge .hs-badge,
+    .hs-footer__red,
+    .hs-footer ul a,
+    .hs-footer ul a::before,
+    .hs-footer__reclamaciones .bi,
+    .hs-chip--vivo {
+        transition: none;
+    }
+
+    .hs-nav.is-scrolled .hs-logo,
+    .hs-nav__carrito:hover .bi,
+    .hs-btn:hover,
+    .hs-btn:hover .bi-arrow-right,
+    .hs-btn:hover .bi-arrow-left,
+    .hs-enlace-flecha:hover .bi-arrow-left,
+    .hs-enlace-flecha:hover .bi-arrow-right,
+    .hs-elevable:hover,
+    .hs-card:not(.hs-card--agotado):hover .hs-card__imagen img,
+    .hs-card:not(.hs-card--agotado):hover .hs-card__sin-imagen,
+    .hs-card:not(.hs-card--agotado):hover .hs-card__badge .hs-badge,
+    .hs-footer__red:hover,
+    .hs-footer ul a:hover,
+    .hs-footer__reclamaciones:hover .bi,
+    .hs-chip--vivo:hover {
+        transform: none;
+    }
+
+    .hs-brillo::after {
+        display: none;
+    }
+
+    .hs-menu-cuenta.show,
+    .hs-carrito-icono__badge.is-latido,
+    .hs-entrada,
+    .alert {
+        animation: none;
+    }
+}
