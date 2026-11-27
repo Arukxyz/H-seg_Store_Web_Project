@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://thymeleaf.org"
+      th:replace="~{layout/admin :: pagina(titulo='Donaciones pendientes · Impacto HÖSÉG', activa='impacto-donaciones', contenido=~{::main})}">
+<body>
+<main class="hs-admin-page">
+    <div class="hs-page-heading">
+        <div>
+            <p class="hs-eyebrow">IMPACTO SOCIAL · ASIGNACIÓN</p>
+            <h1>Donaciones pendientes</h1>
+            <p class="hs-page-desc">Compromisos generados por compras pagadas que esperan ser asignados a un lote.</p>
+        </div>
+        <a class="hs-admin-btn hs-admin-btn--primary" th:href="@{/gestion-impacto/lotes}">
+            <i class="bi bi-plus-circle me-1" aria-hidden="true"></i> Crear nuevo lote
+        </a>
+    </div>
+
+    <section class="hs-admin-card">
+        <div class="hs-card-head hs-card-head--wrap">
+            <div>
+                <h2>Compromisos por asignar (<span th:text="${#lists.size(pendientes)}">0</span>)</h2>
+                <p>Selecciona uno o más compromisos y asígnalos a un lote activo.</p>
+            </div>
+        </div>
+
+        <form th:if="${!pendientes.isEmpty()}" method="post" id="formAsignarLote"
+              th:action="@{/gestion-impacto/lotes/0/asignar}">
+            <div class="hs-op-toolbar">
+                <div class="hs-field hs-op-toolbar__select">
+                    <label for="selectLoteDestino">LOTE DESTINO</label>
+                    <select id="selectLoteDestino" class="hs-admin-input" required>
+                        <option value="">Elige lote destino...</option>
+                        <option th:each="l : ${lotes}" th:if="${l.estado.name() != 'ENTREGADO'}"
+                                th:value="${l.id}"
+                                th:text="${l.codigoLote + ' · ' + l.comunidad.nombre}">
+                            LOTE-2026-1001 · Ccatca
+                        </option>
+                    </select>
+                </div>
+                <button type="submit" class="hs-admin-btn hs-admin-btn--primary">
+                    <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i> Asignar al lote
+                </button>
+            </div>
+
+            <p class="hs-aviso-deslizar d-md-none px-3 mb-1">
+                <span>Desliza la tabla para ver detalles</span>
+                <i class="bi bi-arrow-right hs-aviso-deslizar__flecha" aria-hidden="true"></i>
+            </p>
+
+            <div class="hs-table-scroll">
+                <table class="hs-admin-table">
+                    <thead>
+                    <tr>
+                        <th style="width: 36px;"><input type="checkbox" id="chkAllDon" aria-label="Seleccionar todas"></th>
+                        <th>Boleta</th>
+                        <th>Compromiso</th>
+                        <th>Prenda origen</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="d : ${pendientes}">
+                        <td><input class="chk-don" type="checkbox" name="idsDonacion" th:value="${d.id}"></td>
+                        <td><span class="hs-code-pill" th:text="${d.detalleVenta.venta.codigoComprobante}">WEB-000126</span></td>
+                        <td>
+                            <span class="hs-op-badge hs-op-badge--ok"
+                                  th:text="${d.cantidad + ' ' + d.tipo.name()}">1 ABRIGO</span>
+                        </td>
+                        <td th:text="${d.producto.nombre}">Casaca Älpafill</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </form>
+
+        <div th:if="${pendientes.isEmpty()}" class="hs-empty-row py-5">
+            <div class="hs-empty-box">
+                <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                <span>Todas las donaciones están asignadas. ¡Buen trabajo!</span>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

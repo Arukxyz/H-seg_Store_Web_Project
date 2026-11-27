@@ -2,6 +2,9 @@
    HÖSÉG Web · Página principal
    HeroBanner, FeaturedCarousel, ImpactSteps, ImpactCounters, ImpactCTA
    y AboutStrip. Secciones, tipografía y componentes reutilizables: hoseg.css.
+   Movimiento: solo transform y opacity; todo lo ligado al scroll va con
+   IntersectionObserver o con animation-timeline dentro de @supports.
+   Al final, el bloque de "reducir movimiento".
    ===================================================================== */
 
 /* ---------- HeroBanner ---------------------------------------------- */
@@ -14,6 +17,12 @@
     background: var(--hs-bark);
 }
 
+/* Ken Burns: la foto se acerca muy despacio (22 s) y vuelve. Solo transform. */
+@keyframes hsKenBurns {
+    from { transform: scale(1); }
+    to   { transform: scale(1.08); }
+}
+
 .hs-hero__imagen {
     position: absolute;
     inset: 0;
@@ -21,12 +30,41 @@
     height: 100%;
     object-fit: cover;
     object-position: center;
+    animation: hsKenBurns 22s ease-in-out infinite alternate;
 }
 
 .hs-hero__velo {
     position: absolute;
     inset: 0;
     background: var(--hs-velo-hero);
+}
+
+/* Grano de película estático. El SVG (ruido fractal) es solo una máscara:
+   lo que se ve es --hs-bark con la forma del ruido. Se genera una vez y no
+   se anima; sin mix-blend-mode. */
+.hs-hero__grano {
+    position: absolute;
+    inset: 0;
+    background: var(--hs-bark);
+    opacity: 0.18;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+    pointer-events: none;
+}
+
+/* Divisor orgánico bajo el hero, del crema de la sección siguiente */
+.hs-hero::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    z-index: 1;
+    height: 36px;
+    background: var(--hs-cream);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 36' preserveAspectRatio='none'%3E%3Cpath d='M0 36V18C240 34 480 36 720 24S1200 0 1440 14V36Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 36' preserveAspectRatio='none'%3E%3Cpath d='M0 36V18C240 34 480 36 720 24S1200 0 1440 14V36Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    pointer-events: none;
 }
 
 .hs-hero__contenido {
@@ -38,12 +76,13 @@
     min-height: 100vh;
     min-height: 100svh;
     padding-top: 5rem;
-    padding-bottom: 4rem;
+    /* Móvil: sitio para el óvalo de navegación y el divisor */
+    padding-bottom: 7.5rem;
 }
 
 @media (min-width: 768px) {
     .hs-hero__contenido {
-        padding-bottom: 5rem;
+        padding-bottom: 6rem;
     }
 }
 
@@ -53,10 +92,11 @@
 
 .hs-hero__titulo {
     margin-bottom: 1.25rem;
-    font-size: clamp(2.75rem, 7vw, 4.5rem);
+    font-size: clamp(2.375rem, 9vw, 4.5rem);
     font-weight: 600;
     line-height: 1.1;
     color: var(--hs-cream);
+    text-shadow: var(--hs-sombra-titulo);
 }
 
 .hs-hero__bajada {
@@ -71,9 +111,42 @@
     .hs-hero__bajada { font-size: 1.125rem; }
 }
 
+/* Entrada escalonada: chips → título → bajada → botones. Toda la secuencia
+   termina antes de 0,6 s; el título casi no espera porque es lo principal. */
+.hs-hero__entrada {
+    animation: hsFadeSlide 0.42s var(--hs-ease-seda) backwards;
+    animation-delay: calc(var(--hs-i, 0) * 50ms);
+}
+
+/* Brillo de los chips del hero: una franja que los cruza cada 7 s */
+@keyframes hsBrilloChip {
+    0%, 86% { transform: translateX(-110%); }
+    100%    { transform: translateX(110%); }
+}
+
+.hs-hero .hs-chip-vidrio {
+    position: relative;
+    overflow: hidden;
+}
+
+.hs-hero .hs-chip-vidrio::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 30%, var(--hs-destello-suave) 50%, transparent 70%);
+    transform: translateX(-110%);
+    animation: hsBrilloChip 7s var(--hs-ease) 2s infinite;
+    pointer-events: none;
+}
+
+.hs-hero .hs-chip-vidrio + .hs-chip-vidrio::after {
+    animation-delay: 2.4s;
+}
+
 /* ---------- FeaturedCarousel ---------------------------------------- */
-/* Deslizamiento manual (home.js): Bootstrap Carousel no muestra 1,4
-   tarjetas en móvil. --visibles fija cuántas caben por breakpoint. */
+/* Móvil y tablet (< 992 px): deslizamiento manual (home.js). Bootstrap
+   Carousel no muestra 1,4 tarjetas en móvil. --visibles fija cuántas
+   caben por breakpoint. Desde 992 px, home.js activa el arco. */
 .hs-carrusel {
     --visibles: 1.4;
     --separacion: 16px;
@@ -81,7 +154,6 @@
 }
 
 @media (min-width: 768px)  { .hs-carrusel { --visibles: 2; } }
-@media (min-width: 1200px) { .hs-carrusel { --visibles: 4; } }
 
 .hs-carrusel__pista {
     display: flex;
@@ -94,6 +166,18 @@
     flex: 0 0 calc((100% - var(--separacion) * (var(--visibles) - 1)) / var(--visibles));
 }
 
+/* Las flechas solo se muestran en el arco (escritorio); en móvil se usa el
+   dedo y los puntos. */
+.hs-carrusel__flechas {
+    display: none !important;
+}
+
+@media (min-width: 992px) {
+    .hs-carrusel__flechas {
+        display: flex !important;
+    }
+}
+
 .hs-carrusel__puntos {
     display: flex;
     justify-content: center;
@@ -102,6 +186,7 @@
 }
 
 .hs-carrusel__puntos button {
+    position: relative;
     width: 7px;
     height: 7px;
     padding: 0;
@@ -111,14 +196,83 @@
     transition: width var(--hs-t-fast), background var(--hs-t-fast);
 }
 
+/* Área táctil mayor que el punto */
+.hs-carrusel__puntos button::before {
+    content: "";
+    position: absolute;
+    inset: -10px -4px;
+}
+
 .hs-carrusel__puntos button.is-active {
     width: 20px;
     background: var(--hs-terracotta);
 }
 
+/* ---------- Carrusel en arco (≥ 992 px) ------------------------------
+   home.js añade .hs-carrusel--arco y pone en cada tarjeta:
+     --pos   posición respecto de la central (−2 … 2; con decimales al arrastrar)
+     --dist  |pos|          --dist2  pos²
+   Todas las tarjetas ocupan la misma celda de la grilla y el CSS las
+   reparte en arco: se apartan, bajan, giran y se achican según la
+   distancia. Las de |pos| > 2,5 se ocultan (.is-lejos). */
+.hs-carrusel--arco {
+    --ancho-tarjeta: clamp(240px, 22vw, 280px);
+    padding: 8px 0 72px;
+    overflow: visible;
+    outline: none;
+    cursor: grab;
+    touch-action: pan-y;
+    user-select: none;
+}
+
+.hs-carrusel--arco.is-arrastrando {
+    cursor: grabbing;
+}
+
+.hs-carrusel--arco:focus-visible .hs-carrusel__item.is-actual .hs-card {
+    box-shadow: var(--hs-anillo-foco-oscuro);
+}
+
+.hs-carrusel--arco .hs-carrusel__pista {
+    display: grid;
+    justify-items: center;
+    transform: none !important;
+    transition: none;
+}
+
+.hs-carrusel--arco .hs-carrusel__item {
+    grid-area: 1 / 1;
+    width: var(--ancho-tarjeta);
+    transform:
+        translateX(calc(var(--pos, 0) * 74%))
+        translateY(calc(var(--dist2, 0) * 12px))
+        rotate(calc(var(--pos, 0) * 5deg))
+        scale(calc(1 - var(--dist, 0) * 0.07));
+    transform-origin: 50% 100%;
+    transition: transform 0.8s var(--hs-ease-seda), opacity 0.5s var(--hs-ease);
+}
+
+.hs-carrusel--arco .hs-carrusel__item img {
+    -webkit-user-drag: none;
+}
+
+.hs-carrusel--arco .hs-carrusel__item:not(.is-actual) .hs-card {
+    opacity: 0.88;
+}
+
+.hs-carrusel--arco .hs-carrusel__item.is-lejos {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Mientras se arrastra, las tarjetas siguen al puntero sin retraso */
+.hs-carrusel--arco.is-arrastrando .hs-carrusel__item {
+    transition: none;
+}
+
 /* ---------- ImpactSteps --------------------------------------------- */
 .hs-paso {
-    position: relative;
+    --hs-elevar: -6px;
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -127,6 +281,50 @@
     border: 1px solid var(--hs-sand);
     border-radius: 16px;
     background: var(--hs-card);
+}
+
+/* Número gigante de fondo, decorativo (dentro de la tarjeta: sin overflow,
+   para no recortar la sombra de .hs-elevable) */
+.hs-paso__fondo {
+    position: absolute;
+    top: 10px;
+    right: 16px;
+    z-index: -1;
+    font-family: var(--hs-font-display);
+    font-size: 6rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--hs-cream-dark);
+    transition: transform var(--hs-t-lento) var(--hs-ease-seda);
+    pointer-events: none;
+}
+
+.hs-paso:hover .hs-paso__fondo {
+    transform: translate(-6px, 6px) scale(1.06);
+}
+
+/* Barra superior que se completa al pasar el cursor, como en las tarjetas
+   de Nosotros: va de borde a borde y las esquinas de la tarjeta la
+   recortan, así que se funde con ella. La tarjeta no puede llevar
+   overflow: hidden (cortaría la sombra de .hs-elevable), por eso la barra
+   es una capa del tamaño de la tarjeta, con sus mismas esquinas, que solo
+   pinta los 4 px de arriba; al pasar el cursor crece el ancho pintado. */
+.hs-paso::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 15px;   /* el radio interior: 16 px de la tarjeta menos 1 px de borde */
+    background: linear-gradient(var(--hs-terracotta), var(--hs-terracotta)) 0 0 / 18% 4px no-repeat;
+    transition: background-size var(--hs-t-lento) var(--hs-ease-seda);
+    pointer-events: none;
+}
+
+.hs-paso:hover::before {
+    background-size: 100% 4px;
+}
+
+.hs-paso:hover {
+    border-color: var(--hs-terracota-35);
 }
 
 .hs-paso__numero {
@@ -147,6 +345,11 @@
     background: var(--hs-terracotta-light);
     color: var(--hs-terracotta);
     font-size: 36px;
+    transition: transform var(--hs-t-medio) var(--hs-ease-seda);
+}
+
+.hs-paso:hover .hs-paso__icono {
+    transform: rotate(-8deg) scale(1.08);
 }
 
 .hs-paso__titulo {
@@ -162,16 +365,103 @@
     color: var(--hs-muted);
 }
 
-/* Flecha centrada en el hueco entre tarjetas (solo desktop) */
+/* Flecha centrada en el hueco entre tarjetas (solo desktop). Fuera de la
+   tarjeta, en su columna; avanza cuando se pasa sobre el paso anterior. */
+.hs-pasos__col {
+    position: relative;
+}
+
 .hs-paso__flecha {
     position: absolute;
     top: 50%;
-    right: calc(-0.75rem - 8px);
+    right: -14px;   /* el borde de la columna es el centro del hueco entre tarjetas */
     z-index: 1;
     align-items: center;
-    transform: translateY(-50%);
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin-top: -14px;
+    border: 1px solid var(--hs-sand);
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-cream-dark);
     color: var(--hs-bark);
-    font-size: 16px;
+    font-size: 14px;
+    transition: transform var(--hs-t-medio) var(--hs-ease-seda), color var(--hs-t-fast);
+}
+
+.hs-pasos__col:hover .hs-paso__flecha {
+    transform: translateX(4px);
+    color: var(--hs-terracotta);
+}
+
+/* Velo para oscurecer la tarjeta cuando otra se apila encima (móvil) */
+.hs-paso__velo {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+    background: var(--hs-corteza-50);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ---------- "Así funciona" en móvil: tarjetas apiladas ----------------
+   Cada columna es sticky y la siguiente se le monta encima al bajar; no se
+   secuestra el scroll. Con soporte de animation-timeline, la tarjeta que
+   queda detrás además se achica y se oscurece (como en el ejemplo de
+   Bramus Van Damme); sin soporte (Firefox) se apilan igual, sin achicarse. */
+@media (max-width: 767.98px) {
+    .hs-pasos {
+        --total: 3;
+        view-timeline-name: --hs-pasos;
+    }
+
+    .hs-pasos__col {
+        position: sticky;
+        top: calc(var(--hs-nav-alto) + 16px + var(--hs-i, 0) * 14px);
+        padding-bottom: 1.5rem;
+    }
+
+    .hs-pasos__col:last-child {
+        padding-bottom: 0;
+    }
+
+    .hs-paso {
+        box-shadow: var(--hs-shadow-card);
+    }
+}
+
+@supports (animation-timeline: view()) {
+    @media (max-width: 767.98px) and (prefers-reduced-motion: no-preference) {
+        @keyframes hsPasoAtras {
+            to { transform: scale(calc(1 - var(--detras) * 0.05)); }
+        }
+
+        @keyframes hsPasoVelo {
+            to { opacity: calc(var(--detras) * 0.14); }
+        }
+
+        .hs-pasos__col .hs-paso,
+        .hs-pasos__col .hs-paso__velo {
+            animation-timing-function: linear;
+            animation-fill-mode: forwards;
+            animation-timeline: --hs-pasos;
+            animation-range:
+                exit-crossing calc(var(--hs-i) / var(--total) * 100%)
+                exit-crossing calc((var(--hs-i) + 1) / var(--total) * 100%);
+        }
+
+        .hs-pasos__col .hs-paso {
+            --detras: calc(var(--total) - 1 - var(--hs-i));
+            animation-name: hsPasoAtras;
+            transform-origin: 50% 0;
+        }
+
+        .hs-pasos__col .hs-paso__velo {
+            --detras: calc(var(--total) - 1 - var(--hs-i));
+            animation-name: hsPasoVelo;
+        }
+    }
 }
 
 /* ---------- ImpactCounters ------------------------------------------ */
@@ -198,6 +488,19 @@
     background: var(--hs-terracotta-light);
     color: var(--hs-terracotta);
     font-size: 28px;
+    transition: background var(--hs-t-fast), color var(--hs-t-fast),
+                transform var(--hs-t-medio) var(--hs-ease-seda);
+}
+
+/* Hover cálido: la caja del icono se enciende y el borde toma terracota */
+.hs-contador:hover {
+    border-color: var(--hs-terracota-35);
+}
+
+.hs-contador:hover .hs-contador__icono {
+    background: var(--hs-terracotta);
+    color: var(--hs-card);
+    transform: scale(1.08);
 }
 
 .hs-contador__cifra {
@@ -216,19 +519,46 @@
 }
 
 /* ---------- ImpactCTA ----------------------------------------------- */
+/* Fondo con un resplandor terracota muy suave detrás de la cápsula */
+.hs-cta {
+    background:
+        radial-gradient(ellipse 60% 70% at 50% 100%, var(--hs-terracota-12) 0%, transparent 70%),
+        var(--hs-cream-dark);
+}
+
 .hs-cta__texto {
     max-width: 28rem;
 }
 
+/* Cápsula: campo y botón dentro de un mismo borde. Al enfocar el campo,
+   el borde se enciende (solo :focus-within, sin animaciones continuas). */
 .hs-cta__form {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    max-width: 24rem;
+    gap: 8px;
+    max-width: 26rem;
+    padding: 8px;
+    border: 1px solid var(--hs-sand);
+    border-radius: 20px;
+    background: var(--hs-card);
+    box-shadow: var(--hs-shadow-card);
+    transition: border-color var(--hs-t-fast), box-shadow var(--hs-t-fast);
+}
+
+.hs-cta__form:focus-within {
+    border-color: var(--hs-terracotta);
+    box-shadow: var(--hs-shadow-card), var(--hs-anillo-foco);
 }
 
 .hs-cta__form .hs-input {
     flex: 1;
+    border-color: transparent;
+    background: transparent;
+}
+
+.hs-cta__form .hs-input:focus {
+    border-color: transparent;
+    box-shadow: none;
 }
 
 .hs-cta__form .hs-btn {
@@ -238,10 +568,37 @@
 @media (min-width: 576px) {
     .hs-cta__form {
         flex-direction: row;
+        border-radius: var(--hs-radius-pill);
+    }
+
+    .hs-cta__form .hs-btn {
+        border-radius: var(--hs-radius-pill);
     }
 }
 
 /* ---------- AboutStrip ---------------------------------------------- */
+/* Marco desplazado detrás de la foto: un recuadro con borde terracota que
+   asoma abajo a la derecha y se acerca al pasar el cursor. */
+.hs-about__marco {
+    position: relative;
+    isolation: isolate;
+}
+
+.hs-about__marco::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border: 1px solid var(--hs-terracotta);
+    border-radius: 16px;
+    transform: translate(14px, 14px);
+    transition: transform var(--hs-t-lento) var(--hs-ease-seda);
+}
+
+.hs-about__marco:hover::before {
+    transform: translate(8px, 8px);
+}
+
 .hs-about__imagen {
     aspect-ratio: 4 / 3;
     overflow: hidden;
@@ -249,10 +606,56 @@
     background: var(--hs-cream-dark);
 }
 
+/* Zoom al pasar el cursor con `scale` y parallax con `translate`: son
+   propiedades distintas y se suman sin pisarse. */
 .hs-about__imagen img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: scale var(--hs-t-lento) var(--hs-ease-seda);
+}
+
+.hs-about__marco:hover .hs-about__imagen img {
+    scale: 1.05;
+}
+
+@supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+        @keyframes hsParallaxFoto {
+            from { translate: 0 -5%; }
+            to   { translate: 0 5%; }
+        }
+
+        .hs-about__imagen img {
+            height: 112%;
+            margin-top: -6%;
+            animation: hsParallaxFoto linear both;
+            animation-timeline: view();
+        }
+    }
+}
+
+/* Píldoras como sellos: borde punteado, un poco giradas; se enderezan al pasar */
+.hs-sello {
+    padding: 4px 12px;
+    border: 1px dashed var(--hs-terracotta);
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-terracota-06);
+    color: var(--hs-terracotta-hover);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    transform: rotate(-2deg);
+    transition: transform var(--hs-t-medio) var(--hs-ease-seda), background var(--hs-t-fast);
+}
+
+.hs-sello:nth-child(even) {
+    transform: rotate(1.5deg);
+}
+
+.hs-sello:hover {
+    background: var(--hs-terracotta-light);
+    transform: rotate(0) scale(1.05);
 }
 
 /* ── Créditos de las fotos por defecto (licencias CC BY, docs/creditos-imagenes.md) ── */
@@ -267,23 +670,74 @@
     text-decoration: underline;
 }
 
-/* Sobre la foto del hero: claro y semitransparente. En móvil va arriba,
-   bajo la barra, porque abajo lo taparía el óvalo de navegación. */
+/* Sobre la foto del hero: claro y discreto. En móvil va arriba, bajo la
+   barra, porque abajo lo taparía el óvalo de navegación. */
 .hs-credito-foto--hero {
     position: absolute;
     z-index: 2;
     top: 4.5rem;
     right: 1rem;
     margin: 0;
-    max-width: 18rem;
+    max-width: 16rem;
+    font-size: 0.625rem;
     text-align: right;
     color: var(--hs-cream);
-    opacity: 0.75;
+    opacity: 0.55;
+    transition: opacity var(--hs-t-fast);
+}
+
+.hs-credito-foto--hero:hover,
+.hs-credito-foto--hero:focus-within {
+    opacity: 0.9;
 }
 
 @media (min-width: 768px) {
     .hs-credito-foto--hero {
         top: auto;
-        bottom: 1rem;
+        bottom: 3rem;   /* por encima del divisor */
+        max-width: 18rem;
+        font-size: 0.6875rem;
+    }
+}
+
+/* ---------- Menos movimiento ---------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    .hs-hero__imagen,
+    .hs-hero__entrada,
+    .hs-hero .hs-chip-vidrio::after {
+        animation: none;
+    }
+
+    .hs-hero .hs-chip-vidrio::after {
+        display: none;
+    }
+
+    .hs-carrusel__pista,
+    .hs-carrusel--arco .hs-carrusel__item,
+    .hs-paso__fondo,
+    .hs-paso::before,
+    .hs-paso__icono,
+    .hs-paso__flecha,
+    .hs-contador__icono,
+    .hs-about__marco::before,
+    .hs-about__imagen img,
+    .hs-sello {
+        transition: none;
+    }
+
+    .hs-paso:hover .hs-paso__fondo,
+    .hs-paso:hover .hs-paso__icono,
+    .hs-pasos__col:hover .hs-paso__flecha,
+    .hs-contador:hover .hs-contador__icono,
+    .hs-about__marco:hover::before {
+        transform: none;
+    }
+
+    .hs-about__marco:hover .hs-about__imagen img {
+        scale: none;
+    }
+
+    .hs-paso::before {
+        background-size: 100% 4px;
     }
 }

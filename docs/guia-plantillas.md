@@ -94,7 +94,7 @@ Se usa **Bootstrap Icons**, servido desde su WebJar (lo carga el layout). No hay
 
 Catálogo completo: <https://icons.getbootstrap.com>. Son una fuente: toman el color del texto y su tamaño es el `font-size`. `hs-icono` (22 px) y `hs-icono-sm` (18 px) dan las medidas del diseño; las cajas de icono de los componentes (`hs-paso__icono`, `hs-contador__icono`, `hs-btn-redondo`) ya fijan el suyo. Si el icono es decorativo lleva `aria-hidden="true"`; si es lo único que hay en un botón, el botón lleva `aria-label`.
 
-Iconos que ya usa el portal: `bi-house` (Inicio), `bi-bag` (Tienda), `bi-cup-hot` (Café), `bi-activity` (Impacto), `bi-person` (Cuenta), `bi-cart` (Carrito), `bi-gift` (abrigo; Bootstrap Icons no tiene prenda), `bi-tree` (árbol), `bi-people`, `bi-heart`, `bi-chevron-left/right`, `bi-arrow-right`, `bi-journal-text` (Libro de Reclamaciones), `bi-shield-check` (sello B).
+Iconos que ya usa el portal: `bi-house` (Inicio), `bi-bag` (Tienda), `bi-cup-hot` (Café), `bi-activity` (Impacto), `bi-person` (Cuenta), `bi-cart` (Carrito), `bi-casaca` / `bi-casaca-fill` (abrigo; icono propio en `static/images/iconos/`, porque Bootstrap Icons no tiene prendas; se escribe igual que los demás), `bi-tree` (árbol), `bi-people`, `bi-heart`, `bi-chevron-left/right`, `bi-arrow-right`, `bi-journal-text` (Libro de Reclamaciones), `bi-shield-check` (sello B).
 
 ## 3. Clases `hs-*` (en `static/css/hoseg.css`)
 
@@ -105,18 +105,33 @@ Iconos que ya usa el portal: `bi-house` (Inicio), `bi-bag` (Tienda), `bi-cup-hot
 | Titulares | `hs-kicker` (antetítulo en mayúsculas), `hs-h2` (titular de sección en Fraunces), `hs-texto-secundario` |
 | Botones | `hs-btn hs-btn--primario`, `hs-btn--secundario`, `hs-btn--vidrio` (sobre foto), `hs-btn--deshabilitado`, `hs-btn-redondo` (circular con icono) |
 | Chips | `hs-chip`, `hs-chip hs-chip--pequeno`, `hs-chip-talla`, `hs-chip-vidrio` (sobre foto) |
-| Formularios | `hs-input` (campo de texto con foco terracota) |
-| Enlaces | `hs-enlace-flecha` |
+| Cabecera de página | fragmento `fragments/cabecera :: cabecera(kicker, titulo, bajada)` (centrada, marca de agua, entrada escalonada) |
+| Formularios | `hs-label`, `hs-input` (campo de texto con foco terracota), `hs-select` (el `<select>` de todo el sitio; no usar `form-select`), `hs-campo-error` |
+| Botón de solo icono | `hs-btn-icono` (mostrar clave, copiar, ayuda), `hs-btn-icono--sm` |
+| Enlaces | `hs-enlace` (dentro del texto: subrayado que nace del centro), `hs-enlace-flecha` ("ir a…": la flecha avanza; con `bi-arrow-left`, retrocede) |
 | Anchos sueltos | `hs-ancho-texto` (párrafo, 36 rem), `hs-ancho-form` (formulario corto, 24 rem) |
 | Iconos | `hs-icono` (22 px), `hs-icono-sm` (18 px) |
+| Movimiento | `hs-elevable` (sube con sombra al pasar el cursor), `hs-brillo` (destello diagonal; solo botones principales y foto de producto), `hs-entrada` (entrada escalonada al cargar), `hs-chip--vivo` (píldora con hover), atributo `data-revelar` (aparece al entrar en pantalla) |
 
 Para la grilla, espaciado y utilidades (`row`, `col-*`, `d-flex`, `gap-*`, `mb-*`, `d-none d-md-block`…) se usa **Bootstrap 5** tal cual. Los componentes de Bootstrap (`.btn`, `.card`, `.form-control`) también funcionan y toman la paleta por las variables `--bs-*` mapeadas en `tokens.css`, pero para que la página se vea igual que la Home es mejor usar las `hs-*` de arriba.
 
 ### Reglas
 
 - **Nada de colores literales en las plantillas ni en los CSS de componentes.** Todo sale de `tokens.css` (`var(--hs-terracotta)`, `var(--hs-muted)`, transparencias y sombras incluidas). Si falta un color, se agrega ahí.
-- **Nada de `style="..."` en las plantillas**: si hace falta una medida, se crea una clase.
-- **Nada de SVG copiados**: los iconos son de Bootstrap Icons.
+- **Nada de `style="..."` en las plantillas**: si hace falta una medida, se crea una clase. La única
+  excepción son las variables de una cascada: el índice (`style="--hs-i: 2"` o
+  `th:style="|--hs-i: ${n.index}|"`) y, si hace falta, el tiempo entre piezas (`style="--hs-paso: 150ms"`).
+- **Nada de SVG copiados**: los iconos son de Bootstrap Icons. Excepción: la casaca (`bi-casaca`), dibujada
+  para el proyecto.
+- **Brillo (`hs-brillo`)**: uno por página, en su acción principal (Agregar al carrito, Confirmar, Pagar,
+  Enviar…), más el "Suscribirme" del footer. No va en las pantallas de acceso (login, registro, recuperar).
+- **Elevación**: botones y chips suben 2 px; tarjetas de información, 4 px (`hs-elevable`); tarjeta de producto,
+  6 px. Las tarjetas de vidrio (`backdrop-filter`) no se desplazan: solo cambian de color.
+- **Avisos y errores**: `alert alert-success` / `alert-danger` y `.text-danger` ya salen en salvia y terracota
+  (mapeo de `--bs-success-*` / `--bs-danger-*` en `tokens.css`); no hace falta clase extra.
+- **Movimiento**: solo `transform` y `opacity`; nada que escuche el `scroll` en JavaScript (para aparecer al
+  entrar en pantalla, `data-revelar`, que resuelve `static/js/revelar.js` para todo el sitio). Cada CSS con
+  animaciones lleva su bloque `@media (prefers-reduced-motion: reduce)`, donde todo queda visible y quieto.
 - Si un bloque se repite (dos o más veces con distinto texto), se convierte en un fragmento con parámetros en `fragments/`.
 - **Nada de Tailwind** ni clases copiadas del export de Figma (`flex items-center`, `text-[11px]`): se traducen a Bootstrap o a CSS propio.
 - CSS propio de una página va en `static/css/<pagina>.css` y se enlaza en su `<head>`. Si algo sirve para más de una página, va a `hoseg.css`.
@@ -148,13 +163,10 @@ La ruta de consulta se lee de la propiedad `hoseg.consulta.ruta` (modelo: `${rut
 
 ## 5. Servicios que ya existen
 
-Los más usados al armar una página:
-
-- `CatalogoService`: `tarjetas()` y `tarjetas(FiltroCatalogo)`, `destacados(n)`, `detalle(codigo)`, `categorias()`, `colecciones()`. Filtra `activo AND visible_web`.
-- `ImpactoService`: `resumen()` (cifras sobre lo entregado), `nombresComunidades()`, `nombresOng()`, `consultarBoleta(codigo)` y `consultarDonacion(id)`.
+- `CatalogoService`: `tarjetas()`, `destacados(n)`. Filtra `activo AND visible_web`.
+- `ImpactoService`: `resumen()` (cifras sobre lo entregado) y `nombresComunidades()`.
 - `CarritoService` (`@SessionScope`, un carrito por visitante): `agregar(Producto, cantidad)`, `quitar(codigo)`, `vaciar()`, `items()`, `estaVacio()`, `totalUnidades()`, `total()`. Cada talla es un `Producto` distinto, así que cada línea del carrito es un código.
-- `ContenidoService`: `bloque(clave)` y `bloques(...)`, los textos editables desde el panel; si un bloque no existe, la plantilla usa su texto por defecto.
-- `ResenaService`, `VentaService`, `ClienteService`, `CafeService` y los demás: la lista completa, con qué controlador usa cada uno, está en el [README](../README.md#estructura); qué pone cada controlador en el modelo, en [contrato-backend.md](contrato-backend.md).
+- Repositorios: `ProductoRepository`, `ClienteRepository` (`findByEmailIgnoreCase`), `VentaRepository` (`findByCodigoComprobante`), `DonacionRepository`, `LoteDonacionRepository`, `ComunidadRepository`.
 
 Los controladores **no** usan repositorios ni contienen reglas de negocio: llaman a servicios. Las validaciones de formulario van en DTOs de `dto/` con `@NotBlank`, `@Email`, `@Size`.
 

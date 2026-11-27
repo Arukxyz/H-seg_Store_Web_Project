@@ -34,6 +34,13 @@
     <link rel="stylesheet" th:href="@{/css/tokens.css}">
     <link rel="stylesheet" th:href="@{/css/hoseg.css}">
     <th:block th:replace="${estilos}"/>
+    <!-- Antes de pintar: activa la aparición al entrar en pantalla (revelar.js) solo si el
+         navegador puede hacerla y no se pidió menos movimiento. Sin JS todo queda visible. -->
+    <script>
+        if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            document.documentElement.classList.add('hs-revelar');
+        }
+    </script>
 </head>
 <body>
 
@@ -45,6 +52,7 @@
 
 <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}" defer></script>
 <script th:src="@{/js/navbar.js}" defer></script>
+<script th:src="@{/js/revelar.js}" defer></script>
 <th:block th:replace="${scripts}"/>
 </body>
 </html>

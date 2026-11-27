@@ -18,7 +18,7 @@ import pe.edu.utp.hoseg.web.service.CampoInvalidoException;
 import pe.edu.utp.hoseg.web.service.ClienteService;
 import pe.edu.utp.hoseg.web.service.ImpactoService;
 import pe.edu.utp.hoseg.web.service.VentaService;
-
+import pe.edu.utp.hoseg.web.service.BoletaPdfService;
 /**
  * Mi cuenta (bloque 2: CU-13, CU-14). Una sola página con dos pestañas:
  * pedidos e impacto (?seccion=pedidos, por defecto) y mis datos (?seccion=datos).
@@ -29,11 +29,13 @@ public class CuentaController {
     private final ClienteService clienteService;
     private final VentaService ventaService;
     private final ImpactoService impactoService;
-
-    public CuentaController(ClienteService clienteService, VentaService ventaService, ImpactoService impactoService) {
+    private final BoletaPdfService boletaPdfService;
+    
+    public CuentaController(ClienteService clienteService, VentaService ventaService, ImpactoService impactoService, BoletaPdfService boletaPdfService) {
         this.clienteService = clienteService;
         this.ventaService = ventaService;
         this.impactoService = impactoService;
+        this.boletaPdfService = boletaPdfService;
     }
 
     @GetMapping("/cuenta")
@@ -91,6 +93,20 @@ public class CuentaController {
         model.addAttribute("pedido", ventaService.detallePedido(cliente.id(), codigo));
         return "cuenta/pedido-detalle";
     }
+
+        /** Descarga de boleta electrónica en PDF con QR JWT. Solo para el dueño del pedido. */
+    @GetMapping("/cuenta/pedidos/{codigo}/boleta")
+    public org.springframework.http.ResponseEntity<byte[]> descargarBoleta(
+            @AuthenticationPrincipal ClienteAutenticado cliente,
+            @PathVariable String codigo) {
+        byte[] pdf = boletaPdfService.generarBoletaPdf(cliente.id(), codigo);
+        return org.springframework.http.ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"Boleta-" + codigo + ".pdf\"")
+                .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
+                .body(pdf);
+    }
+
 
     private void preparar(ClienteAutenticado cliente, String seccion, Model model) {
         model.addAttribute("seccion", "datos".equals(seccion) ? "datos" : "pedidos");

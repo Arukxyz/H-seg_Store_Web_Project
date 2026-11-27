@@ -92,11 +92,41 @@
     --hs-pill-blur:    blur(24px) saturate(180%);
     --hs-pill-inactive: rgba(217, 206, 184, 0.6);
 
+    /* ---------- Derivados para animaciones ----------
+       Todos salen de un color de la paleta con otra opacidad:
+       terracota = 196, 98, 45 · salvia = 90, 122, 92 · corteza = 44, 24, 16 ·
+       crema = 245, 240, 232 · tarjeta = 253, 250, 245. */
+    --hs-destello:          rgba(253, 250, 245, 0.38);  /* franja del brillo diagonal (.hs-brillo) */
+    --hs-destello-suave:    rgba(253, 250, 245, 0.22);  /* brillo de los chips del hero */
+    --hs-sombra-titulo:     0 2px 24px rgba(44, 24, 16, 0.45);  /* titular sobre foto */
+    --hs-sombra-boton:      0 10px 24px rgba(196, 98, 45, 0.28); /* botón primario elevado */
+    --hs-terracota-06:      rgba(196, 98, 45, 0.06);
+    --hs-terracota-12:      rgba(196, 98, 45, 0.12);
+    --hs-terracota-22:      rgba(196, 98, 45, 0.22);  /* aros del panel de Nosotros: se superponen y se oscurecen */
+    --hs-sombra-aro:        -10px 10px 20px rgba(44, 24, 16, 0.28);
+    --hs-terracota-35:      rgba(196, 98, 45, 0.35);
+    --hs-salvia-10:         rgba(90, 122, 92, 0.10);
+    --hs-corteza-08:        rgba(44, 24, 16, 0.08);
+    --hs-corteza-50:        rgba(44, 24, 16, 0.50);    /* velo de la tarjeta apilada que queda detrás */
+    --hs-crema-60:          rgba(245, 240, 232, 0.60);
+    --hs-arena-50:          rgba(217, 206, 184, 0.50);
+
     /* ---------- Transiciones ---------- */
     --hs-ease:       cubic-bezier(0.4, 0, 0.2, 1);
+    --hs-ease-seda:  cubic-bezier(0.16, 1, 0.3, 1);   /* sale rápido y frena suave */
     --hs-t-fast:     0.18s;
     --hs-t-pill:     0.22s;
+    --hs-t-medio:    0.35s;
+    --hs-t-lento:    0.6s;
     --hs-t-carousel: 0.5s;
+
+    /* Alto de la barra superior (56 px móvil, 64 px desde md): lo usan los
+       elementos fijos (sticky) para no quedar debajo de ella. */
+    --hs-nav-alto:   56px;
+}
+
+@media (min-width: 768px) {
+    :root { --hs-nav-alto: 64px; }
 }
 
 /* ---------- Mapeo a las variables de Bootstrap 5 ----------
@@ -111,6 +141,28 @@
     --bs-primary:          var(--hs-terracotta);
     --bs-link-color:       var(--hs-terracotta);
     --bs-link-hover-color: var(--hs-terracotta-hover);
+
+    /* Éxito = salvia y error = terracota: avisos (.alert), .text-danger,
+       .invalid-feedback y la validación de formularios de Bootstrap dejan
+       de usar su verde y su rojo. Los -rgb repiten el color de la paleta en
+       números porque Bootstrap los usa dentro de rgba(). */
+    --bs-success:                   var(--hs-sage);
+    --bs-success-rgb:               90, 122, 92;
+    --bs-success-text-emphasis:     var(--hs-sage);
+    --bs-success-bg-subtle:         var(--hs-sage-light);
+    --bs-success-border-subtle:     var(--hs-badge-arbol-borde);
+    --bs-danger:                    var(--hs-terracotta-hover);
+    --bs-danger-rgb:                168, 80, 30;
+    --bs-danger-text-emphasis:      var(--hs-terracotta-hover);
+    --bs-danger-bg-subtle:          var(--hs-terracotta-light);
+    --bs-danger-border-subtle:      var(--hs-badge-abrigo-borde);
+    --bs-form-valid-color:          var(--hs-sage);
+    --bs-form-valid-border-color:   var(--hs-sage);
+    --bs-form-invalid-color:        var(--hs-terracotta-hover);
+    --bs-form-invalid-border-color: var(--hs-terracotta);
+
+    /* .text-muted y los textos secundarios de Bootstrap: el marrón apagado de la paleta */
+    --bs-secondary-color:           var(--hs-muted);
 }
 
 /* ---------- Base ---------- */
@@ -145,6 +197,13 @@ h1, h2, h3, .hs-display {
 @keyframes hsFadeSlide {
     from { opacity: 0; transform: translateY(20px); }
     to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Aparición con rebote para un icono de resultado (éxito, alerta) */
+@keyframes hsPopExito {
+    0%   { opacity: 0; transform: scale(0.7); }
+    70%  { transform: scale(1.08); }
+    100% { opacity: 1; transform: scale(1); }
 }
 
 .hs-count-animate { animation: hsCountUp 0.6s ease forwards; }

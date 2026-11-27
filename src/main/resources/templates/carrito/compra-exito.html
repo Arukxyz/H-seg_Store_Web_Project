@@ -1,72 +1,157 @@
 <!DOCTYPE html>
-<!--
-  Bloque 1 · 1.6 Compra registrada (GET /compra-exito, justo después de confirmar; CarritoController).
-  Modelo: compra (CompraRegistrada: codigoComprobante, totalProductos, costoEnvio, totalAPagar, tipoEnvio, impacto).
-  El botón "Copiar" usa el portapapeles del navegador (tienda.js); sin él, el código se puede seleccionar.
--->
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: pagina(titulo='Compra registrada · HÖSÉG', activa='carrito',
+    th:replace="~{layout/base :: pagina(titulo='Pago confirmado · HÖSÉG', activa='carrito',
                                           transparente=false, contenido=~{::main}, estilos=~{::link}, scripts=~{::script})}">
+
 <head>
     <link rel="stylesheet" th:href="@{/css/tienda.css}">
 </head>
-<body>
-<main class="hs-main--bajo-nav hs-pagina">
-    <section class="hs-seccion">
-        <div class="container hs-ancho-md">
-            <div class="text-center mb-5">
-                <span class="hs-exito__icono"><i class="bi bi-check2" aria-hidden="true"></i></span>
-                <p class="hs-kicker">Compra registrada</p>
-                <h1 class="hs-pagina-cabecera__titulo mb-3">¡Gracias! Tu pedido quedó registrado.</h1>
-                <p class="hs-texto-secundario mb-4">
-                    Está pendiente de confirmación de pago. Guarda este código: con él sigues tu pedido y tu impacto.
-                </p>
-                <div class="hs-exito__codigo">
-                    <span th:text="${compra.codigoComprobante}">WEB-000110</span>
-                    <button class="hs-btn hs-btn--secundario" type="button" th:attr="data-copiar=${compra.codigoComprobante}">
-                        <i class="bi bi-copy" aria-hidden="true"></i> <span data-copiar-texto>Copiar</span>
-                    </button>
-                </div>
-            </div>
 
-            <div class="row g-4">
-                <div class="col-12 col-md-6">
-                    <div class="hs-resumen h-100">
-                        <h2 class="h5 mb-3">Resumen</h2>
-                        <div class="hs-resumen__fila">
-                            <span>Productos</span>
-                            <span th:text="'S/ ' + ${#numbers.formatDecimal(compra.totalProductos, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</span>
+<body>
+    <main class="hs-main--bajo-nav hs-pagina">
+        <section class="hs-seccion">
+            <div class="container hs-ancho-md">
+                <div class="text-center mb-5">
+                    <span class="hs-exito__icono"><i class="bi bi-check2" aria-hidden="true"></i></span>
+                    <p class="hs-kicker hs-entrada" style="--hs-i: 1">Pago aprobado</p>
+                    <h1 class="hs-pagina-cabecera__titulo mb-3 hs-entrada" style="--hs-i: 2">¡Gracias! Tu compra está confirmada.</h1>
+                    <p class="hs-texto-secundario mb-4 hs-entrada" style="--hs-i: 3">
+                        Tu pago fue procesado con éxito y tu pedido ya pasó a preparación. Guarda este código para
+                        seguir tu pedido y tu impacto.
+                    </p>
+                    <div class="hs-exito__codigo hs-entrada" style="--hs-i: 4">
+                        <span th:text="${compra.codigoComprobante}">WEB-000110</span>
+                        <button class="hs-btn hs-btn--secundario" type="button"
+                            th:attr="data-copiar=${compra.codigoComprobante}">
+                            <i class="bi bi-copy" aria-hidden="true"></i> <span data-copiar-texto>Copiar</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row g-4 hs-entrada" style="--hs-i: 5">
+                    <div class="col-12 col-md-6">
+                        <div class="hs-resumen h-100">
+                            <h2 class="h5 mb-3">Resumen de compra</h2>
+                            <div class="hs-resumen__fila">
+                                <span>Productos</span>
+                                <span
+                                    th:text="'S/ ' + ${#numbers.formatDecimal(compra.totalProductos, 1, 'COMMA', 2, 'POINT')}">S/
+                                    259.90</span>
+                            </div>
+                            <div class="hs-resumen__fila">
+                                <span th:text="${compra.tipoEnvio.etiqueta}">Recojo en tienda</span>
+                                <span
+                                    th:text="${compra.costoEnvio.signum() == 0} ? 'Gratis' : 'S/ ' + ${#numbers.formatDecimal(compra.costoEnvio, 1, 'COMMA', 2, 'POINT')}">Gratis</span>
+                            </div>
+                            <div class="hs-resumen__total mb-3">
+                                <span>Total pagado</span>
+                                <span
+                                    th:text="'S/ ' + ${#numbers.formatDecimal(compra.totalAPagar, 1, 'COMMA', 2, 'POINT')}">S/
+                                    259.90</span>
+                            </div>
+                            <div class="hs-impacto-caja" th:if="${compra.impacto.tieneImpacto()}"
+                                th:classappend="${compra.impacto.abrigos == 0} ? 'hs-impacto-caja--arbol'">
+                                <span class="hs-impacto-caja__icono">
+                                    <i class="bi"
+                                        th:classappend="${compra.impacto.abrigos > 0} ? 'bi-casaca-fill' : 'bi-tree-fill'"
+                                        aria-hidden="true"></i>
+                                </span>
+                                <span>Con esta compra generas <strong th:text="${compra.impacto.texto}">1
+                                        abrigo</strong>
+                                    para una comunidad de Cusco.</span>
+                            </div>
                         </div>
-                        <div class="hs-resumen__fila">
-                            <span th:text="${compra.tipoEnvio.etiqueta}">Recojo en tienda</span>
-                            <span th:text="${compra.costoEnvio.signum() == 0} ? 'Gratis' : 'S/ ' + ${#numbers.formatDecimal(compra.costoEnvio, 1, 'COMMA', 2, 'POINT')}">Gratis</span>
-                        </div>
-                        <div class="hs-resumen__total mb-3">
-                            <span>Total a pagar</span>
-                            <span th:text="'S/ ' + ${#numbers.formatDecimal(compra.totalAPagar, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</span>
-                        </div>
-                        <div class="hs-impacto-caja" th:if="${compra.impacto.tieneImpacto()}"
-                             th:classappend="${compra.impacto.abrigos == 0} ? 'hs-impacto-caja--arbol'">
-                            <span class="hs-impacto-caja__icono">
-                                <i class="bi" th:classappend="${compra.impacto.abrigos > 0} ? 'bi-gift-fill' : 'bi-tree-fill'" aria-hidden="true"></i>
-                            </span>
-                            <span>Con esta compra generas <strong th:text="${compra.impacto.texto}">1 abrigo</strong>
-                                  para una comunidad de Cusco.</span>
+                    </div>
+
+                    <!-- Comprobante de operación aprobada -->
+                    <div class="col-12 col-md-6">
+                        <div class="hs-resumen h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <h2 class="h5 mb-3">Detalle de transacción</h2>
+                                <div class="hs-resumen__fila">
+                                    <span>Estado</span>
+                                    <span class="badge bg-success">PAGADO</span>
+                                </div>
+                                <div class="hs-resumen__fila" th:if="${compra.metodoPago != null}">
+                                    <span>Medio de pago</span>
+                                    <strong th:text="${compra.metodoPago}">TARJETA ****4512</strong>
+                                </div>
+                                <div class="hs-resumen__fila" th:if="${compra.codigoTransaccion != null}">
+                                    <span>N.º de operación</span>
+                                    <code th:text="${compra.codigoTransaccion}">TRX-849201</code>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 pt-3 border-top">
+                                <button type="button" class="hs-btn hs-btn--secundario w-100" data-bs-toggle="modal"
+                                    data-bs-target="#modalBoletaPreview">
+                                    <i class="bi bi-receipt me-1" aria-hidden="true"></i> Vista previa de boleta
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-12 col-md-6">
-                    <th:block th:replace="~{fragments/pago :: instrucciones(${compra.codigoComprobante})}"/>
+
+                <div class="d-flex flex-column flex-sm-row justify-content-center gap-3 mt-5 hs-entrada" style="--hs-i: 6">
+                    <a class="hs-btn hs-btn--primario hs-brillo"
+                        th:href="@{/cuenta/pedidos/{c}(c=${compra.codigoComprobante})}">Ver mi pedido</a>
+                    <a class="hs-btn hs-btn--secundario"
+                        th:href="@{${rutaConsulta}(boleta=${compra.codigoComprobante})}">Sigue tu impacto</a>
                 </div>
             </div>
+        </section>
 
-            <div class="d-flex flex-column flex-sm-row justify-content-center gap-3 mt-5">
-                <a class="hs-btn hs-btn--primario" th:href="@{/cuenta/pedidos/{c}(c=${compra.codigoComprobante})}">Ver mi pedido</a>
-                <a class="hs-btn hs-btn--secundario" th:href="@{${rutaConsulta}(boleta=${compra.codigoComprobante})}">Sigue tu impacto</a>
+        <!-- Modal de Bootstrap: Vista previa rápida del comprobante -->
+        <div class="modal fade" id="modalBoletaPreview" tabindex="-1" aria-labelledby="modalBoletaTitulo"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4 border-0 shadow">
+                    <div class="modal-header border-bottom-0 pb-0">
+                        <h2 class="modal-title h5 fw-bold" id="modalBoletaTitulo">Boleta Electrónica HÖSÉG</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="hs-comprobante">
+                            <div class="hs-comprobante__etiqueta">Comprobante autorizado</div>
+                            <div class="hs-comprobante__codigo" th:text="${compra.codigoComprobante}">WEB-000110</div>
+                            <div class="small text-muted" th:if="${compra.codigoTransaccion != null}"
+                                th:text="'Operación: ' + ${compra.codigoTransaccion}">Operación: TRX-849201</div>
+                        </div>
+                        <div class="d-flex justify-content-between py-1 border-bottom">
+                            <span class="text-muted">Modalidad:</span>
+                            <span class="fw-semibold" th:text="${compra.tipoEnvio.etiqueta}">Recojo en tienda</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-1 border-bottom"
+                            th:if="${compra.metodoPago != null}">
+                            <span class="text-muted">Pago:</span>
+                            <span class="fw-semibold" th:text="${compra.metodoPago}">TARJETA ****4512</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 fs-5 fw-bold">
+                            <span>Total Pagado:</span>
+                            <span
+                                th:text="'S/ ' + ${#numbers.formatDecimal(compra.totalAPagar, 1, 'COMMA', 2, 'POINT')}">S/
+                                259.90</span>
+                        </div>
+                        <div class="alert alert-success small mb-0 mt-2" th:if="${compra.impacto.tieneImpacto()}">
+                            <i class="bi bi-heart-fill me-1"></i>
+                            Impacto activo: <strong th:text="${compra.impacto.texto}">1 abrigo</strong> registrado para
+                            trazabilidad.
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top-0 pt-0">
+                        <a class="hs-btn hs-btn--primario"
+                            th:href="@{/cuenta/pedidos/{c}/boleta(c=${compra.codigoComprobante})}">
+                            <i class="bi bi-file-earmark-pdf me-1" aria-hidden="true"></i> Descargar PDF con QR
+                        </a>
+                        <button type="button" class="hs-btn hs-btn--secundario" data-bs-dismiss="modal">Cerrar</button>
+                        
+
+                    </div>
+                </div>
             </div>
         </div>
-    </section>
-</main>
-<script th:src="@{/js/tienda.js}" defer></script>
+    </main>
+    <script th:src="@{/js/tienda.js}" defer></script>
 </body>
+
 </html>

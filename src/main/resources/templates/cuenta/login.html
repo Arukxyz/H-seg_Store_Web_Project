@@ -65,14 +65,14 @@
                 <label class="hs-cuenta__campo">
                     <span class="hs-cuenta__label-fila">
                         <span>Contraseña</span>
-                        <a th:href="@{/recuperar}" class="hs-cuenta__link-olvido">¿Olvidaste tu contraseña?</a>
+                        <a th:href="@{/recuperar}" class="hs-cuenta__link-olvido hs-enlace">¿Olvidaste tu contraseña?</a>
                     </span>
                     <div class="hs-cuenta__input-wrap">
                         <i class="bi bi-lock hs-cuenta__input-icono" aria-hidden="true"></i>
                         <input id="login-password" class="hs-input hs-cuenta__input--icono hs-cuenta__input--pass"
                                type="password" name="password" placeholder="••••••••"
                                autocomplete="current-password" required>
-                        <button type="button" class="hs-cuenta__ojo" data-toggle-pass="login-password"
+                        <button type="button" class="hs-cuenta__ojo hs-btn-icono" data-toggle-pass="login-password"
                                 aria-label="Mostrar u ocultar contraseña">
                             <i class="bi bi-eye" aria-hidden="true"></i>
                         </button>
@@ -87,27 +87,11 @@
 
             <div class="hs-cuenta__pie">
                 <span>¿Aún no eres parte de HÖSÉG?</span>
-                <a th:href="@{/registro}" class="hs-cuenta__cta-registro">Crear cuenta</a>
+                <a th:href="@{/registro}" class="hs-cuenta__cta-registro hs-enlace">Crear cuenta</a>
             </div>
         </div>
     </section>
 </main>
-
-<!-- Interacción ligera para el botón de mostrar/ocultar contraseña -->
-<script>
-document.querySelectorAll('[data-toggle-pass]').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const input = document.getElementById(btn.dataset.togglePass);
-        const icon = btn.querySelector('i');
-        if (!input) return;
-        const mostrar = input.type === 'password';
-        input.type = mostrar ? 'text' : 'password';
-        if (icon) {
-            icon.classList.toggle('bi-eye', !mostrar);
-            icon.classList.toggle('bi-eye-slash', mostrar);
-        }
-    });
-});
-</script>
+<script th:src="@{/js/cuenta.js}" defer></script>
 </body>
 </html>

@@ -4,7 +4,7 @@ import java.util.Locale;
 
 /** producto.tipo_compromiso / donacion.tipo: qué genera cada compra. */
 public enum TipoCompromiso {
-    ABRIGO("1 abrigo", "bi-gift"),
+    ABRIGO("1 abrigo", "bi-casaca"),
     ARBOL("1 árbol", "bi-tree");
 
     private final String etiqueta;
@@ -20,7 +20,7 @@ public enum TipoCompromiso {
         return etiqueta;
     }
 
-    /** Clase de Bootstrap Icons (contorno); el badge usa la variante "-fill". */
+    /** Clase del icono (contorno); el badge usa la variante "-fill". bi-casaca es propio (hoseg.css). */
     public String getIcono() {
         return icono;
     }

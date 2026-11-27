@@ -72,5 +72,6 @@ public class Donacion {
     public EstadoDonacion getEstado() { return estado; }
     public void setEstado(EstadoDonacion estado) { this.estado = estado; }
     public LoteDonacion getLote() { return lote; }
+    public void setLote(LoteDonacion lote) { this.lote = lote; }
     public OffsetDateTime getCreadoEn() { return creadoEn; }
 }

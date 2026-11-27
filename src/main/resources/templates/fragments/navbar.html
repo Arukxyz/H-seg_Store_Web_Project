@@ -39,24 +39,22 @@
                 <i class="bi bi-speedometer2 hs-icono" aria-hidden="true"></i>
                 <span class="d-none d-lg-inline">Panel</span>
             </a>
-            <!-- Cliente: inicial de su nombre y menú con su cuenta y la salida.
-                 Cerrar sesión es POST: th:action añade el token CSRF. -->
+                        <a class="hs-nav__cuenta d-none d-md-inline-flex" th:href="@{/logistica/pedidos}" sec:authorize="hasRole('LOGISTICA')">
+                <i class="bi bi-truck hs-icono" aria-hidden="true"></i>
+                <span class="d-none d-lg-inline">Logística</span>
+            </a>
+            <a class="hs-nav__cuenta d-none d-md-inline-flex" th:href="@{/gestion-impacto/lotes}" sec:authorize="hasRole('GESTOR_IMPACTO')">
+                <i class="bi bi-heart hs-icono" aria-hidden="true"></i>
+                <span class="d-none d-lg-inline">Impacto</span>
+            </a>
+
+            <!-- Cliente: inicial de su nombre y menú con su cuenta y la salida -->
             <div class="dropdown d-none d-md-block" sec:authorize="hasRole('CLIENTE')">
                 <button class="hs-nav__cuenta hs-nav__usuario" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <span class="hs-avatar" aria-hidden="true" th:text="${#authentication.principal.inicial}">M</span>
                     <span class="d-none d-lg-inline">Mi cuenta</span>
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end hs-menu-cuenta">
-                    <li class="hs-menu-cuenta__quien" th:text="${#authentication.principal.nombre}">Ana</li>
-                    <li><a class="dropdown-item" th:href="@{/cuenta}">Mis pedidos e impacto</a></li>
-                    <li><a class="dropdown-item" th:href="@{/cuenta(seccion='datos')}">Mis datos</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li>
-                        <form th:action="@{/logout}" method="post" class="m-0">
-                            <button class="dropdown-item" type="submit">Cerrar sesión</button>
-                        </form>
-                    </li>
-                </ul>
+                <ul th:replace="~{fragments/navbar :: menuCuenta}"></ul>
             </div>
             <!-- Icono de carrito con contador; el badge solo existe si hay ítems -->
             <a class="hs-nav__carrito" th:href="@{/carrito}" aria-label="Carrito">
@@ -82,15 +80,57 @@
                 <i class="bi hs-icono" th:classappend="${e.icono}" aria-hidden="true"></i>
                 <span th:text="${e.etiqueta}">Inicio</span>
             </a>
-            <!-- Cliente con sesión: su cuenta; personal del panel: el panel; visitante: el login -->
-            <a class="hs-pill__item" th:classappend="${activa == 'cuenta'} ? 'is-active'"
-               th:href="${#authorization.expression('hasRole(''CLIENTE'')')} ? @{/cuenta} : (${#authorization.expression('hasRole(''ADMINISTRADOR'')')} ? @{/admin/panel} : @{/login})" data-seccion="cuenta">
+            <!-- Cliente con sesión: abre hacia arriba el mismo menú de cuenta del escritorio
+                 (sin él no tendría cómo cerrar sesión en el móvil). La separación la da
+                 data-bs-offset: Popper no toma en cuenta los márgenes del menú. -->
+            <th:block sec:authorize="hasRole('CLIENTE')">
+                <button class="hs-pill__item" th:classappend="${activa == 'cuenta'} ? 'is-active'" type="button"
+                        data-seccion="cuenta" data-bs-toggle="dropdown" data-bs-offset="0,14"
+                        data-bs-popper-config='{"placement":"top-end"}' aria-expanded="false">
+                    <i class="bi bi-person hs-icono" aria-hidden="true"></i>
+                    <span>Cuenta</span>
+                </button>
+                <ul th:replace="~{fragments/navbar :: menuCuenta}"></ul>
+            </th:block>
+                        <!-- Personal del panel: su panel; visitante: el login -->
+            <a class="hs-pill__item" th:classappend="${activa == 'cuenta'} ? 'is-active'" sec:authorize="hasRole('ADMINISTRADOR')"
+               th:href="@{/admin/panel}" data-seccion="cuenta">
+                <i class="bi bi-speedometer2 hs-icono" aria-hidden="true"></i>
+                <span>Panel</span>
+            </a>
+            <a class="hs-pill__item" th:classappend="${activa == 'cuenta'} ? 'is-active'" sec:authorize="hasRole('LOGISTICA')"
+               th:href="@{/logistica/pedidos}" data-seccion="cuenta">
+                <i class="bi bi-truck hs-icono" aria-hidden="true"></i>
+                <span>Panel</span>
+            </a>
+            <a class="hs-pill__item" th:classappend="${activa == 'cuenta'} ? 'is-active'" sec:authorize="hasRole('GESTOR_IMPACTO')"
+               th:href="@{/gestion-impacto/lotes}" data-seccion="cuenta">
+                <i class="bi bi-heart hs-icono" aria-hidden="true"></i>
+                <span>Panel</span>
+            </a>
+            <a class="hs-pill__item" th:classappend="${activa == 'cuenta'} ? 'is-active'" sec:authorize="isAnonymous()"
+               th:href="@{/login}" data-seccion="cuenta">
                 <i class="bi bi-person hs-icono" aria-hidden="true"></i>
                 <span>Cuenta</span>
             </a>
+
         </div>
     </nav>
 </th:block>
+
+<!-- Opciones de la cuenta del cliente: las mismas en el menú del escritorio y en el óvalo móvil.
+     Cerrar sesión es POST: th:action añade el token CSRF. -->
+<ul class="dropdown-menu dropdown-menu-end hs-menu-cuenta" th:fragment="menuCuenta">
+    <li class="hs-menu-cuenta__quien" th:text="${#authentication.principal.nombre}">Ana</li>
+    <li><a class="dropdown-item" th:href="@{/cuenta}">Mis pedidos e impacto</a></li>
+    <li><a class="dropdown-item" th:href="@{/cuenta(seccion='datos')}">Mis datos</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li>
+        <form th:action="@{/logout}" method="post" class="m-0">
+            <button class="dropdown-item" type="submit">Cerrar sesión</button>
+        </form>
+    </li>
+</ul>
 
 </body>
 </html>

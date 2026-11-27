@@ -57,7 +57,7 @@
                     </div>
 
                     <div class="hs-cuenta__impactos">
-                        <article class="hs-cuenta__impacto hs-cuenta__impacto--generado">
+                        <article class="hs-cuenta__impacto hs-elevable hs-cuenta__impacto--generado">
                             <span class="hs-cuenta__impacto-icono" aria-hidden="true">
                                 <i class="bi bi-heart-fill"></i>
                             </span>
@@ -72,7 +72,7 @@
                             </span>
                         </article>
 
-                        <article class="hs-cuenta__impacto hs-cuenta__impacto--entregado">
+                        <article class="hs-cuenta__impacto hs-elevable hs-cuenta__impacto--entregado">
                             <span class="hs-cuenta__impacto-icono" aria-hidden="true">
                                 <i class="bi bi-tree-fill"></i>
                             </span>
@@ -86,7 +86,7 @@
                             </span>
                         </article>
 
-                        <article class="hs-cuenta__impacto hs-cuenta__impacto--espera">
+                        <article class="hs-cuenta__impacto hs-elevable hs-cuenta__impacto--espera">
                             <span class="hs-cuenta__impacto-icono" aria-hidden="true">
                                 <i class="bi bi-hourglass-split"></i>
                             </span>
@@ -125,7 +125,7 @@
 
                     <!-- Listado de tarjetas de pedidos -->
                     <div class="hs-cuenta__pedidos" th:if="${!pedidos.isEmpty()}">
-                        <article class="hs-cuenta__pedido" th:each="p : ${pedidos}">
+                        <article class="hs-cuenta__pedido hs-elevable" th:each="p : ${pedidos}">
                             <div class="hs-cuenta__pedido-principal">
                                 <div>
                                     <span class="hs-cuenta__etiqueta">PEDIDO</span>
@@ -153,7 +153,7 @@
                                 </div>
                             </div>
 
-                            <a class="hs-cuenta__pedido-enlace"
+                            <a class="hs-cuenta__pedido-enlace hs-enlace-flecha"
                                th:href="@{/cuenta/pedidos/{c}(c=${p.codigoComprobante})}">
                                 <span>Ver detalle del pedido</span>
                                 <i class="bi bi-arrow-right" aria-hidden="true"></i>
@@ -241,7 +241,7 @@
                                 <div class="hs-cuenta__input-wrap">
                                     <input id="pass-actual" class="hs-input hs-cuenta__input--pass" type="password"
                                            th:field="*{actual}" autocomplete="current-password" required>
-                                    <button type="button" class="hs-cuenta__ojo" data-toggle-pass="pass-actual"
+                                    <button type="button" class="hs-cuenta__ojo hs-btn-icono" data-toggle-pass="pass-actual"
                                             aria-label="Mostrar u ocultar contraseña actual">
                                         <i class="bi bi-eye" aria-hidden="true"></i>
                                     </button>
@@ -254,7 +254,7 @@
                                 <div class="hs-cuenta__input-wrap">
                                     <input id="pass-nueva" class="hs-input hs-cuenta__input--pass" type="password"
                                            th:field="*{nueva}" autocomplete="new-password" required>
-                                    <button type="button" class="hs-cuenta__ojo" data-toggle-pass="pass-nueva"
+                                    <button type="button" class="hs-cuenta__ojo hs-btn-icono" data-toggle-pass="pass-nueva"
                                             aria-label="Mostrar u ocultar contraseña nueva">
                                         <i class="bi bi-eye" aria-hidden="true"></i>
                                     </button>
@@ -267,7 +267,7 @@
                                 <div class="hs-cuenta__input-wrap">
                                     <input id="pass-confirm" class="hs-input hs-cuenta__input--pass" type="password"
                                            th:field="*{confirmacion}" autocomplete="new-password" required>
-                                    <button type="button" class="hs-cuenta__ojo" data-toggle-pass="pass-confirm"
+                                    <button type="button" class="hs-cuenta__ojo hs-btn-icono" data-toggle-pass="pass-confirm"
                                             aria-label="Mostrar u ocultar confirmación">
                                         <i class="bi bi-eye" aria-hidden="true"></i>
                                     </button>
@@ -288,34 +288,6 @@
         </div>
     </section>
 </main>
-<script>
-document.querySelectorAll('[data-toggle-pass]').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const input = document.getElementById(btn.dataset.togglePass);
-        const icon = btn.querySelector('i');
-        if (!input) return;
-        const mostrar = input.type === 'password';
-        input.type = mostrar ? 'text' : 'password';
-        if (icon) {
-            icon.classList.toggle('bi-eye', !mostrar);
-            icon.classList.toggle('bi-eye-slash', mostrar);
-        }
-    });
-});
-
-// Transición suave al cambiar entre pestañas de Mi Cuenta
-const panelTab = document.getElementById('cuenta-tab-panel');
-document.querySelectorAll('.hs-cuenta__pestanas a:not(.is-activa)').forEach(enlace => {
-    enlace.addEventListener('click', (e) => {
-        if (!panelTab || e.metaKey || e.ctrlKey) return;
-        e.preventDefault();
-        panelTab.classList.add('is-leaving');
-        setTimeout(() => {
-            window.location.assign(enlace.href);
-        }, 160);
-    });
-});
-</script>
-
+<script th:src="@{/js/cuenta.js}" defer></script>
 </body>
 </html>

@@ -11,12 +11,15 @@
 -->
 <body>
 
-<article class="hs-card" th:fragment="card(p)" th:classappend="${!p.disponible} ? 'hs-card--agotado'">
-    <div class="hs-card__imagen">
+<!-- hs-elevable: sube con sombra al pasar el cursor; hs-brillo-grupo + hs-brillo: el destello
+     cruza la foto. Estilos en hoseg.css (sección "Tarjeta de producto"). -->
+<article class="hs-card hs-elevable hs-brillo-grupo" th:fragment="card(p)" th:classappend="${!p.disponible} ? 'hs-card--agotado'">
+    <div class="hs-card__imagen hs-brillo">
         <img th:if="${p.urlImagen != null}" th:src="${p.urlImagen}" th:alt="${p.nombre}" loading="lazy">
-        <!-- Sin foto cargada aún: fondo neutro con el icono del compromiso -->
+        <!-- Sin foto cargada aún: degradado de la paleta, icono del compromiso y la colección -->
         <div class="hs-card__sin-imagen" th:unless="${p.urlImagen != null}" aria-hidden="true">
             <i class="bi" th:classappend="${p.tipoCompromiso?.icono ?: 'bi-bag'}"></i>
+            <span class="hs-card__sin-imagen-marca" th:text="${p.coleccion ?: 'HÖSÉG'}">Älpafill</span>
         </div>
 
         <div class="hs-card__badge" th:if="${p.tipoCompromiso != null}">

@@ -1,85 +1,77 @@
 <!DOCTYPE html>
 <!--
-  ESQUELETO · Bloque 3 · 3.4 Página legal (GET /terminos y /politica-rsu, InstitucionalController).
+  Bloque 3 · 3.4 Página legal (GET /terminos y /politica-rsu, InstitucionalController).
   Una sola plantilla para ambas.
+  Modelo: bloque (BloqueContenido o null: titulo, cuerpo, imagenUrl, actualizadoEn), tituloPorDefecto.
+  Con imagen en el panel: banner con la foto; sin imagen: la cabecera común (fragments/cabecera).
+  Estilos en static/css/legal.css.
 -->
-<html lang="es" xmlns:th="http://thymeleaf.org"
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: pagina(titulo=${bloque?.titulo ?: tituloPorDefecto} + ' · HÖSÉG', activa='',
-                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+                                          transparente=false, contenido=~{::main}, estilos=~{::link}, scripts=~{})}">
 <head>
-    <meta charset="UTF-8">
-    <title th:text="${bloque?.titulo ?: tituloPorDefecto} + ' · HÖSÉG'">Términos y condiciones</title>
+    <link rel="stylesheet" th:href="@{/css/legal.css}">
 </head>
 <body>
-<main class="hs-main--bajo-nav">
+<main class="hs-main--bajo-nav hs-legal">
 
-
-    <!-- BANNER DE IMAGEN DINÁMICO -->
-    <div th:if="${bloque?.imagenUrl}" class="w-100 position-relative mb-5" style="height: 250px; overflow: hidden;">
-        <img th:src="${bloque.imagenUrl}" class="w-100 h-100" style="object-fit: cover; filter: brightness(0.65);" alt="Cabecera Legal">
-        <div class="position-absolute top-50 start-50 translate-middle text-center w-100 px-3">
-            <h1 class="text-white fw-bold display-6 m-0 text-shadow" th:text="${bloque?.titulo ?: tituloPorDefecto}">Términos y condiciones</h1>
-        </div>
+    <!-- Banner con la imagen del panel (si la hay) -->
+    <div class="hs-legal__banner" th:if="${bloque?.imagenUrl}">
+        <img th:src="${bloque.imagenUrl}" alt="">
+        <div class="hs-legal__banner-velo" aria-hidden="true"></div>
+        <h1 class="hs-legal__banner-titulo hs-entrada" style="--hs-i: 0"
+            th:text="${bloque?.titulo ?: tituloPorDefecto}">Términos y condiciones</h1>
     </div>
 
-    <section class="hs-seccion py-4">
-        <div class="container">
-            
-            <!-- Encabezado en texto plano si NO existe imagen_url -->
-            <div class="mb-4" th:unless="${bloque?.imagenUrl}">
-                <span class="hs-kicker text-uppercase tracking-wider">Documento Oficial</span>
-                <h1 class="hs-h2 my-2 fw-bold" style="color: var(--hs-bark);" 
-                    th:text="${bloque?.titulo ?: tituloPorDefecto}">Términos y condiciones</h1>
-            </div>
+    <!-- Sin imagen: la cabecera común de las páginas interiores -->
+    <th:block th:unless="${bloque?.imagenUrl}">
+        <th:block th:replace="~{fragments/cabecera :: cabecera('Documento oficial', ${bloque?.titulo ?: tituloPorDefecto}, null)}"/>
+    </th:block>
 
-            <!-- Fecha de Actualización -->
-            <p th:if="${bloque?.actualizadoEn}" class="text-muted small mb-4">
-                <i class="bi bi-clock me-1"></i>
+    <section class="hs-seccion pt-0">
+        <div class="container">
+            <p th:if="${bloque?.actualizadoEn}" class="hs-legal__fecha hs-entrada" style="--hs-i: 2">
+                <i class="bi bi-clock" aria-hidden="true"></i>
                 <span th:text="'Actualizado el ' + ${#temporals.format(bloque.actualizadoEn, 'dd/MM/yyyy')}">Actualizado</span>
             </p>
 
-            <hr class="my-4 text-black-50 opacity-10">
-
-            <!-- Estructura de dos columnas balanceada -->
-            <div class="row g-5">
-                
-                <!-- COLUMNA IZQUIERDA: REEMPLAZO DEL ÍNDICE POR INFORMACIÓN CORPORATIVA -->
-                <div class="col-12 col-md-3 d-none d-md-block">
-                    <div class="sticky-top pt-2" style="top: 100px; z-index: 10;">
-                        
-                        <!-- Tarjeta de Confianza Común -->
-                        <div class="card p-3 border-0 bg-light mb-3" style="border-radius: var(--hs-radius); background-color: var(--hs-card) !important; border: 1px solid var(--hs-sand) !important;">
-                            <h5 class="h6 text-uppercase fw-bold text-dark mb-3"><i class="bi bi-shield-check me-2 text-success"></i>Garantía HÖSÉG</h5>
-                            <p class="xs-small text-muted mb-0" style="font-size: 0.8rem; line-height: 1.4;">
-                                Todos nuestros procesos legales y de trazabilidad están certificados y auditados de acuerdo a los estándares de triple impacto.
+            <div class="row g-4 g-lg-5">
+                <!-- Columna lateral (solo desde md): compromiso y contacto -->
+                <aside class="col-12 col-md-4 col-lg-3 d-none d-md-block">
+                    <div class="hs-legal__lateral hs-entrada" style="--hs-i: 3">
+                        <div class="hs-legal__tarjeta">
+                            <h2 class="hs-legal__tarjeta-titulo">
+                                <i class="bi bi-shield-check hs-legal__icono--salvia" aria-hidden="true"></i>Triple impacto
+                            </h2>
+                            <p class="hs-legal__tarjeta-texto">
+                                Cada donación es rastreable con el número de tu boleta. Somos empresa de triple
+                                impacto, con la certificación B Corp en proceso.
                             </p>
                         </div>
 
-                        <!-- Tarjeta de Soporte -->
-                        <div class="card p-3 border-0 bg-light" style="border-radius: var(--hs-radius); background-color: var(--hs-card) !important; border: 1px solid var(--hs-sand) !important;">
-                            <h5 class="h6 text-uppercase fw-bold text-dark mb-2"><i class="bi bi-chat-left-text me-2 style='color: var(--hs-terracotta);'"></i>¿Consultas?</h5>
-                            <p class="xs-small text-muted mb-0" style="font-size: 0.8rem; line-height: 1.4;">
-                                Si tienes dudas sobre nuestras políticas, puedes escribir a nuestro canal institucional: <br>
-                                <strong class="text-dark">hola@socialheater.com</strong>
+                        <div class="hs-legal__tarjeta">
+                            <h2 class="hs-legal__tarjeta-titulo">
+                                <i class="bi bi-chat-left-text hs-legal__icono--terracota" aria-hidden="true"></i>¿Consultas?
+                            </h2>
+                            <p class="hs-legal__tarjeta-texto">
+                                Si tienes dudas sobre nuestras políticas, escríbenos a
+                                <a class="hs-enlace" href="mailto:hola@hoseg.pe">hola@hoseg.pe</a>.
                             </p>
                         </div>
-
                     </div>
-                </div>
+                </aside>
 
-                <!-- COLUMNA DERECHA: -->
-                <div id="documento" class="col-12 col-md-9">
-                    <div class="hs-texto-secundario lh-lg" style="white-space: pre-line; text-align: justify;" 
+                <!-- Documento -->
+                <div id="documento" class="col-12 col-md-8 col-lg-9">
+                    <div class="hs-legal__documento hs-entrada" style="--hs-i: 3"
                          th:text="${bloque?.cuerpo ?: 'Contenido en preparación.'}">Texto</div>
-                         
-                    <!-- Botón de salida -->
-                    <div class="mt-5 pt-3 border-top">
-                        <a href="/" class="hs-btn hs-btn--secundario rounded-pill">
-                            <i class="bi bi-arrow-left me-2"></i>Volver al Inicio
+
+                    <div class="hs-legal__pie">
+                        <a class="hs-enlace-flecha" th:href="@{/}">
+                            <i class="bi bi-arrow-left" aria-hidden="true"></i> Volver al inicio
                         </a>
                     </div>
                 </div>
-
             </div>
         </div>
     </section>

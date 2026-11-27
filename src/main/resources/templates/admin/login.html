@@ -1,16 +1,10 @@
 <!DOCTYPE html>
-<!--
-  PLANTILLA · Bloque 4 · 4.1 Login administrativo (GET /admin/login; el POST lo procesa Spring Security).
-  El formulario DEBE enviar "username" y "password" por POST a /admin/login.
-  Usuarios de la tabla usuario del escritorio, solo rol ADMINISTRADOR; mismo bloqueo que el escritorio.
-  Variantes: ?error · ?bloqueado=5 (minutos) · ?inactivo · ?sinPermiso (es ENCARGADO) · ?salir
--->
-<html lang="es" xmlns:th="http://thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
-    <title>Acceso administrativo · HÖSÉG</title>
+    <title>Acceso interno · HÖSÉG</title>
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/font/bootstrap-icons.min.css}">
     <link rel="stylesheet" th:href="@{/css/tokens.css}">
@@ -21,23 +15,22 @@
 <main class="hs-login-wrap">
     <section class="hs-login-card hs-login-split" aria-labelledby="titulo-login">
 
-        <!-- Columna izquierda: Identidad visual (solo escritorio) -->
+        <!-- Columna izquierda: Identidad visual -->
         <aside class="hs-login-visual d-none d-md-flex" aria-hidden="true">
             <img th:src="@{/images/hero-cusco.jpg}" alt="" class="hs-login-visual__img">
             <div class="hs-login-visual__velo"></div>
             <div class="hs-login-visual__contenido">
                 <span class="hs-chip-vidrio hs-chip-vidrio--terracota">
-                    <i class="bi bi-shield-check" aria-hidden="true"></i> Gestión con propósito
+                    <i class="bi bi-shield-check" aria-hidden="true"></i> Operaciones &amp; Propósito
                 </span>
                 <div>
                     <h2 class="hs-login-visual__titulo">Cada prenda abriga, cada taza reforesta.</h2>
                     <p class="hs-login-visual__texto">
-                        Administra el catálogo, el impacto social y la experiencia de HÖSÉG desde un solo lugar.
+                        Portal unificado para Administración, Logística de Despachos y Gestión de Impacto Social en Cusco.
                     </p>
                 </div>
             </div>
         </aside>
-
         <!-- Columna derecha: Formulario de acceso -->
         <div class="hs-login-body">
             <div class="hs-login-top">
@@ -48,19 +41,20 @@
 
             <div class="hs-login-brand">
                 <span class="hs-wordmark">HÖSÉG</span>
-                <span class="hs-login-subtitle">PANEL DE ADMINISTRACIÓN</span>
+                <span class="hs-login-subtitle" id="login-role-subtitle">PORTAL INTERNO DEL PERSONAL</span>
             </div>
 
-            <h1 id="titulo-login" class="visually-hidden">Iniciar sesión en el panel de administración</h1>
+            <h1 id="titulo-login" class="visually-hidden">Iniciar sesión en el portal interno</h1>
 
-            <!-- Avisos de Spring Security (lógica intacta) -->
+
+            <!-- Avisos de Spring Security -->
             <div th:if="${param.error}" class="hs-notice hs-notice--danger" role="alert">
                 <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
                 <span>Usuario o contraseña incorrectos.</span>
             </div>
             <div th:if="${param.bloqueado}" class="hs-notice hs-notice--warning" role="alert">
                 <i class="bi bi-shield-exclamation" aria-hidden="true"></i>
-                <span th:text="'Cuenta bloqueada. Intenta de nuevo en ' + ${param.bloqueado} + ' minuto(s).'">Cuenta bloqueada.</span>
+                <span th:text="'Cuenta bloqueada. Intenta de nuevo en ' + ${param.bloqueado[0]} + ' minuto(s).'">Cuenta bloqueada.</span>
             </div>
             <div th:if="${param.inactivo}" class="hs-notice hs-notice--danger" role="alert">
                 <i class="bi bi-person-x" aria-hidden="true"></i>
@@ -68,7 +62,7 @@
             </div>
             <div th:if="${param.sinPermiso}" class="hs-notice hs-notice--warning" role="alert">
                 <i class="bi bi-lock" aria-hidden="true"></i>
-                <span>Tu usuario no tiene acceso al panel web.</span>
+                <span>Tu usuario no tiene acceso al portal web.</span>
             </div>
             <div th:if="${param.salir}" class="hs-notice hs-notice--success" role="status">
                 <i class="bi bi-check-circle" aria-hidden="true"></i>
@@ -88,12 +82,17 @@
 
                 <div class="hs-field">
                     <label for="admin-password">CONTRASEÑA</label>
-                    <div class="hs-input-icon-wrap">
+                                       <div class="hs-input-icon-wrap position-relative">
                         <i class="bi bi-lock hs-input-icon" aria-hidden="true"></i>
-                        <input id="admin-password" class="hs-admin-input hs-admin-input--con-icono"
+                        <input id="admin-password" class="hs-admin-input hs-admin-input--con-icono pe-5"
                                type="password" name="password" autocomplete="current-password"
                                placeholder="••••••••" required>
+                        <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted"
+                                data-toggle-pass="admin-password" aria-label="Mostrar u ocultar contraseña">
+                            <i class="bi bi-eye" aria-hidden="true"></i>
+                        </button>
                     </div>
+
                 </div>
 
                 <button class="hs-admin-btn hs-admin-btn--primary hs-login-submit" type="submit"
@@ -104,11 +103,13 @@
             </form>
 
             <p class="hs-login-footnote">
-                <i class="bi bi-lock-fill" aria-hidden="true"></i> Acceso exclusivo para personal autorizado.
+                <i class="bi bi-lock-fill" aria-hidden="true"></i> Acceso exclusivo para personal autorizado (RBAC).
             </p>
         </div>
 
     </section>
 </main>
+<script th:src="@{/js/cuenta.js}" defer></script>
 </body>
+
 </html>

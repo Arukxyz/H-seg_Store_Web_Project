@@ -53,19 +53,34 @@ public class AdminController {
     public String panel(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
                         Model model) {
-        LocalDate hoy = LocalDate.now(PanelAdminService.LIMA);
-        LocalDate fin = hasta == null ? hoy : hasta;
-        LocalDate inicio = desde == null ? fin.withDayOfMonth(1) : desde;
-        if (inicio.isAfter(fin)) {
-            LocalDate cambio = inicio;
-            inicio = fin;
-            fin = cambio;
-        }
-        model.addAttribute("desde", inicio);
-        model.addAttribute("hasta", fin);
-        model.addAttribute("indicadores", panelAdminService.indicadores(inicio, fin));
-        model.addAttribute("pedidos", panelAdminService.pedidos(inicio, fin));
+        Rango rango = rango(desde, hasta, model);
+        model.addAttribute("indicadores", panelAdminService.indicadores(rango.desde(), rango.hasta()));
+        // Los gráficos del panel se arman con estos pedidos (datos ocultos en la vista)
+        model.addAttribute("pedidos", panelAdminService.pedidos(rango.desde(), rango.hasta()));
         return "admin/panel";
+    }
+
+    /** Pedidos web en pantalla propia (solo lectura), con el mismo rango de fechas que el panel. */
+    @GetMapping("/admin/pedidos")
+    public String pedidos(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+                          Model model) {
+        Rango rango = rango(desde, hasta, model);
+        model.addAttribute("pedidos", panelAdminService.pedidos(rango.desde(), rango.hasta()));
+        return "admin/pedidos";
+    }
+
+    private record Rango(LocalDate desde, LocalDate hasta) {
+    }
+
+    /** Sin fechas: del 1 del mes a hoy (hora de Lima). Si vienen invertidas, se ordenan. */
+    private static Rango rango(LocalDate desde, LocalDate hasta, Model model) {
+        LocalDate fin = hasta == null ? LocalDate.now(PanelAdminService.LIMA) : hasta;
+        LocalDate inicio = desde == null ? fin.withDayOfMonth(1) : desde;
+        Rango rango = inicio.isAfter(fin) ? new Rango(fin, inicio) : new Rango(inicio, fin);
+        model.addAttribute("desde", rango.desde());
+        model.addAttribute("hasta", rango.hasta());
+        return rango;
     }
 
     @GetMapping("/admin/catalogo")

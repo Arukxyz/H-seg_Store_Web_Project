@@ -1,4 +1,12 @@
 <!DOCTYPE html>
+<!--
+  ESQUELETO · Bloque 5 · 3.7 Error 404. Spring Boot la muestra sola para cualquier ruta inexistente
+  y cuando un servicio lanza RecursoNoEncontradoException (producto oculto, pedido ajeno…).
+
+  Diseño: mismo tratamiento que error.html pero en salvia (hs-error__icono--salvia), coherente con el
+  color que usa el resto del sitio para "naturaleza/calma" en vez de "urgencia".
+  No se agregó ni se quitó ninguna variable del modelo, así que no afecta la lógica de los demás bloques.
+-->
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
     th:replace="~{layout/base :: pagina(titulo='Página no encontrada · HÖSÉG', activa='',
                                           transparente=false, contenido=~{::main}, estilos=~{::link}, scripts=~{::script})}">
@@ -9,32 +17,31 @@
 
 <body>
     <main class="hs-main--bajo-nav">
-        <section class="hs-seccion d-flex align-items-center hs-fondo-comunidad" style="min-height: 60vh;">
+        <section class="hs-seccion hs-error d-flex align-items-center hs-fondo-comunidad">
             <div class="container hs-ancho-sm text-center">
-                <div class="d-inline-flex align-items-center justify-content-center mb-4 hs-icono-pulso hs-icono-pulso--salvia hs-fade-in"
-                    style="width: 88px; height: 88px; border-radius: 50%; background: var(--hs-cream-dark);">
-                    <i class="bi bi-signpost-split" style="font-size: 2.25rem; color: var(--hs-sage);"></i>
+                <div class="hs-error__icono hs-error__icono--salvia hs-entrada" style="--hs-i: 0">
+                    <i class="bi bi-signpost-split" aria-hidden="true"></i>
                 </div>
 
-                <p class="hs-kicker hs-fade-in" style="animation-delay: .1s;">Error 404</p>
-                <h1 class="hs-h2 mb-2 hs-fade-in" style="animation-delay: .15s;">No encontramos esta página.</h1>
-                <p class="hs-texto-secundario mb-2 hs-fade-in" style="animation-delay: .2s;">
+                <p class="hs-kicker hs-entrada" style="--hs-i: 1">Error 404</p>
+                <h1 class="hs-h2 mb-2 hs-entrada" style="--hs-i: 2">No encontramos esta página.</h1>
+                <p class="hs-texto-secundario mb-2 hs-entrada" style="--hs-i: 3">
                     Puede que el enlace esté mal escrito, o que esta prenda ya haya encontrado otro hogar.
                 </p>
 
-                <div class="mb-2 hs-fade-in" style="animation-delay: .25s;">
+                <div class="mb-2 hs-entrada" style="--hs-i: 4">
                     <div class="hs-barra-progreso mx-auto">
                         <div class="hs-barra-progreso__relleno hs-barra-progreso__relleno--salvia"></div>
                     </div>
                 </div>
-                <p class="hs-texto-secundario mb-4 hs-fade-in" style="animation-delay: .25s;">
-                    <small class="text-muted" id="hs-aviso-redireccion">
+                <p class="hs-texto-secundario mb-4 hs-entrada" style="--hs-i: 4">
+                    <small class="hs-error__aviso" id="hs-aviso-redireccion">
                         Serás redirigido al inicio en <span id="hs-segundos">8</span> segundos…
                     </small>
                 </p>
 
-                <div class="d-flex flex-column flex-sm-row justify-content-center gap-2 hs-fade-in"
-                    style="animation-delay: .3s;">
+                <div class="d-flex flex-column flex-sm-row justify-content-center gap-2 hs-entrada"
+                    style="--hs-i: 5">
                     <a class="hs-btn hs-btn--primario" id="hs-link-inicio" th:href="@{/}">
                         <i class="bi bi-house me-1"></i> Ir al inicio
                     </a>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+    <!-- Aviso flotante de stock bajo. Lo usan Pedidos (primera pantalla de Logística al iniciar sesión)
+     e Inventario, así que vive en un solo lugar.
+     Se muestra solo si el controlador mandó 'productosCriticos' con elementos.
+     data-destino: a dónde ir con "Filtrar stock crítico" cuando la página no tiene la pestaña de crítico. -->
+    <aside th:fragment="avisoStock" th:if="${productosCriticos != null and !productosCriticos.isEmpty()}"
+        class="hs-stock-toast" id="toastStockCritico" role="alert" hidden
+        th:data-destino="@{/logistica/inventario(filtro='critico')}">
+        <div class="hs-stock-toast__head">
+            <span><i class="bi bi-exclamation-triangle-fill me-1"></i>
+                <strong th:text="${#lists.size(productosCriticos)} + ' producto(s) en stock bajo'">2 en stock
+                    bajo</strong>
+            </span>
+            <button type="button" class="btn-close btn-sm" id="btnCerrarStockToast" aria-label="Cerrar aviso"></button>
+        </div>
+        <ul class="hs-stock-toast__list">
+            <li th:each="pc, stat : ${productosCriticos}" th:if="${stat.index < 4}">
+                <span th:text="${pc.nombre + ' (' + pc.tallaMostrada + ')'}">Chompa (M)</span>
+                <strong th:text="${pc.stockComercial} + ' u.'">2 u.</strong>
+            </li>
+        </ul>
+        <button type="button" id="btnVerSoloCriticos"
+            class="hs-admin-btn hs-admin-btn--primary w-100 justify-content-center mt-2">
+            <i class="bi bi-funnel me-1"></i> Filtrar stock crítico
+        </button>
+    </aside>
+
+</body>
+
+</html>

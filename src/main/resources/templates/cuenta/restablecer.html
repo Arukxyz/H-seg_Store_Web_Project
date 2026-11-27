@@ -65,7 +65,7 @@
                             <input class="hs-input hs-cuenta__input--icono hs-cuenta__input--pass"
                                    id="nueva" type="password" th:field="*{nueva}"
                                    placeholder="Mínimo 8 caracteres" autocomplete="new-password" required>
-                            <button type="button" class="hs-cuenta__ojo" data-toggle-pass="nueva"
+                            <button type="button" class="hs-cuenta__ojo hs-btn-icono" data-toggle-pass="nueva"
                                     aria-label="Mostrar u ocultar contraseña nueva">
                                 <i class="bi bi-eye" aria-hidden="true"></i>
                             </button>
@@ -80,7 +80,7 @@
                             <input class="hs-input hs-cuenta__input--icono hs-cuenta__input--pass"
                                    id="confirmacion" type="password" th:field="*{confirmacion}"
                                    placeholder="Vuelve a escribir tu clave" autocomplete="new-password" required>
-                            <button type="button" class="hs-cuenta__ojo" data-toggle-pass="confirmacion"
+                            <button type="button" class="hs-cuenta__ojo hs-btn-icono" data-toggle-pass="confirmacion"
                                     aria-label="Mostrar u ocultar confirmación">
                                 <i class="bi bi-eye" aria-hidden="true"></i>
                             </button>
@@ -103,40 +103,14 @@
             </div>
 
             <div class="hs-cuenta__pie">
-                <a th:href="@{/login}" class="hs-cuenta__cta-registro">
+                <a th:href="@{/login}" class="hs-cuenta__cta-registro hs-enlace">
                     <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Volver a iniciar sesión
                 </a>
             </div>
         </div>
     </section>
 </main>
+<script th:src="@{/js/cuenta.js}" defer></script>
 
-<script>
-document.querySelectorAll('[data-toggle-pass]').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const input = document.getElementById(btn.dataset.togglePass);
-        const icon = btn.querySelector('i');
-        if (!input) return;
-        const mostrar = input.type === 'password';
-        input.type = mostrar ? 'text' : 'password';
-        if (icon) {
-            icon.classList.toggle('bi-eye', !mostrar);
-            icon.classList.toggle('bi-eye-slash', mostrar);
-        }
-    });
-});
-
-const pNueva = document.getElementById('nueva');
-const pConf = document.getElementById('confirmacion');
-const pMsg = document.getElementById('pass-match-msg');
-if (pNueva && pConf && pMsg) {
-    const revisarCoincidencia = () => {
-        const coinciden = pNueva.value.length > 0 && pNueva.value === pConf.value;
-        pMsg.hidden = !coinciden;
-    };
-    pNueva.addEventListener('input', revisarCoincidencia);
-    pConf.addEventListener('input', revisarCoincidencia);
-}
-</script>
 </body>
 </html>

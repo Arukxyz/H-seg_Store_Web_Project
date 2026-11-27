@@ -64,4 +64,28 @@ public interface DonacionRepository extends JpaRepository<Donacion, Integer> {
              group by d.tipo, d.estado
             """)
     List<UnidadesDonadas> delPeriodo(@Param("desde") OffsetDateTime desde, @Param("hasta") OffsetDateTime hasta);
+
+
+                /** Donaciones en estado PENDIENTE listas para asignarse a un lote. */
+    @Query("""
+            select d from Donacion d
+              join fetch d.producto
+              join fetch d.detalleVenta dv
+              join fetch dv.venta
+             where d.estado = :estado
+             order by d.creadoEn asc
+            """)
+    List<Donacion> porEstadoConVenta(@Param("estado") EstadoDonacion estado);
+
+    /** Donaciones pertenecientes a un lote específico. */
+    @Query("""
+            select d from Donacion d
+              join fetch d.producto
+              join fetch d.detalleVenta dv
+              join fetch dv.venta
+             where d.lote.id = :idLote
+             order by d.id asc
+            """)
+    List<Donacion> delLote(@Param("idLote") Integer idLote);
+
 }

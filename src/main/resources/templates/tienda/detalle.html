@@ -8,268 +8,394 @@
   Formularios: POST /carrito/agregar (codigo, cantidad) · POST /tienda/{codigo}/resenas (calificacion, titulo, comentario).
   tienda.js actualiza precio, máximo, aviso de stock e impacto al cambiar de talla o cantidad;
   sin JavaScript el formulario funciona igual y el servidor valida todo.
+  la sección de reseñas está rediseñada.
 -->
 <html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      th:replace="~{layout/base :: pagina(titulo=${producto.nombre} + ' · HÖSÉG', activa='tienda',
+    th:replace="~{layout/base :: pagina(titulo=${producto.nombre} + ' · HÖSÉG', activa='tienda',
                                           transparente=false, contenido=~{::main}, estilos=~{::link}, scripts=~{::script})}">
+
 <head>
     <link rel="stylesheet" th:href="@{/css/tienda.css}">
+    <!-- estilos de la sección de reseñas (van después de tienda.css) -->
+    <link rel="stylesheet" th:href="@{/css/resenas.css}">
 </head>
+
 <body>
-<main class="hs-main--bajo-nav hs-pagina" th:with="elegida=${producto.varianteInicial()}">
-    <th:block th:replace="~{fragments/avisos :: avisos}"/>
+    <main class="hs-main--bajo-nav hs-pagina" th:with="elegida=${producto.varianteInicial()}">
+        <th:block th:replace="~{fragments/avisos :: avisos}" />
 
-    <div class="container pt-4">
-        <nav aria-label="Ruta">
-            <ol class="hs-migas">
-                <li><a th:href="@{/tienda}">Tienda</a></li>
-                <li><a th:href="@{/tienda(categoria=${producto.categoria})}" th:text="${producto.categoria}">Casacas</a></li>
-                <li aria-current="page" th:text="${producto.nombre}">Casaca Älpafill Cusco</li>
-            </ol>
-        </nav>
+        <div class="container pt-4">
+            <nav aria-label="Ruta">
+                <ol class="hs-migas">
+                    <li><a th:href="@{/tienda}">Tienda</a></li>
+                    <li><a th:href="@{/tienda(categoria=${producto.categoria})}"
+                            th:text="${producto.categoria}">Casacas</a></li>
+                    <li aria-current="page" th:text="${producto.nombre}">Casaca Älpafill Cusco</li>
+                </ol>
+            </nav>
 
-        <div class="row g-4 g-lg-5" data-detalle>
-            <!-- Galería -->
-            <div class="col-12 col-md-6">
-                <div class="hs-galeria">
-                    <img th:if="${producto.urlImagen != null}" th:src="${producto.urlImagen}" th:alt="${producto.nombre}">
-                    <div class="hs-galeria__sin-imagen" th:unless="${producto.urlImagen != null}" aria-hidden="true">
-                        <i class="bi" th:classappend="${producto.tipoCompromiso?.icono ?: 'bi-bag'}"></i>
-                    </div>
-                    <div class="hs-card__badge" th:if="${producto.tipoCompromiso != null}">
-                        <th:block th:replace="~{fragments/product-card :: badge(${producto.tipoCompromiso})}"/>
+            <div class="row g-4 g-lg-5" data-detalle>
+                <!-- Galería -->
+                <div class="col-12 col-md-6">
+                    <div class="hs-galeria">
+                        <img th:if="${producto.urlImagen != null}" th:src="${producto.urlImagen}"
+                            th:alt="${producto.nombre}">
+                        <div class="hs-galeria__sin-imagen" th:unless="${producto.urlImagen != null}"
+                            aria-hidden="true">
+                            <i class="bi" th:classappend="${producto.tipoCompromiso?.icono ?: 'bi-bag'}"></i>
+                        </div>
+                        <div class="hs-card__badge" th:if="${producto.tipoCompromiso != null}">
+                            <th:block th:replace="~{fragments/product-card :: badge(${producto.tipoCompromiso})}" />
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Compra -->
-            <div class="col-12 col-md-6">
-                <p class="hs-kicker" th:text="${producto.coleccion ?: producto.categoria}">Älpafill</p>
-                <h1 class="hs-detalle__nombre" th:text="${producto.nombre}">Casaca Älpafill Cusco</h1>
+                <!-- Compra -->
+                <div class="col-12 col-md-6">
+                    <p class="hs-kicker" th:text="${producto.coleccion ?: producto.categoria}">Älpafill</p>
+                    <h1 class="hs-detalle__nombre" th:text="${producto.nombre}">Casaca Älpafill Cusco</h1>
 
-                <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
-                    <span class="hs-detalle__precio" data-precio
-                          th:text="'S/ ' + ${#numbers.formatDecimal(elegida != null ? elegida.precio : producto.precioDesde, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</span>
-                    <a class="hs-calificacion" href="#resenas" th:if="${resumenResenas.tieneResenas()}">
-                        <th:block th:replace="~{fragments/estrellas :: estrellas(${resumenResenas.estrellas})}"/>
-                        <span th:text="${#numbers.formatDecimal(resumenResenas.promedio, 1, 1)} + ' (' + ${resumenResenas.total} + (${resumenResenas.total} == 1 ? ' reseña)' : ' reseñas)')">4.5 (12 reseñas)</span>
-                    </a>
-                </div>
+                    <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
+                        <span class="hs-detalle__precio" data-precio
+                            th:text="'S/ ' + ${#numbers.formatDecimal(elegida != null ? elegida.precio : producto.precioDesde, 1, 'COMMA', 2, 'POINT')}">S/
+                            259.90</span>
+                        <a class="hs-calificacion" href="#resenas" th:if="${resumenResenas.tieneResenas()}">
+                            <th:block th:replace="~{fragments/estrellas :: estrellas(${resumenResenas.estrellas})}" />
+                            <span
+                                th:text="${#numbers.formatDecimal(resumenResenas.promedio, 1, 1)} + ' (' + ${resumenResenas.total} + (${resumenResenas.total} == 1 ? ' reseña)' : ' reseñas)')">4.5
+                                (12 reseñas)</span>
+                        </a>
+                    </div>
 
-                <form method="post" th:action="@{/carrito/agregar}" th:if="${producto.disponible}" class="d-flex flex-column gap-4">
-                    <!-- Tallas: cada una es un código de producto -->
-                    <fieldset th:unless="${producto.sinTallas}">
-                        <legend class="hs-detalle__etiqueta w-100">
-                            <span>Talla</span>
-                            <button class="hs-enlace border-0 bg-transparent p-0" type="button"
+                    <form method="post" th:action="@{/carrito/agregar}" th:if="${producto.disponible}"
+                        class="d-flex flex-column gap-4">
+                        <!-- Tallas: cada una es un código de producto -->
+                        <fieldset th:unless="${producto.sinTallas}">
+                            <legend class="hs-detalle__etiqueta w-100">
+                                <span>Talla</span>
+                                <button class="hs-enlace border-0 bg-transparent p-0" type="button"
                                     data-bs-toggle="modal" data-bs-target="#guia-tallas">
-                                <i class="bi bi-rulers" aria-hidden="true"></i> Guía de tallas
-                            </button>
-                        </legend>
-                        <div class="hs-tallas">
-                            <label class="hs-talla" th:each="v : ${producto.variantes}"
-                                   th:title="${v.disponible} ? null : 'Agotada'">
-                                <input type="radio" name="codigo" required
-                                       th:value="${v.codigo}" th:disabled="${!v.disponible}"
-                                       th:checked="${elegida != null and v.codigo == elegida.codigo}"
-                                       th:attr="data-precio=${v.precio},data-maximo=${v.maximo},data-pocas=${v.quedanPocas}">
-                                <span th:text="${v.talla}">M</span>
-                            </label>
-                        </div>
-                    </fieldset>
-                    <input th:if="${producto.sinTallas}" type="hidden" name="codigo" th:value="${elegida.codigo}">
-
-                    <div class="d-flex flex-wrap align-items-center gap-3">
-                        <div>
-                            <label class="hs-detalle__etiqueta" for="cantidad">Cantidad</label>
-                            <div class="hs-cantidad" data-cantidad>
-                                <button type="button" data-menos aria-label="Menos">−</button>
-                                <input id="cantidad" type="number" name="cantidad" value="1" min="1"
-                                       th:max="${elegida != null ? elegida.maximo : 1}" inputmode="numeric">
-                                <button type="button" data-mas aria-label="Más">+</button>
+                                    <i class="bi bi-rulers" aria-hidden="true"></i> Guía de tallas
+                                </button>
+                            </legend>
+                            <div class="hs-tallas">
+                                <label class="hs-talla" th:each="v : ${producto.variantes}"
+                                    th:title="${v.disponible} ? null : 'Agotada'">
+                                    <input type="radio" name="codigo" required th:value="${v.codigo}"
+                                        th:disabled="${!v.disponible}"
+                                        th:checked="${elegida != null and v.codigo == elegida.codigo}"
+                                        th:attr="data-precio=${v.precio},data-maximo=${v.maximo},data-pocas=${v.quedanPocas}">
+                                    <span th:text="${v.talla}">M</span>
+                                </label>
                             </div>
-                        </div>
-                        <span class="hs-aviso-stock" data-aviso-pocas th:hidden="${elegida == null or !elegida.quedanPocas}">
-                            <i class="bi bi-exclamation-circle" aria-hidden="true"></i> ¡Quedan pocas unidades!
-                        </span>
-                    </div>
-
-                    <!-- Impacto exacto: se multiplica con la cantidad (tienda.js) -->
-                    <div class="hs-impacto-caja" th:if="${producto.tipoCompromiso != null}"
-                         th:classappend="${producto.tipoCompromiso.name() == 'ARBOL'} ? 'hs-impacto-caja--arbol'">
-                        <span class="hs-impacto-caja__icono"><i class="bi" th:classappend="${producto.tipoCompromiso.icono} + '-fill'" aria-hidden="true"></i></span>
-                        <span data-impacto-texto th:attr="data-tipo=${producto.tipoCompromiso}"
-                              th:text="${producto.tipoCompromiso.name() == 'ABRIGO'} ? 'Esta compra abriga a 1 niño en Cusco.' : 'Esta compra planta 1 árbol en Cusco.'">
-                            Esta compra abriga a 1 niño en Cusco.</span>
-                    </div>
-
-                    <button class="hs-btn hs-btn--primario w-100" type="submit">
-                        <i class="bi bi-bag-plus" aria-hidden="true"></i> Agregar al carrito
-                    </button>
-                </form>
-
-                <div th:unless="${producto.disponible}" class="d-flex flex-column gap-3">
-                    <span class="hs-btn hs-btn--deshabilitado w-100">Agotado</span>
-                    <p class="hs-texto-secundario mb-0">Este producto se agotó en todas sus tallas. Mira otros parecidos más abajo.</p>
-                </div>
-
-                <!-- Descripción, cuidados y entrega -->
-                <div class="accordion accordion-flush hs-acordeon mt-4" id="acordeon-detalle">
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#det-descripcion" aria-expanded="true" aria-controls="det-descripcion">Descripción</button>
-                        </h2>
-                        <div id="det-descripcion" class="accordion-collapse collapse show">
-                            <div class="accordion-body" th:text="${producto.descripcion ?: 'Pronto agregaremos la descripción de este producto.'}">Descripción</div>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#det-cuidados" aria-expanded="false" aria-controls="det-cuidados"
-                                    th:text="${producto.categoria == 'Café'} ? 'Conservación' : 'Cuidados'">Cuidados</button>
-                        </h2>
-                        <div id="det-cuidados" class="accordion-collapse collapse">
-                            <div class="accordion-body" th:if="${producto.categoria == 'Café'}">
-                                Guárdalo en un lugar fresco y seco, lejos de la luz, en su bolsa bien cerrada.
-                                Muélelo justo antes de preparar para conservar su aroma.
-                            </div>
-                            <div class="accordion-body" th:unless="${producto.categoria == 'Café'}">
-                                Lava a mano en agua fría con jabón neutro, sin retorcer. Seca a la sombra y en
-                                horizontal. No uses secadora ni lejía.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="accordion-item">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#det-entrega" aria-expanded="false" aria-controls="det-entrega">Entrega e impacto</button>
-                        </h2>
-                        <div id="det-entrega" class="accordion-collapse collapse">
-                            <div class="accordion-body">
-                                Recógelo gratis en Höség Café Cusco o pídelo por delivery. Con tu código de pedido puedes
-                                seguir tu donación hasta la comunidad que la recibe en
-                                <a class="hs-enlace" th:href="@{${rutaConsulta}}">Consulta tu impacto</a>.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Reseñas -->
-        <section id="resenas" class="mt-5 pt-3" aria-labelledby="titulo-resenas">
-            <div class="row g-4 g-lg-5">
-                <div class="col-12 col-lg-4">
-                    <h2 class="hs-h2" id="titulo-resenas">Reseñas</h2>
-                    <div class="hs-resenas__resumen" th:if="${resumenResenas.tieneResenas()}">
-                        <span class="hs-resenas__promedio" th:text="${#numbers.formatDecimal(resumenResenas.promedio, 1, 1)}">4.5</span>
-                        <div>
-                            <th:block th:replace="~{fragments/estrellas :: estrellas(${resumenResenas.estrellas})}"/>
-                            <p class="hs-texto-secundario mb-0"
-                               th:text="${resumenResenas.total} + (${resumenResenas.total} == 1 ? ' reseña' : ' reseñas') + ' de compras verificadas'">12 reseñas</p>
-                        </div>
-                    </div>
-
-                    <!-- Formulario: solo para quien compró y pagó este modelo (resenaForm existe) -->
-                    <form th:if="${resenaForm != null}" th:object="${resenaForm}" method="post"
-                          th:action="@{/tienda/{c}/resenas(c=${producto.codigoElegido})}" class="hs-caja mt-4">
-                        <h3 class="h5" th:text="${yaReseno} ? 'Editar mi reseña' : 'Escribe tu reseña'">Escribe tu reseña</h3>
-                        <fieldset class="mb-3">
-                            <legend class="hs-label">Tu calificación</legend>
-                            <div class="hs-estrellas-input">
-                                <th:block th:each="n : ${#numbers.sequence(5, 1)}">
-                                    <input type="radio" th:id="'estrella-' + ${n}" th:field="*{calificacion}" th:value="${n}">
-                                    <label th:for="'estrella-' + ${n}" th:title="${n} + (${n} == 1 ? ' estrella' : ' estrellas')">
-                                        <i class="bi bi-star-fill" aria-hidden="true"></i>
-                                        <span class="visually-hidden" th:text="${n} + ' estrellas'">5 estrellas</span>
-                                    </label>
-                                </th:block>
-                            </div>
-                            <p class="hs-campo-error" th:if="${#fields.hasErrors('calificacion')}" th:errors="*{calificacion}">Elige de 1 a 5 estrellas.</p>
                         </fieldset>
-                        <label class="hs-label" for="resena-titulo">Título <span class="hs-texto-secundario">(opcional)</span></label>
-                        <input class="hs-input mb-1" id="resena-titulo" th:field="*{titulo}" th:errorclass="is-invalid" maxlength="100">
-                        <p class="hs-campo-error" th:if="${#fields.hasErrors('titulo')}" th:errors="*{titulo}">Máximo 100 caracteres.</p>
-                        <label class="hs-label mt-3" for="resena-comentario">Tu opinión</label>
-                        <textarea class="hs-input" id="resena-comentario" th:field="*{comentario}" th:errorclass="is-invalid"
-                                  rows="4" maxlength="1000" placeholder="¿Cómo te queda? ¿Abriga? ¿Lo recomendarías?"></textarea>
-                        <p class="hs-campo-error" th:if="${#fields.hasErrors('comentario')}" th:errors="*{comentario}">Cuéntanos qué te pareció.</p>
-                        <button class="hs-btn hs-btn--primario w-100 mt-3" type="submit" th:text="${yaReseno} ? 'Guardar cambios' : 'Publicar reseña'">Publicar reseña</button>
+                        <input th:if="${producto.sinTallas}" type="hidden" name="codigo" th:value="${elegida.codigo}">
+
+                        <div class="d-flex flex-wrap align-items-center gap-3">
+                            <div>
+                                <label class="hs-detalle__etiqueta" for="cantidad">Cantidad</label>
+                                <div class="hs-cantidad" data-cantidad>
+                                    <button type="button" data-menos aria-label="Menos">−</button>
+                                    <input id="cantidad" type="number" name="cantidad" value="1" min="1"
+                                        th:max="${elegida != null ? elegida.maximo : 1}" inputmode="numeric">
+                                    <button type="button" data-mas aria-label="Más">+</button>
+                                </div>
+                            </div>
+                            <span class="hs-aviso-stock" data-aviso-pocas
+                                th:hidden="${elegida == null or !elegida.quedanPocas}">
+                                <i class="bi bi-exclamation-circle" aria-hidden="true"></i> ¡Quedan pocas unidades!
+                            </span>
+                        </div>
+
+                        <!-- Impacto exacto: se multiplica con la cantidad (tienda.js) -->
+                        <div class="hs-impacto-caja" th:if="${producto.tipoCompromiso != null}"
+                            th:classappend="${producto.tipoCompromiso.name() == 'ARBOL'} ? 'hs-impacto-caja--arbol'">
+                            <span class="hs-impacto-caja__icono"><i class="bi"
+                                    th:classappend="${producto.tipoCompromiso.icono} + '-fill'"
+                                    aria-hidden="true"></i></span>
+                            <span data-impacto-texto th:attr="data-tipo=${producto.tipoCompromiso}"
+                                th:text="${producto.tipoCompromiso.name() == 'ABRIGO'} ? 'Esta compra abriga a 1 niño en Cusco.' : 'Esta compra planta 1 árbol en Cusco.'">
+                                Esta compra abriga a 1 niño en Cusco.</span>
+                        </div>
+
+                        <button class="hs-btn hs-btn--primario hs-brillo w-100" type="submit">
+                            <i class="bi bi-bag-plus" aria-hidden="true"></i> Agregar al carrito
+                        </button>
                     </form>
 
-                    <p class="hs-texto-secundario mt-4" th:if="${resenaForm == null}" sec:authorize="isAnonymous()">
-                        ¿Compraste este producto? <a class="hs-enlace" th:href="@{/login}">Inicia sesión</a> para dejar tu reseña.
-                    </p>
-                    <p class="hs-texto-secundario mt-4" th:if="${resenaForm == null}" sec:authorize="hasRole('CLIENTE')">
-                        Podrás reseñar este producto cuando hayas recibido la confirmación de pago de tu pedido.
-                    </p>
-                </div>
-
-                <div class="col-12 col-lg-8">
-                    <div class="hs-vacio" th:unless="${resumenResenas.tieneResenas()}">
-                        <span class="hs-vacio__icono"><i class="bi bi-chat-heart" aria-hidden="true"></i></span>
-                        <p class="mb-0">Este producto aún no tiene reseñas.</p>
+                    <div th:unless="${producto.disponible}" class="d-flex flex-column gap-3">
+                        <span class="hs-btn hs-btn--deshabilitado w-100">Agotado</span>
+                        <p class="hs-texto-secundario mb-0">Este producto se agotó en todas sus tallas. Mira otros
+                            parecidos más abajo.</p>
                     </div>
-                    <article class="hs-resena" th:each="r : ${resenas}">
-                        <th:block th:replace="~{fragments/estrellas :: estrellas(${r.calificacion})}"/>
-                        <h3 class="h6 mt-2 mb-1" th:if="${r.titulo}" th:text="${r.titulo}">Abriga muchísimo</h3>
-                        <p class="mb-2" th:text="${r.comentario}">Comentario</p>
-                        <p class="hs-resena__autor mb-0">
-                            <span th:text="${r.autor}">María G.</span> · talla <span th:text="${r.talla}">M</span> ·
-                            <time th:datetime="${r.fecha}" th:text="${#temporals.format(r.fecha, 'dd/MM/yyyy')}">23/10/2026</time>
-                            <span th:if="${r.editada}">· editada</span> ·
-                            <span class="hs-verificada"><i class="bi bi-patch-check-fill" aria-hidden="true"></i> Compra verificada</span>
-                        </p>
-                    </article>
+
+                    <!-- Descripción, cuidados y entrega -->
+                    <div class="accordion accordion-flush hs-acordeon mt-4" id="acordeon-detalle">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#det-descripcion" aria-expanded="true"
+                                    aria-controls="det-descripcion">Descripción</button>
+                            </h2>
+                            <div id="det-descripcion" class="accordion-collapse collapse show">
+                                <div class="accordion-body"
+                                    th:text="${producto.descripcion ?: 'Pronto agregaremos la descripción de este producto.'}">
+                                    Descripción</div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#det-cuidados" aria-expanded="false" aria-controls="det-cuidados"
+                                    th:text="${producto.categoria == 'Café'} ? 'Conservación' : 'Cuidados'">Cuidados</button>
+                            </h2>
+                            <div id="det-cuidados" class="accordion-collapse collapse">
+                                <div class="accordion-body" th:if="${producto.categoria == 'Café'}">
+                                    Guárdalo en un lugar fresco y seco, lejos de la luz, en su bolsa bien cerrada.
+                                    Muélelo justo antes de preparar para conservar su aroma.
+                                </div>
+                                <div class="accordion-body" th:unless="${producto.categoria == 'Café'}">
+                                    Lava a mano en agua fría con jabón neutro, sin retorcer. Seca a la sombra y en
+                                    horizontal. No uses secadora ni lejía.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#det-entrega" aria-expanded="false"
+                                    aria-controls="det-entrega">Entrega e impacto</button>
+                            </h2>
+                            <div id="det-entrega" class="accordion-collapse collapse">
+                                <div class="accordion-body">
+                                    Recógelo gratis en Höség Café Cusco o pídelo por delivery. Con tu código de pedido
+                                    puedes
+                                    seguir tu donación hasta la comunidad que la recibe en
+                                    <a class="hs-enlace" th:href="@{${rutaConsulta}}">Consulta tu impacto</a>.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </section>
 
-        <!-- Relacionados -->
-        <section class="mt-5 pt-3" th:unless="${producto.relacionados.isEmpty()}" aria-labelledby="titulo-relacionados">
-            <h2 class="hs-h2 mb-4" id="titulo-relacionados">También te puede gustar</h2>
-            <div class="row g-3 g-md-4">
-                <div class="col-6 col-md-3" th:each="p : ${producto.relacionados}">
-                    <th:block th:replace="~{fragments/product-card :: card(${p})}"/>
+            <!-- Reseñas -->
+            <!-- sección rediseñada (estilos en static/css/resenas.css, bajo .hs-resenas). Mismo modelo
+             (resumenResenas, resenas, resenaForm, yaReseno), mismo formulario POST y mismos campos
+             (calificacion, titulo, comentario). Se añaden: tarjeta de resumen con barras por estrellas
+             (componente progress de Bootstrap), avatar con inicial y tarjetas por reseña. -->
+            <section id="resenas" class="hs-resenas mt-5 pt-3" aria-labelledby="titulo-resenas"
+                th:with="cantidad=${#lists.size(resenas)}">
+                <div class="hs-resenas__cabecera">
+                    <p class="hs-kicker">Opiniones</p>
+                    <h2 class="hs-h2" id="titulo-resenas">Reseñas</h2>
                 </div>
-            </div>
-        </section>
-    </div>
 
-    <!-- 1.3 Guía de tallas: medidas de referencia de la prenda, en cm -->
-    <div class="modal fade hs-modal" id="guia-tallas" tabindex="-1" aria-labelledby="titulo-guia" aria-hidden="true"
-         th:unless="${producto.sinTallas}">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content p-2">
-                <div class="modal-header border-0">
-                    <h2 class="modal-title h5" id="titulo-guia">Guía de tallas</h2>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <div class="row g-4 g-lg-5">
+                    <div class="col-12 col-lg-4">
+                        <div class="hs-resenas__lateral">
+
+                            <!-- tarjeta de resumen: promedio grande, estrellas y barras por calificación.
+                             Las barras se calculan con las mismas reseñas de la lista (sin tocar el controlador). -->
+                            <div class="hs-resenas__panel" th:if="${resumenResenas.tieneResenas()}">
+                                <div class="hs-resenas__resumen">
+                                    <span class="hs-resenas__promedio"
+                                        th:text="${#numbers.formatDecimal(resumenResenas.promedio, 1, 1)}">4.5</span>
+                                    <div>
+                                        <th:block
+                                            th:replace="~{fragments/estrellas :: estrellas(${resumenResenas.estrellas})}" />
+                                        <p class="hs-texto-secundario mb-0"
+                                            th:text="${resumenResenas.total} + (${resumenResenas.total} == 1 ? ' reseña' : ' reseñas') + ' de compras verificadas'">
+                                            12 reseñas</p>
+                                    </div>
+                                </div>
+                                <ul class="hs-resenas__barras" data-revelar aria-label="Reseñas por calificación">
+                                    <!-- __${n}__ pone el número de estrellas dentro de la expresión antes de evaluarla -->
+                                    <li th:each="n : ${#numbers.sequence(5, 1)}" th:with="c=${resenas.?[calificacion == __${n}__].size()},
+                                             pct=${cantidad > 0 ? c * 100 / cantidad : 0}">
+                                        <span class="hs-resenas__barra-n"><span th:text="${n}">5</span> <i
+                                                class="bi bi-star-fill" aria-hidden="true"></i></span>
+                                        <div class="progress" role="progressbar"
+                                            th:attr="aria-valuenow=${pct}, aria-label=${n} + ' estrellas'"
+                                            aria-valuemin="0" aria-valuemax="100">
+                                            <div class="progress-bar" th:style="'width:' + ${pct} + '%'"></div>
+                                        </div>
+                                        <span class="hs-resenas__barra-c" th:text="${c}">3</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Formulario: solo para quien compró y pagó este modelo (resenaForm existe) -->
+                            <!-- título con icono, calificación con estrellas más grandes y una guía de lectura -->
+                            <form th:if="${resenaForm != null}" th:object="${resenaForm}" method="post"
+                                th:action="@{/tienda/{c}/resenas(c=${producto.codigoElegido})}"
+                                class="hs-caja hs-resenas__form">
+                                <h3 class="hs-resenas__form-titulo">
+                                    <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                                    <span th:text="${yaReseno} ? 'Editar mi reseña' : 'Escribe tu reseña'">Escribe tu
+                                        reseña</span>
+                                </h3>
+                                <fieldset class="mb-3">
+                                    <legend class="hs-label">Tu calificación</legend>
+                                    <div class="hs-estrellas-input">
+                                        <th:block th:each="n : ${#numbers.sequence(5, 1)}">
+                                            <input type="radio" th:id="'estrella-' + ${n}" th:field="*{calificacion}"
+                                                th:value="${n}">
+                                            <label th:for="'estrella-' + ${n}"
+                                                th:title="${n} + (${n} == 1 ? ' estrella' : ' estrellas')">
+                                                <i class="bi bi-star-fill" aria-hidden="true"></i>
+                                                <span class="visually-hidden" th:text="${n} + ' estrellas'">5
+                                                    estrellas</span>
+                                            </label>
+                                        </th:block>
+                                    </div>
+                                    <p class="hs-resenas__guia"><span>No me gustó</span><span>Me encantó</span></p>
+                                    <p class="hs-campo-error" th:if="${#fields.hasErrors('calificacion')}"
+                                        th:errors="*{calificacion}">Elige de 1 a 5 estrellas.</p>
+                                </fieldset>
+                                <label class="hs-label" for="resena-titulo">Título <span
+                                        class="hs-texto-secundario">(opcional)</span></label>
+                                <input class="hs-input mb-1" id="resena-titulo" th:field="*{titulo}"
+                                    th:errorclass="is-invalid" maxlength="100" placeholder="Ej.: Abriga muchísimo">
+                                <p class="hs-campo-error" th:if="${#fields.hasErrors('titulo')}" th:errors="*{titulo}">
+                                    Máximo 100 caracteres.</p>
+                                <label class="hs-label mt-3" for="resena-comentario">Tu opinión</label>
+                                <textarea class="hs-input" id="resena-comentario" th:field="*{comentario}"
+                                    th:errorclass="is-invalid" rows="4" maxlength="1000"
+                                    placeholder="¿Cómo te queda? ¿Abriga? ¿Lo recomendarías?"></textarea>
+                                <p class="hs-campo-error" th:if="${#fields.hasErrors('comentario')}"
+                                    th:errors="*{comentario}">Cuéntanos qué te pareció.</p>
+                                <button class="hs-btn hs-btn--primario w-100 mt-3" type="submit">
+                                    <i class="bi bi-send" aria-hidden="true"></i>
+                                    <span th:text="${yaReseno} ? 'Guardar cambios' : 'Publicar reseña'">Publicar
+                                        reseña</span>
+                                </button>
+                            </form>
+
+                            <!-- los dos avisos van en una caja con icono -->
+                            <p class="hs-resenas__aviso" th:if="${resenaForm == null}" sec:authorize="isAnonymous()">
+                                <i class="bi bi-person-lock" aria-hidden="true"></i>
+                                <span>¿Compraste este producto? <a class="hs-enlace" th:href="@{/login}">Inicia
+                                        sesión</a> para dejar tu reseña.</span>
+                            </p>
+                            <p class="hs-resenas__aviso" th:if="${resenaForm == null}"
+                                sec:authorize="hasRole('CLIENTE')">
+                                <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+                                <span>Podrás reseñar este producto cuando hayas recibido la confirmación de pago de tu
+                                    pedido.</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-8">
+                        <!-- estado vacío con una invitación; mantiene el texto original -->
+                        <div class="hs-vacio" th:unless="${resumenResenas.tieneResenas()}">
+                            <span class="hs-vacio__icono"><i class="bi bi-chat-heart" aria-hidden="true"></i></span>
+                            <p class="mb-1 fw-semibold">Este producto aún no tiene reseñas.</p>
+                            <p class="hs-texto-secundario mb-0">Las opiniones de quienes ya compraron aparecerán aquí.
+                            </p>
+                        </div>
+
+                        <!-- cada reseña es una tarjeta con avatar (inicial del autor), insignia de compra verificada
+                         y la talla como chip. Mismos datos que antes (calificacion, titulo, comentario, autor, talla, fecha, editada). -->
+                        <article class="hs-resena hs-elevable" th:each="r : ${resenas}">
+                            <header class="hs-resena__cabecera">
+                                <span class="hs-resena__avatar" aria-hidden="true"
+                                    th:text="${#strings.isEmpty(r.autor)} ? '·' : ${#strings.toUpperCase(#strings.substring(r.autor, 0, 1))}">M</span>
+                                <div class="hs-resena__quien">
+                                    <p class="hs-resena__nombre mb-0" th:text="${r.autor}">María G.</p>
+                                    <span class="hs-verificada"><i class="bi bi-patch-check-fill"
+                                            aria-hidden="true"></i> Compra verificada</span>
+                                </div>
+                                <time class="hs-resena__fecha" th:datetime="${r.fecha}"
+                                    th:text="${#temporals.format(r.fecha, 'dd/MM/yyyy')}">23/10/2026</time>
+                            </header>
+                            <div class="hs-resena__estrellas">
+                                <th:block th:replace="~{fragments/estrellas :: estrellas(${r.calificacion})}" />
+                                <span class="hs-resena__editada" th:if="${r.editada}">editada</span>
+                            </div>
+                            <h3 class="hs-resena__titulo" th:if="${r.titulo}" th:text="${r.titulo}">Abriga muchísimo
+                            </h3>
+                            <p class="hs-resena__texto" th:text="${r.comentario}">Comentario</p>
+                            <span class="hs-chip-talla"><i class="bi bi-rulers" aria-hidden="true"></i> Talla <span
+                                    th:text="${r.talla}">M</span></span>
+                        </article>
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <!--/* MEDIDAS DE REFERENCIA: confirmar con la ficha técnica de la marca. */-->
-                    <table class="hs-tabla mb-4">
-                        <thead><tr><th>Talla</th><th>Pecho</th><th>Largo</th><th>Manga</th></tr></thead>
-                        <tbody>
-                        <tr><td>S</td><td>96</td><td>66</td><td>61</td></tr>
-                        <tr><td>M</td><td>102</td><td>69</td><td>63</td></tr>
-                        <tr><td>L</td><td>108</td><td>72</td><td>65</td></tr>
-                        <tr><td>XL</td><td>114</td><td>75</td><td>67</td></tr>
-                        </tbody>
-                    </table>
-                    <h3 class="h6">Cómo medirte</h3>
-                    <ul class="hs-texto-secundario mb-0 ps-3">
-                        <li><strong>Pecho:</strong> rodea la parte más ancha del pecho, bajo las axilas.</li>
-                        <li><strong>Largo:</strong> desde el hombro hasta donde quieres que llegue la prenda.</li>
-                        <li><strong>Manga:</strong> desde el hombro hasta la muñeca, con el brazo relajado.</li>
-                    </ul>
+            </section>
+
+            <!-- Relacionados -->
+            <section class="mt-5 pt-3" th:unless="${producto.relacionados.isEmpty()}"
+                aria-labelledby="titulo-relacionados">
+                <h2 class="hs-h2 mb-4" id="titulo-relacionados">También te puede gustar</h2>
+                <div class="row g-3 g-md-4">
+                    <div class="col-6 col-md-3" th:each="p : ${producto.relacionados}">
+                        <th:block th:replace="~{fragments/product-card :: card(${p})}" />
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 1.3 Guía de tallas: medidas de referencia de la prenda, en cm -->
+        <div class="modal fade hs-modal" id="guia-tallas" tabindex="-1" aria-labelledby="titulo-guia" aria-hidden="true"
+            th:unless="${producto.sinTallas}">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content p-2">
+                    <div class="modal-header border-0">
+                        <h2 class="modal-title h5" id="titulo-guia">Guía de tallas</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!--/* MEDIDAS DE REFERENCIA: confirmar con la ficha técnica de la marca. */-->
+                        <table class="hs-tabla mb-4">
+                            <thead>
+                                <tr>
+                                    <th>Talla</th>
+                                    <th>Pecho</th>
+                                    <th>Largo</th>
+                                    <th>Manga</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>S</td>
+                                    <td>96</td>
+                                    <td>66</td>
+                                    <td>61</td>
+                                </tr>
+                                <tr>
+                                    <td>M</td>
+                                    <td>102</td>
+                                    <td>69</td>
+                                    <td>63</td>
+                                </tr>
+                                <tr>
+                                    <td>L</td>
+                                    <td>108</td>
+                                    <td>72</td>
+                                    <td>65</td>
+                                </tr>
+                                <tr>
+                                    <td>XL</td>
+                                    <td>114</td>
+                                    <td>75</td>
+                                    <td>67</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <h3 class="h6">Cómo medirte</h3>
+                        <ul class="hs-texto-secundario mb-0 ps-3">
+                            <li><strong>Pecho:</strong> rodea la parte más ancha del pecho, bajo las axilas.</li>
+                            <li><strong>Largo:</strong> desde el hombro hasta donde quieres que llegue la prenda.</li>
+                            <li><strong>Manga:</strong> desde el hombro hasta la muñeca, con el brazo relajado.</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</main>
+    </main>
 
-<script th:src="@{/js/tienda.js}" defer></script>
+    <script th:src="@{/js/tienda.js}" defer></script>
 </body>
+
 </html>

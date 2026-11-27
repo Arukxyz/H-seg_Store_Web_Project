@@ -5,6 +5,8 @@ import pe.edu.utp.hoseg.web.model.TipoEnvio;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Seguimiento del envío en "Detalle de pedido" (2.6).
@@ -27,4 +29,11 @@ public record EnvioVista(
         String codigoSeguimiento,
         OffsetDateTime fechaDespacho,
         OffsetDateTime fechaEntrega) {
+
+    /** "Distrito, provincia, departamento" sin los que falten: el recojo y muchos delivery no los traen todos. */
+    public String getUbicacion() {
+        return Stream.of(distrito, provincia, departamento)
+                .filter(s -> s != null && !s.isBlank())
+                .collect(Collectors.joining(", "));
+    }
 }

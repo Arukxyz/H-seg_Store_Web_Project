@@ -16,23 +16,18 @@
 <main class="hs-main--bajo-nav hs-pagina" th:classappend="${!vacio} ? 'hs-pagina--con-barra'">
     <th:block th:replace="~{fragments/avisos :: avisos}"/>
 
-    <header class="hs-pagina-cabecera">
-        <div class="container">
-            <p class="hs-kicker">Carrito</p>
-            <h1 class="hs-pagina-cabecera__titulo">Tu carrito</h1>
-        </div>
-    </header>
+    <th:block th:replace="~{fragments/cabecera :: cabecera('Carrito', 'Tu carrito', null)}"/>
 
     <div class="container">
         <!-- Vacío -->
-        <div class="hs-vacio" th:if="${vacio}">
+        <div class="hs-vacio hs-entrada" style="--hs-i: 2" th:if="${vacio}">
             <span class="hs-vacio__icono"><i class="bi bi-bag" aria-hidden="true"></i></span>
             <h2 class="h5">Tu carrito está vacío.</h2>
             <p class="hs-texto-secundario">Cada prenda que elijas abriga a alguien más en Cusco.</p>
             <a class="hs-btn hs-btn--primario" th:href="@{/tienda}">Ir a la tienda</a>
         </div>
 
-        <div class="row g-4" th:unless="${vacio}">
+        <div class="row g-4 hs-entrada" style="--hs-i: 2" th:unless="${vacio}">
             <!-- Líneas -->
             <section class="col-12 col-lg-8" aria-label="Productos del carrito">
                 <article class="hs-linea" th:each="i : ${items}"
@@ -101,12 +96,12 @@
                     <div class="hs-impacto-caja mb-3" th:if="${impacto.tieneImpacto()}"
                          th:classappend="${impacto.abrigos == 0} ? 'hs-impacto-caja--arbol'">
                         <span class="hs-impacto-caja__icono">
-                            <i class="bi" th:classappend="${impacto.abrigos > 0} ? 'bi-gift-fill' : 'bi-tree-fill'" aria-hidden="true"></i>
+                            <i class="bi" th:classappend="${impacto.abrigos > 0} ? 'bi-casaca-fill' : 'bi-tree-fill'" aria-hidden="true"></i>
                         </span>
                         <span>Tu impacto con esta compra: <strong th:text="${impacto.texto}">2 abrigos + 1 árbol</strong></span>
                     </div>
 
-                    <a th:if="${sePuedeConfirmar}" class="hs-btn hs-btn--primario w-100" th:href="@{/carrito/confirmar}">Confirmar compra</a>
+                    <a th:if="${sePuedeConfirmar}" class="hs-btn hs-btn--primario hs-brillo w-100" th:href="@{/carrito/confirmar}">Confirmar compra</a>
                     <span th:unless="${sePuedeConfirmar}" class="hs-btn hs-btn--deshabilitado w-100">Revisa los productos marcados</span>
                     <p class="hs-texto-secundario text-center mt-2 mb-0" sec:authorize="isAnonymous()">
                         Te pediremos iniciar sesión; tu carrito se conserva.
@@ -122,7 +117,7 @@
             <span class="hs-texto-secundario d-block small">Total</span>
             <span class="hs-barra-movil__total" th:text="'S/ ' + ${#numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}">S/ 259.90</span>
         </div>
-        <a th:if="${sePuedeConfirmar}" class="hs-btn hs-btn--primario" th:href="@{/carrito/confirmar}">Confirmar</a>
+        <a th:if="${sePuedeConfirmar}" class="hs-btn hs-btn--primario hs-brillo" th:href="@{/carrito/confirmar}">Confirmar</a>
         <span th:unless="${sePuedeConfirmar}" class="hs-btn hs-btn--deshabilitado">Revisa tu carrito</span>
     </div>
 </main>

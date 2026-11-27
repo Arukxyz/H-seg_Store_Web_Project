@@ -73,12 +73,12 @@
                 </a>
 
                 <p class="mt-3 mb-0 text-center small">
-                    <a th:href="@{/recuperar}" class="hs-cuenta__link-olvido">Intentar con otro correo</a>
+                    <a th:href="@{/recuperar}" class="hs-cuenta__link-olvido hs-enlace">Intentar con otro correo</a>
                 </p>
             </div>
 
             <div class="hs-cuenta__pie" th:unless="${param.enviado}">
-                <a th:href="@{/login}" class="hs-cuenta__cta-registro">
+                <a th:href="@{/login}" class="hs-cuenta__cta-registro hs-enlace">
                     <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Volver a iniciar sesión
                 </a>
             </div>

@@ -4,18 +4,8 @@
    base (hs-btn, hs-input, hs-card, hs-chip, hs-badge) de hoseg.css.
    ===================================================================== */
 
-/* ── Cabecera de página interior ──────────────────────────────────── */
-.hs-pagina-cabecera {
-    padding: 2.5rem 0 1.5rem;
-}
-
-.hs-pagina-cabecera__titulo {
-    font-family: var(--hs-font-display);
-    font-size: clamp(2rem, 5vw, 2.75rem);
-    font-weight: 600;
-    line-height: 1.15;
-    margin: 0;
-}
+/* La cabecera de página interior (.hs-pagina-cabecera, --marca, .hs-acento)
+   es común: hoseg.css y el fragmento fragments/cabecera.html. */
 
 .hs-migas {
     display: flex;
@@ -71,22 +61,7 @@
     padding-left: 44px;
 }
 
-.hs-select {
-    width: 100%;
-    padding: 12px 40px 12px 16px;
-    border: 1px solid var(--hs-sand);
-    border-radius: 12px;
-    background-color: var(--hs-card);
-    color: var(--hs-bark);
-    font-family: var(--hs-font-body);
-    font-size: 0.875rem;
-}
-
-.hs-select:focus {
-    outline: none;
-    border-color: var(--hs-terracotta);
-    box-shadow: var(--hs-anillo-foco);
-}
+/* .hs-select (el <select> con estilo propio) es común: hoseg.css, "Formularios". */
 
 .hs-filtros {
     display: flex;
@@ -98,10 +73,23 @@
     background: var(--hs-card);
 }
 
+/* Escritorio: los filtros acompañan al bajar, justo bajo la barra fija. Si
+   no caben en la ventana, se desplazan por dentro. */
 @media (min-width: 992px) {
     .hs-filtros {
         position: sticky;
-        top: 88px;
+        top: calc(var(--hs-nav-alto) + 24px);
+        max-height: calc(100vh - var(--hs-nav-alto) - 48px);
+        overflow-y: auto;
+        scrollbar-width: thin;
+    }
+}
+
+/* Móvil: el panel desplegado se distingue del resto de la página */
+@media (max-width: 991.98px) {
+    #panel-filtros .hs-filtros {
+        margin-bottom: 0.5rem;
+        box-shadow: var(--hs-shadow-card);
     }
 }
 
@@ -139,11 +127,24 @@
     font-size: 0.8125rem;
     font-weight: 500;
     cursor: pointer;
-    transition: background var(--hs-t-fast), border-color var(--hs-t-fast), color var(--hs-t-fast);
+    transition: background var(--hs-t-fast), border-color var(--hs-t-fast), color var(--hs-t-fast),
+                transform var(--hs-t-medio) var(--hs-ease-seda);
 }
 
 .hs-opcion span:hover {
     border-color: var(--hs-terracotta);
+    transform: translateY(-2px);
+}
+
+.hs-opcion span:active {
+    transform: scale(0.95);
+}
+
+/* Al elegir un filtro, el chip "late" una vez */
+@keyframes hsElegido {
+    0%   { transform: scale(0.92); }
+    60%  { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
 
 .hs-opcion input:checked + span {
@@ -151,6 +152,11 @@
     background: var(--hs-terracotta-light);
     color: var(--hs-terracotta-hover);
     font-weight: 600;
+}
+
+/* Solo el chip recién elegido (tiene el foco): los marcados al cargar no laten */
+.hs-opcion input:checked:focus + span {
+    animation: hsElegido var(--hs-t-medio) var(--hs-ease-seda);
 }
 
 .hs-opcion input:focus-visible + span {
@@ -168,16 +174,7 @@
     color: var(--hs-muted);
 }
 
-.hs-enlace {
-    color: var(--hs-terracotta);
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.hs-enlace:hover {
-    color: var(--hs-terracotta-hover);
-    text-decoration: underline;
-}
+/* .hs-enlace (enlace dentro del texto) es común: hoseg.css, "Enlaces". */
 
 /* Estado vacío: sin resultados, carrito vacío */
 .hs-vacio {
@@ -200,6 +197,144 @@
     font-size: 1.75rem;
 }
 
+/* ── Tienda: resultados sin recarga, tamaño de página y paginador ──── */
+.hs-tienda__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+}
+
+.hs-por-pagina {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.hs-select--compacto {
+    width: auto;
+    padding: 6px 32px 6px 12px;
+    border-radius: var(--hs-radius-pill);
+}
+
+/* Mientras llegan los resultados nuevos (tienda.js) */
+.hs-resultados {
+    transition: opacity var(--hs-t-fast) var(--hs-ease);
+}
+
+.hs-resultados.is-cargando {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+/* Las tarjetas entran en cascada, cada una un poco después de la anterior */
+.hs-grilla-tienda__item {
+    animation: hsFadeSlide 0.45s var(--hs-ease) both;
+    animation-delay: calc(var(--hs-i, 0) * 45ms);
+}
+
+/* Una sola columna en móvil: la tarjeta no crece sin límite en pantallas de 500 px */
+@media (max-width: 575.98px) {
+    .hs-grilla-tienda .hs-card {
+        max-width: 26rem;
+        margin-inline: auto;
+    }
+}
+
+.hs-paginador {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 2.5rem;
+}
+
+.hs-paginador__numero,
+.hs-paginador__flecha {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border: 1px solid var(--hs-sand);
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-card);
+    color: var(--hs-bark);
+    font-family: var(--hs-font-body);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color var(--hs-t-fast) var(--hs-ease),
+                border-color var(--hs-t-fast) var(--hs-ease),
+                color var(--hs-t-fast) var(--hs-ease),
+                transform var(--hs-t-fast) var(--hs-ease);
+}
+
+.hs-paginador__numero:hover,
+.hs-paginador__flecha:not(:disabled):hover {
+    border-color: var(--hs-terracotta);
+    background: var(--hs-terracotta-light);
+    color: var(--hs-terracotta);
+    transform: translateY(-2px);
+}
+
+.hs-paginador__numero:focus-visible,
+.hs-paginador__flecha:focus-visible {
+    outline: none;
+    box-shadow: var(--hs-anillo-foco-oscuro);
+}
+
+.hs-paginador__numero.is-actual {
+    border-color: var(--hs-terracotta);
+    background: var(--hs-terracotta);
+    color: var(--hs-sobre-acento);
+    transform: none;
+    cursor: default;
+}
+
+.hs-paginador__flecha:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.hs-paginador__salto {
+    min-width: 20px;
+    color: var(--hs-muted);
+    text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hs-resultados,
+    .hs-paginador__numero,
+    .hs-paginador__flecha,
+    .hs-opcion span,
+    .hs-select,
+    .hs-talla span,
+    .hs-galeria img {
+        transition: none;
+    }
+    .hs-grilla-tienda__item,
+    .hs-opcion input:checked:focus + span,
+    .hs-talla input:checked:focus + span,
+    .hs-pagina-cabecera .hs-fade-in,
+    .hs-exito__icono {
+        animation: none;
+    }
+    .hs-opcion span:hover,
+    .hs-opcion span:active,
+    .hs-talla input:not(:disabled) + span:hover,
+    .hs-galeria:hover img {
+        transform: none;
+    }
+    .hs-paginador__numero:hover,
+    .hs-paginador__flecha:not(:disabled):hover {
+        transform: none;
+    }
+}
+
 /* ── Detalle de producto ──────────────────────────────────────────── */
 .hs-galeria {
     position: relative;
@@ -209,10 +344,16 @@
     background: var(--hs-cream-dark);
 }
 
+/* La foto se acerca un poco al pasar el cursor, como en la tarjeta del catálogo */
 .hs-galeria img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform var(--hs-t-lento) var(--hs-ease-seda);
+}
+
+.hs-galeria:hover img {
+    transform: scale(1.04);
 }
 
 .hs-galeria__sin-imagen {
@@ -298,17 +439,24 @@
     background: var(--hs-card);
     font-weight: 600;
     cursor: pointer;
-    transition: border-color var(--hs-t-fast), background var(--hs-t-fast);
+    transition: border-color var(--hs-t-fast), background var(--hs-t-fast), color var(--hs-t-fast),
+                transform var(--hs-t-medio) var(--hs-ease-seda);
 }
 
-.hs-talla span:hover {
+/* Mismo movimiento que los chips de filtro: suben 2 px y laten al elegirlos */
+.hs-talla input:not(:disabled) + span:hover {
     border-color: var(--hs-bark);
+    transform: translateY(-2px);
 }
 
 .hs-talla input:checked + span {
     border-color: var(--hs-bark);
     background: var(--hs-bark);
     color: var(--hs-cream);
+}
+
+.hs-talla input:checked:focus + span {
+    animation: hsElegido var(--hs-t-medio) var(--hs-ease-seda);
 }
 
 .hs-talla input:focus-visible + span {
@@ -534,23 +682,8 @@
     border-radius: 4px;
 }
 
-.hs-campo-error {
-    margin-top: 6px;
-    font-size: 0.8125rem;
-    color: var(--hs-terracotta-hover);
-}
-
-.hs-input.is-invalid,
-.hs-select.is-invalid {
-    border-color: var(--hs-terracotta);
-}
-
-.hs-label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 0.8125rem;
-    font-weight: 600;
-}
+/* .hs-label, .hs-campo-error y el borde del campo con error son comunes:
+   hoseg.css, "Formularios". */
 
 /* ── Carrito ──────────────────────────────────────────────────────── */
 .hs-linea {
@@ -656,7 +789,7 @@
 @media (min-width: 992px) {
     .hs-resumen {
         position: sticky;
-        top: 88px;
+        top: calc(var(--hs-nav-alto) + 24px);
     }
 }
 
@@ -805,6 +938,30 @@
     line-height: 1.6;
 }
 
+/* Pago con billetera: recuadro del QR */
+.hs-pago-qr {
+    padding: 1rem;
+    border: 1px solid var(--hs-sand);
+    border-radius: var(--hs-radius);
+    background: var(--hs-cream);
+    text-align: center;
+}
+
+.hs-pago-qr .bi {
+    font-size: 3.5rem;
+    line-height: 1;
+    color: var(--hs-bark);
+}
+
+/* Resumen del pago: la entrega elegida, en un recuadro claro */
+.hs-resumen__entrega {
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--hs-sand);
+    border-radius: 12px;
+    background: var(--hs-cream);
+    font-size: 0.875rem;
+}
+
 .hs-pago__titulo {
     display: flex;
     align-items: center;
@@ -834,6 +991,31 @@
     background: var(--hs-sage-light);
     color: var(--hs-sage);
     font-size: 2.25rem;
+    animation: hsPopExito 0.6s var(--hs-ease-seda) both;
+}
+
+/* Tarjeta del comprobante en la vista previa de la boleta */
+.hs-comprobante {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px dashed var(--hs-terracotta);
+    border-radius: var(--hs-radius);
+    background: var(--hs-cream);
+    text-align: center;
+}
+
+.hs-comprobante__etiqueta {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--hs-muted);
+}
+
+.hs-comprobante__codigo {
+    font-family: var(--hs-font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
 }
 
 .hs-exito__codigo {

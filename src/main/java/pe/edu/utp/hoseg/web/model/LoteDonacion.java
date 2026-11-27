@@ -68,4 +68,15 @@ public class LoteDonacion {
     public OffsetDateTime getFechaEntrega() { return fechaEntrega; }
     public EstadoLote getEstado() { return estado; }
     public String getObservaciones() { return observaciones; }
+
+    public void setCodigoLote(String codigoLote) { this.codigoLote = codigoLote; }
+    public void setComunidad(Comunidad comunidad) { this.comunidad = comunidad; }
+    public void setOng(Ong ong) { this.ong = ong; }
+    public void setIdUsuarioResponsable(Integer idUsuarioResponsable) { this.idUsuarioResponsable = idUsuarioResponsable; }
+    public void setFechaCreacion(OffsetDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
+    public void setFechaDespacho(OffsetDateTime fechaDespacho) { this.fechaDespacho = fechaDespacho; }
+    public void setFechaEntrega(OffsetDateTime fechaEntrega) { this.fechaEntrega = fechaEntrega; }
+    public void setEstado(EstadoLote estado) { this.estado = estado; }
+    public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
+
 }

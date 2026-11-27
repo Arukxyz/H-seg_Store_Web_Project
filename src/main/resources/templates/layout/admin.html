@@ -1,16 +1,7 @@
 <!DOCTYPE html>
-<!--
-  ESQUELETO · Bloque 4 · Layout del panel /admin: menú lateral (Panel, Catálogo web, Höség Café,
-  Contenido, Mensajes, Reseñas) y barra superior con el nombre del usuario y "Cerrar sesión".
-  Misma paleta que la tienda (tokens.css), más sobria. Bloque 4 le da el diseño final.
+<html lang="es" xmlns:th="http://thymeleaf.org" xmlns:sec="http://thymeleaf.org/extras/spring-security"
+    th:fragment="pagina(titulo, activa, contenido)">
 
-  Uso (en el <html> de cada página del panel):
-    th:replace="~{layout/admin :: pagina(titulo='Panel · HÖSÉG', activa='panel', contenido=~{::main})}"
-    activa → panel | catalogo | cafe | contenido | mensajes | resenas
-  El usuario en sesión es ${#authentication.principal} (AdministradorAutenticado: nombre, username).
--->
-<html lang="es" xmlns:th="http://www.thymeleaf.org"
-      th:fragment="pagina(titulo, activa, contenido)">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -21,48 +12,180 @@
     <link rel="stylesheet" th:href="@{/css/tokens.css}">
     <link rel="stylesheet" th:href="@{/css/hoseg.css}">
     <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <link rel="stylesheet" th:href="@{/css/operaciones.css}">
 </head>
+
 <body>
-<div class="d-flex min-vh-100">
-    <nav class="p-3 border-end" style="min-width: 220px" aria-label="Panel">
-        <a class="hs-logo d-block mb-4" th:href="@{/admin/panel}">HÖSÉG</a>
-        <ul class="list-unstyled d-flex flex-column gap-2">
-            <li><a th:href="@{/admin/panel}" th:classappend="${activa == 'panel'} ? 'fw-bold'">Panel</a></li>
-            <li><a th:href="@{/admin/catalogo}" th:classappend="${activa == 'catalogo'} ? 'fw-bold'">Catálogo web</a></li>
-            <li><a th:href="@{/admin/cafe}" th:classappend="${activa == 'cafe'} ? 'fw-bold'">Höség Café</a></li>
-            <li><a th:href="@{/admin/contenido}" th:classappend="${activa == 'contenido'} ? 'fw-bold'">Contenido</a></li>
-            <li><a th:href="@{/admin/mensajes}" th:classappend="${activa == 'mensajes'} ? 'fw-bold'">Mensajes</a></li>
-            <li><a th:href="@{/admin/resenas}" th:classappend="${activa == 'resenas'} ? 'fw-bold'">Reseñas</a></li>
-        </ul>
-    </nav>
+    <div class="d-flex min-vh-100">
+        <nav class="p-3 border-end" style="min-width: 220px" aria-label="Panel">
+            <a class="hs-logo d-block mb-4" sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/admin/panel}">HÖSÉG</a>
+            <a class="hs-logo d-block mb-4" sec:authorize="hasRole('LOGISTICA')"
+                th:href="@{/logistica/pedidos}">HÖSÉG</a>
+            <a class="hs-logo d-block mb-4" sec:authorize="hasRole('GESTOR_IMPACTO')"
+                th:href="@{/gestion-impacto/lotes}">HÖSÉG</a>
 
-        <!-- Botón flotante para desplegar el menú en arco en móvil -->
-    <button type="button" class="hs-admin-fab" aria-label="Abrir menú del panel" aria-expanded="false">
-        <i class="bi bi-grid" aria-hidden="true"></i>
-    </button>
-    <div class="hs-admin-fab-backdrop" hidden></div>
+            <ul class="list-unstyled d-flex flex-column gap-2">
+                <!-- ADMINISTRADOR (usa los iconos automáticos de admin.css) -->
+                <th:block sec:authorize="hasRole('ADMINISTRADOR')">
+                    <!-- data-etiqueta es el rótulo de cada burbuja del menú en arco móvil (admin.css):
+                     así el rótulo viaja con su enlace y no depende del orden de la lista. -->
+                    <li><a th:href="@{/admin/panel}" data-etiqueta="Panel"
+                            th:classappend="${activa == 'panel'} ? 'fw-bold'">Panel</a></li>
+                    <!-- Pedidos abre su propia pantalla (solo lectura para el administrador).
+                     No apunta a /logistica/pedidos porque esa ruta es solo del rol LOGISTICA (SecurityConfig).
+                     El icono se define en admin.css con a[href$="/admin/pedidos"]. -->
+                    <li><a th:href="@{/admin/pedidos}" data-etiqueta="Pedidos"
+                            th:classappend="${activa == 'pedidos'} ? 'fw-bold'">Pedidos</a></li>
+                    <li><a th:href="@{/admin/catalogo}" data-etiqueta="Catálogo"
+                            th:classappend="${activa == 'catalogo'} ? 'fw-bold'">Catálogo web</a></li>
+                    <li><a th:href="@{/admin/cafe}" data-etiqueta="Höség Café"
+                            th:classappend="${activa == 'cafe'} ? 'fw-bold'">Höség Café</a></li>
+                    <li><a th:href="@{/admin/contenido}" data-etiqueta="Contenido"
+                            th:classappend="${activa == 'contenido'} ? 'fw-bold'">Contenido</a></li>
+                    <li><a th:href="@{/admin/mensajes}" data-etiqueta="Mensajes"
+                            th:classappend="${activa == 'mensajes'} ? 'fw-bold'">Mensajes</a></li>
+                    <li><a th:href="@{/admin/resenas}" data-etiqueta="Reseñas"
+                            th:classappend="${activa == 'resenas'} ? 'fw-bold'">Reseñas</a></li>
+                </th:block>
+
+                <!-- LOGÍSTICA -->
+                <th:block sec:authorize="hasRole('LOGISTICA')">
+                    <li><a class="hs-op-link" th:href="@{/logistica/pedidos}"
+                            th:classappend="${activa == 'logistica'} ? 'fw-bold'"><i
+                                class="bi bi-truck me-2"></i>Pedidos y despachos</a></li>
+                    <li><a class="hs-op-link" th:href="@{/logistica/inventario}"
+                            th:classappend="${activa == 'inventario'} ? 'fw-bold'"><i
+                                class="bi bi-box-seam me-2"></i>Inventario y stock</a></li>
+                    <li><a class="hs-op-link" th:href="@{/logistica/proveedores}"
+                            th:classappend="${activa == 'proveedores'} ? 'fw-bold'"><i
+                                class="bi bi-building me-2"></i>Proveedores y talleres</a></li>
+                </th:block>
+
+                <!-- GESTOR DE IMPACTO -->
+                <th:block sec:authorize="hasRole('GESTOR_IMPACTO')">
+                    <li><a class="hs-op-link" th:href="@{/gestion-impacto/donaciones}"
+                            th:classappend="${activa == 'impacto-donaciones'} ? 'fw-bold'"><i
+                                class="bi bi-gift me-2"></i>Donaciones pendientes</a></li>
+                    <li><a class="hs-op-link" th:href="@{/gestion-impacto/lotes}"
+                            th:classappend="${activa == 'impacto'} ? 'fw-bold'"><i
+                                class="bi bi-box2-heart me-2"></i>Lotes y entregas</a></li>
+                    <li><a class="hs-op-link" th:href="@{/gestion-impacto/reportes}"
+                            th:classappend="${activa == 'impacto-reportes'} ? 'fw-bold'"><i
+                                class="bi bi-bar-chart-line me-2"></i>Reportes de impacto</a></li>
+                </th:block>
+
+            </ul>
+        </nav>
+
+        <!-- Menú radial móvil exclusivo de ADMINISTRADOR -->
+        <th:block sec:authorize="hasRole('ADMINISTRADOR')">
+            <button type="button" class="hs-admin-fab" aria-label="Abrir menú del panel" aria-expanded="false">
+                <i class="bi bi-grid" aria-hidden="true"></i>
+            </button>
+            <div class="hs-admin-fab-backdrop" hidden></div>
+        </th:block>
+
+        <!-- Cápsula glassmorphism móvil para LOGÍSTICA -->
+        <nav class="hs-op-pill" sec:authorize="hasRole('LOGISTICA')" aria-label="Navegación logística">
+            <ul class="hs-op-pill__list">
+                <li>
+                    <a class="hs-op-pill__link" th:href="@{/logistica/pedidos}"
+                        th:classappend="${activa == 'logistica'} ? 'is-active'">
+                        <i class="bi bi-truck" aria-hidden="true"></i>
+                        <span>Pedidos</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="hs-op-pill__link" th:href="@{/logistica/inventario}"
+                        th:classappend="${activa == 'inventario'} ? 'is-active'">
+                        <i class="bi bi-box-seam" aria-hidden="true"></i>
+                        <span>Inventario</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="hs-op-pill__link" th:href="@{/logistica/proveedores}"
+                        th:classappend="${activa == 'proveedores'} ? 'is-active'">
+                        <i class="bi bi-building" aria-hidden="true"></i>
+                        <span>Talleres</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Cápsula glassmorphism móvil para GESTOR DE IMPACTO -->
+        <nav class="hs-op-pill" sec:authorize="hasRole('GESTOR_IMPACTO')" aria-label="Navegación impacto">
+            <ul class="hs-op-pill__list">
+                <li>
+                    <a class="hs-op-pill__link" th:href="@{/gestion-impacto/donaciones}"
+                        th:classappend="${activa == 'impacto-donaciones'} ? 'is-active'">
+                        <i class="bi bi-gift" aria-hidden="true"></i>
+                        <span>Donaciones</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="hs-op-pill__link" th:href="@{/gestion-impacto/lotes}"
+                        th:classappend="${activa == 'impacto'} ? 'is-active'">
+                        <i class="bi bi-box2-heart" aria-hidden="true"></i>
+                        <span>Lotes</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="hs-op-pill__link" th:href="@{/gestion-impacto/reportes}"
+                        th:classappend="${activa == 'impacto-reportes'} ? 'is-active'">
+                        <i class="bi bi-bar-chart-line" aria-hidden="true"></i>
+                        <span>Reportes</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
 
 
-    <div class="flex-grow-1">
-                      <header class="d-flex justify-content-end align-items-center gap-3 p-3 border-bottom">
-            <div class="hs-admin-user">
-                <span class="hs-avatar" aria-hidden="true"
-                      th:text="${#strings.substring(#authentication.principal.nombre, 0, 1)}">A</span>
-                <span th:text="${#authentication.principal.nombre}">Administrador</span>
+        <div class="flex-grow-1">
+            <header class="d-flex justify-content-between align-items-center gap-2 px-3 py-2 border-bottom">
+                <span class="hs-side-role-badge" sec:authorize="hasRole('ADMINISTRADOR')">Administración</span>
+                <span class="hs-side-role-badge" sec:authorize="hasRole('LOGISTICA')">Logística</span>
+                <span class="hs-side-role-badge" sec:authorize="hasRole('GESTOR_IMPACTO')">Impacto Social</span>
+
+                <div class="dropdown ms-auto">
+                    <button class="hs-admin-user-btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        <span class="hs-avatar" aria-hidden="true"
+                            th:text="${#strings.substring(#authentication.principal.nombre, 0, 1)}">A</span>
+                        <span class="hs-admin-user-name"
+                            th:text="${#authentication.principal.nombre}">Administrador</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end hs-menu-cuenta">
+                        <li class="px-3 py-1 small text-muted" th:text="${#authentication.principal.username}">usuario
+                        </li>
+                        <li><a class="dropdown-item" th:href="@{/}" target="_blank"><i
+                                    class="bi bi-box-arrow-up-right me-2"></i>Ver tienda</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <form th:action="@{/admin/logout}" method="post" class="m-0">
+                                <button class="dropdown-item text-danger" type="submit"><i
+                                        class="bi bi-box-arrow-right me-2"></i>Cerrar sesión</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </header>
+
+            <div class="container-fluid pt-3">
+                <div class="alert alert-success" role="status" th:if="${exito}" th:text="${exito}">Guardado.</div>
+                <div class="alert alert-danger" role="alert" th:if="${error}" th:text="${error}">Error.</div>
             </div>
-            <form th:action="@{/admin/logout}" method="post" class="m-0">
-                <button class="hs-btn hs-btn--secundario" type="submit">Cerrar sesión</button>
-            </form>
-        </header>
-
-        <div class="container-fluid pt-3">
-            <div class="alert alert-success" role="status" th:if="${exito}" th:text="${exito}">Guardado.</div>
-            <div class="alert alert-danger" role="alert" th:if="${error}" th:text="${error}">Error.</div>
+            <th:block th:replace="${contenido}" />
         </div>
-        <th:block th:replace="${contenido}"/>
     </div>
-</div>
-<script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}" defer></script>
-<script th:src="@{/js/admin.js}" defer></script>
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}" defer></script>
+    <script th:src="@{/js/admin.js}" defer></script>
+    <script th:src="@{/js/logistica.js}" defer></script>
+    <script th:src="@{/js/impacto.js}" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script th:src="@{/js/panel-charts.js}" defer></script>
+
 </body>
+
 </html>

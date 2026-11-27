@@ -9,9 +9,8 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-   
-   
-        // Filtro visual y paginación de Pedidos web en Panel (10 por página)
+
+    // Filtro visual y paginación de Pedidos web en Panel (10 por página)
     const filtros = [...document.querySelectorAll('[data-order-filter]')];
     const pedidos = [...document.querySelectorAll('[data-order-status]')];
     const filaVacia = document.querySelector('.hs-filter-empty');
@@ -117,7 +116,7 @@
     });
 
 
-        // Menú flotante en arco para móvil
+    // Menú flotante en arco para móvil
     const fabBtn = document.querySelector('.hs-admin-fab');
     const fabNav = document.querySelector('nav[aria-label="Panel"]');
     const fabBackdrop = document.querySelector('.hs-admin-fab-backdrop');
@@ -133,9 +132,16 @@
       if (fabBackdrop) fabBackdrop.addEventListener('click', () => toggleFab(false));
     }
 
+    // Popovers de ayuda de los gráficos del panel (data-bs-toggle="popover" en panel.html).
+    // Bootstrap ya lo carga layout/admin.html antes que este script.
+    if (window.bootstrap?.Popover) {
+      document.querySelectorAll('[data-bs-toggle="popover"]')
+        .forEach(el => window.bootstrap.Popover.getOrCreateInstance(el));
+    }
 
 
-           // Buscador, pestañas y paginación en Catálogo web (10 por página)
+
+    // Buscador, pestañas y paginación en Catálogo web (10 por página)
     const buscadorCatalogo = document.getElementById('filtro-catalogo');
     const tabsCatalogo = [...document.querySelectorAll('[data-catalog-filter]')];
     const filasCatalogo = [...document.querySelectorAll('.hs-catalog-row')];
@@ -214,7 +220,7 @@
     }
 
 
-        // Transición suave con spinner y conservación de scroll al cambiar interruptores en Catálogo
+    // Transición suave con spinner y conservación de scroll al cambiar interruptores en Catálogo
     const formsSwitch = [...document.querySelectorAll('.hs-catalog-table form')];
     if (formsSwitch.length) {
       // Restaurar posición de scroll si venimos de pulsar un switch
@@ -245,7 +251,7 @@
     }
 
 
-        // Buscador instantáneo en Carta de Höség Café
+    // Buscador instantáneo en Carta de Höség Café
     const buscadorCafe = document.getElementById('filtro-cafe');
     const filasCafe = [...document.querySelectorAll('.hs-cafe-row')];
     const vacioCafe = document.querySelector('.hs-cafe-search-empty');
@@ -263,8 +269,8 @@
     }
 
 
-           // Conservar posición de scroll y mostrar velo suave al abrir "Editar" en Höség Café
-   
+    // Conservar posición de scroll y mostrar velo suave al abrir "Editar" en Höség Café
+
     const enlacesEditarCafe = [...document.querySelectorAll('.hs-cafe-page a[href*="item="], .hs-cafe-page a[href*="local="]')];
     if (enlacesEditarCafe.length) {
       const loaderCafe = document.createElement('div');
@@ -282,7 +288,7 @@
     }
 
 
-        // Buscador de bloques, contador de caracteres y vista previa de imagen en Contenido
+    // Buscador de bloques, contador de caracteres y vista previa de imagen en Contenido
     const buscadorContenido = document.getElementById('filtro-contenido');
     const filasContenido = [...document.querySelectorAll('.hs-content-row')];
     const vacioContenido = document.querySelector('.hs-content-search-empty');

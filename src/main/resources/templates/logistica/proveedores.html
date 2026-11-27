@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://thymeleaf.org"
+    th:replace="~{layout/admin :: pagina(titulo='Proveedores · Logística HÖSÉG', activa='proveedores', contenido=~{::main})}">
+
+<body>
+    <main class="hs-admin-page">
+        <div class="hs-page-heading">
+            <div>
+                <p class="hs-eyebrow">LOGÍSTICA · ABASTECIMIENTO</p>
+                <h1>Proveedores y talleres</h1>
+                <p class="hs-page-desc">Gestiona talleres aliados y emite órdenes de reposición que ingresan directo al
+                    inventario.</p>
+            </div>
+        </div>
+
+        <div class="hs-op-grid hs-op-grid--lotes mb-4">
+            <!-- 1. Registrar proveedor / taller -->
+            <section class="hs-admin-card">
+                <div class="hs-card-head">
+                    <div>
+                        <h2>1. Registrar taller aliado</h2>
+                        <p>Ingresa un RUC de 11 dígitos para autocompletar la razón social.</p>
+                    </div>
+                </div>
+                <form method="post" th:action="@{/logistica/proveedores}" class="hs-op-form">
+                    <div class="hs-field">
+                        <label for="provRuc">RUC (11 dígitos)</label>
+                        <input class="hs-admin-input" id="provRuc" name="ruc" maxlength="11" inputmode="numeric"
+                            placeholder="Ej. 20503644968">
+                        <small id="avisoRucProv" class="text-muted"></small>
+                    </div>
+                    <div class="hs-field">
+                        <label for="provNombre">Nombre del taller / razón social</label>
+                        <input class="hs-admin-input" id="provNombre" name="nombreTaller" required
+                            placeholder="Taller Textil Andino...">
+                    </div>
+                    <div class="hs-field">
+                        <label for="provContacto">Persona de contacto</label>
+                        <input class="hs-admin-input" id="provContacto" name="contacto"
+                            placeholder="Nombre del encargado">
+                    </div>
+                    <div class="hs-field">
+                        <label for="provTelefono">Teléfono</label>
+                        <input class="hs-admin-input" id="provTelefono" name="telefono" placeholder="987 654 321">
+                    </div>
+                    <button type="submit" class="hs-admin-btn hs-admin-btn--primary justify-content-center">
+                        <i class="bi bi-building-add me-1" aria-hidden="true"></i> Guardar proveedor
+                    </button>
+                </form>
+            </section>
+
+            <!-- 2. Emitir orden de producción / reposición -->
+            <section class="hs-admin-card">
+                <div class="hs-card-head">
+                    <div>
+                        <h2>2. Nueva orden de reposición</h2>
+                        <p>Al recibir el lote del taller, el stock comercial se incrementará automáticamente.</p>
+                    </div>
+                </div>
+                <form method="post" th:action="@{/logistica/proveedores/ordenes}" class="hs-op-form">
+                    <div class="hs-field">
+                        <label for="idProveedor">Taller proveedor</label>
+                        <select class="hs-admin-input" id="idProveedor" name="idProveedor" required>
+                            <option value="">Selecciona un proveedor activo...</option>
+                            <option th:each="pr : ${proveedores}" th:value="${pr.id}"
+                                th:text="${pr.nombreTaller + (pr.ruc != null ? ' · RUC ' + pr.ruc : '')}">Taller
+                            </option>
+                        </select>
+                    </div>
+                    <div class="hs-field">
+                        <label for="codigoProducto">Producto a confeccionar / reponer</label>
+                        <select class="hs-admin-input" id="codigoProducto" name="codigoProducto" required>
+                            <option value="">Selecciona variante de catálogo...</option>
+                            <option th:each="prod : ${productos}" th:value="${prod.codigo}"
+                                th:selected="${productoPreseleccionado != null and productoPreseleccionado == prod.codigo}"
+                                th:text="${prod.codigo + ' · ' + prod.nombre + ' (' + prod.tallaMostrada + ')'}">HSG-001
+                            </option>
+                        </select>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-4">
+                            <div class="hs-field">
+                                <label for="cantOrden">Cantidad</label>
+                                <input class="hs-admin-input" id="cantOrden" type="number" name="cantidad" min="1"
+                                    max="1000" value="15" required>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-8">
+                            <div class="hs-field">
+                                <label for="descOrden">Detalle / especificaciones</label>
+                                <input class="hs-admin-input" id="descOrden" name="descripcion"
+                                    placeholder="Lote de reposición temporada...">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="hs-admin-btn hs-admin-btn--primary justify-content-center">
+                        <i class="bi bi-send-check me-1" aria-hidden="true"></i> Emitir orden a taller
+                    </button>
+                </form>
+            </section>
+        </div>
+
+        <!-- 3. Historial de órdenes a talleres -->
+        <section class="hs-admin-card">
+            <div class="hs-card-head">
+                <div>
+                    <h2>3. Órdenes a talleres</h2>
+                    <p>Confirma la recepción cuando el taller entregue las prendas terminadas.</p>
+                </div>
+            </div>
+
+            <p class="hs-aviso-deslizar d-md-none px-3 pt-2 mb-1">
+                <span>Desliza la tabla para ver acciones</span>
+                <i class="bi bi-arrow-right hs-aviso-deslizar__flecha" aria-hidden="true"></i>
+            </p>
+
+            <div class="hs-table-scroll">
+                <table class="hs-admin-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Taller</th>
+                            <th scope="col">Producto</th>
+                            <th scope="col">Cantidad</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="o : ${ordenes}">
+                            <td class="hs-date"
+                                th:text="${o.fecha != null} ? ${#temporals.format(o.fecha, 'dd/MM/yyyy HH:mm')} : '—'">
+                                15/11/2026</td>
+                            <td>
+                                <strong th:text="${o.proveedor.nombreTaller}">Taller</strong>
+                                <span class="hs-table-sub" th:if="${o.descripcion != null}"
+                                    th:text="${o.descripcion}"></span>
+                            </td>
+                            <td>
+                                <span th:if="${o.producto != null}">
+                                    <span class="hs-code-pill" th:text="${o.producto.codigo}">HSG-001</span>
+                                    <span class="ms-1" th:text="${o.producto.nombre}">Casaca</span>
+                                </span>
+                                <span th:if="${o.producto == null}" class="text-muted">Insumos generales</span>
+                            </td>
+                            <td class="hs-cell-strong" th:text="${o.cantidad} + ' u.'">15 u.</td>
+                            <td>
+                                <span class="hs-op-badge"
+                                    th:classappend="${o.estado.name() == 'RECIBIDO'} ? 'hs-op-badge--ok'">
+                                    <span th:text="${o.estado.etiqueta}">Pendiente</span>
+                                </span>
+                            </td>
+                            <td>
+                                <form th:if="${o.estado.name() == 'SOLICITADO' or o.estado.name() == 'EN_PROCESO'}"
+                                    method="post"
+                                    th:action="@{/logistica/proveedores/ordenes/{id}/recibir(id=${o.id})}">
+                                    <button type="submit" class="hs-admin-btn hs-admin-btn--primary">
+                                        <i class="bi bi-box-seam me-1" aria-hidden="true"></i> Marcar recibido (+Stock)
+                                    </button>
+                                </form>
+                                <span class="hs-soft-label" th:if="${o.estado.name() == 'RECIBIDO'}">
+                                    <i class="bi bi-check2-all" aria-hidden="true"></i> Ingresado
+                                </span>
+                            </td>
+                        </tr>
+                        <tr th:if="${ordenes.isEmpty()}">
+                            <td colspan="6" class="hs-empty-row">No hay órdenes registradas con talleres todavía.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+                    <div class="hs-pagination" id="prov-paginacion" hidden>
+            <span class="hs-pagination__info" id="prov-paginacion-info">Mostrando 1–8</span>
+            <div class="hs-pagination__controls">
+                <button type="button" class="hs-admin-btn hs-admin-btn--ghost hs-admin-btn--sm" id="prov-prev">
+                    <i class="bi bi-chevron-left" aria-hidden="true"></i> Anterior
+                </button>
+                <span class="hs-pagination__page" id="prov-paginacion-num">1 / 1</span>
+                <button type="button" class="hs-admin-btn hs-admin-btn--ghost hs-admin-btn--sm" id="prov-next">
+                    Siguiente <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+
+        </section>
+    </main>
+</body>
+
+</html>

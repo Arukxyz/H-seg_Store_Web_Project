@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <!--
   Bloque 1 · 1.1 Tienda (GET /tienda, TiendaController). Contrato: docs/contrato-backend.md.
-  Modelo: productos (List<TarjetaProducto>), total, filtro (FiltroCatalogo), categorias, colecciones,
+  Modelo: pagina (PaginaCatalogo), tamanosPagina, filtro (FiltroCatalogo), categorias, colecciones,
           compromisos (TipoCompromiso[]), ordenes (OrdenCatalogo[]).
   Los filtros son un GET con los mismos nombres que FiltroCatalogo: q, categoria, coleccion, impacto,
-  disponibles, orden. Con JavaScript se aplican al cambiar (tienda.js); sin él, con "Aplicar".
-  En móvil los filtros van en un panel desplegable.
+  disponibles, orden; más pagina y porPagina. Con JavaScript (tienda.js) se aplican al cambiar y
+  sin recargar: se pide solo el fragmento "resultados" (cabecera X-Hoseg-Parcial). Sin JavaScript,
+  el mismo formulario funciona con "Aplicar" y recargando. En móvil los filtros van en un panel desplegable
+  y no se aplican al tocarlos: "Aplicar" los envía, cierra el panel y baja a los resultados.
 -->
 <html lang="es" xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layout/base :: pagina(titulo='Tienda · HÖSÉG', activa='tienda',
@@ -17,18 +19,19 @@
 <main class="hs-main--bajo-nav hs-pagina">
     <th:block th:replace="~{fragments/avisos :: avisos}"/>
 
-    <header class="hs-pagina-cabecera">
-        <div class="container">
-            <p class="hs-kicker">Tienda</p>
-            <h1 class="hs-pagina-cabecera__titulo">Ropa que abriga dos veces.</h1>
-            <p class="hs-texto-secundario mt-2 mb-0 hs-ancho-texto">
+    <!-- Encabezado centrado con la marca "HÖSÉG" de fondo (decorativa, en el CSS) -->
+    <header class="hs-pagina-cabecera hs-pagina-cabecera--marca">
+        <div class="container text-center">
+            <p class="hs-kicker hs-fade-in">Tienda</p>
+            <h1 class="hs-pagina-cabecera__titulo hs-fade-in">Ropa que abriga <em class="hs-acento">dos veces.</em></h1>
+            <p class="hs-texto-secundario mt-2 mb-0 hs-ancho-texto mx-auto hs-fade-in">
                 Cada casaca abriga a un niño en Cusco y cada accesorio o café siembra un árbol.
             </p>
         </div>
     </header>
 
     <div class="container">
-        <form method="get" th:action="@{/tienda}" data-autoenviar>
+        <form method="get" th:action="@{/tienda}" data-tienda-filtros>
             <div class="row g-2 mb-4">
                 <div class="col-12 col-md">
                     <label class="visually-hidden" for="buscar">Buscar productos</label>
@@ -40,7 +43,8 @@
                 </div>
                 <div class="col-8 col-md-auto">
                     <label class="visually-hidden" for="orden">Ordenar por</label>
-                    <select class="hs-select" id="orden" name="orden">
+                    <!-- data-defecto: valor que tienda.js omite de la URL (OrdenCatalogo.DESTACADOS) -->
+                    <select class="hs-select" id="orden" name="orden" data-defecto="DESTACADOS">
                         <option th:each="o : ${ordenes}" th:value="${o}" th:text="${o.etiqueta}"
                                 th:selected="${o == filtro.ordenEfectivo()}">Destacados</option>
                     </select>
@@ -106,32 +110,78 @@
                                 <span><i class="bi bi-check2" aria-hidden="true"></i> Solo disponibles</span>
                             </label>
 
-                            <button class="hs-btn hs-btn--primario w-100" type="submit" data-solo-sin-js>Aplicar</button>
+                            <!-- Sin JS: aplica en cualquier pantalla. Con JS: solo en móvil, donde los
+                                 filtros del panel esperan a este botón (tienda.js) -->
+                            <button class="hs-btn hs-btn--primario w-100" type="submit" data-solo-sin-js
+                                    data-aplicar-filtros>Aplicar</button>
                         </div>
                     </div>
                 </aside>
 
-                <!-- Resultados -->
-                <section class="col-12 col-lg-9" aria-labelledby="titulo-resultados">
+                <!-- Resultados. tienda.js reemplaza solo el fragmento "resultados" -->
+                <section class="col-12 col-lg-9" aria-labelledby="titulo-resultados" data-tienda-zona>
                     <h2 class="visually-hidden" id="titulo-resultados">Productos</h2>
-                    <div class="hs-tienda__resumen">
-                        <span th:text="${total} + (${total} == 1 ? ' producto' : ' productos')">12 productos</span>
-                        <a class="hs-enlace" th:if="${filtro.hayFiltros()}" th:href="@{/tienda}">
-                            <i class="bi bi-x-circle" aria-hidden="true"></i> Limpiar filtros
-                        </a>
-                    </div>
+                    <p class="visually-hidden" aria-live="polite" data-tienda-anuncio></p>
 
-                    <div class="hs-vacio" th:if="${productos.isEmpty()}">
-                        <span class="hs-vacio__icono"><i class="bi bi-search" aria-hidden="true"></i></span>
-                        <h3 class="h5">No encontramos productos con esos filtros.</h3>
-                        <p class="hs-texto-secundario">Prueba con otra búsqueda o quita algún filtro.</p>
-                        <a class="hs-btn hs-btn--secundario" th:href="@{/tienda}">Ver todo el catálogo</a>
-                    </div>
+                    <div class="hs-resultados" th:fragment="resultados" data-tienda-resultados
+                         th:attr="data-total=${pagina.totalProductos}">
+                        <div class="hs-tienda__resumen">
+                            <span th:if="${pagina.totalPaginas > 1}"
+                                  th:text="|Mostrando ${pagina.desde()}–${pagina.hasta()} de ${pagina.totalProductos} productos|">Mostrando 1–12 de 30 productos</span>
+                            <span th:unless="${pagina.totalPaginas > 1}"
+                                  th:text="${pagina.totalProductos} + (${pagina.totalProductos} == 1 ? ' producto' : ' productos')">12 productos</span>
 
-                    <div class="row g-3 g-md-4">
-                        <div class="col-6 col-md-4" th:each="p : ${productos}">
-                            <th:block th:replace="~{fragments/product-card :: card(${p})}"/>
+                            <div class="hs-tienda__acciones">
+                                <a class="hs-enlace" th:if="${filtro.hayFiltros()}" th:href="@{/tienda}" data-limpiar>
+                                    <i class="bi bi-x-circle" aria-hidden="true"></i> Limpiar filtros
+                                </a>
+                                <label class="hs-por-pagina" th:unless="${pagina.vacia()}">
+                                    <span>Ver</span>
+                                    <select class="hs-select hs-select--compacto" name="porPagina" aria-label="Productos por página"
+                                            data-defecto="12">
+                                        <option th:each="n : ${tamanosPagina}" th:value="${n}" th:text="${n}"
+                                                th:selected="${n == pagina.porPagina}">12</option>
+                                    </select>
+                                </label>
+                            </div>
                         </div>
+
+                        <div class="hs-vacio" th:if="${pagina.vacia()}">
+                            <span class="hs-vacio__icono"><i class="bi bi-search" aria-hidden="true"></i></span>
+                            <h3 class="h5">No encontramos productos con esos filtros.</h3>
+                            <p class="hs-texto-secundario">Prueba con otra búsqueda o quita algún filtro.</p>
+                            <a class="hs-btn hs-btn--secundario" th:href="@{/tienda}" data-limpiar>Ver todo el catálogo</a>
+                        </div>
+
+                        <!-- Una columna en móvil, dos desde 576 px y tres desde 768 px -->
+                        <div class="row g-3 g-md-4 hs-grilla-tienda">
+                            <div class="col-12 col-sm-6 col-md-4 hs-grilla-tienda__item"
+                                 th:each="p, i : ${pagina.productos}" th:style="|--hs-i: ${i.index}|">
+                                <th:block th:replace="~{fragments/product-card :: card(${p})}"/>
+                            </div>
+                        </div>
+
+                        <!-- Paginador: botones del mismo formulario, así conserva filtros y orden -->
+                        <nav class="hs-paginador" aria-label="Páginas de productos" th:if="${pagina.totalPaginas > 1}">
+                            <button class="hs-paginador__flecha" type="submit" name="pagina"
+                                    th:value="${pagina.pagina - 1}" th:disabled="${!pagina.hayAnterior()}"
+                                    aria-label="Página anterior">
+                                <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                            </button>
+                            <th:block th:each="n : ${pagina.numeros()}">
+                                <span class="hs-paginador__salto" th:if="${n == 0}" aria-hidden="true">…</span>
+                                <button class="hs-paginador__numero" type="submit" name="pagina" th:unless="${n == 0}"
+                                        th:value="${n}" th:text="${n}"
+                                        th:classappend="${n == pagina.pagina} ? 'is-actual'"
+                                        th:aria-current="${n == pagina.pagina} ? 'page' : null"
+                                        th:aria-label="|Página ${n}|">1</button>
+                            </th:block>
+                            <button class="hs-paginador__flecha" type="submit" name="pagina"
+                                    th:value="${pagina.pagina + 1}" th:disabled="${!pagina.haySiguiente()}"
+                                    aria-label="Página siguiente">
+                                <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                            </button>
+                        </nav>
                     </div>
                 </section>
             </div>

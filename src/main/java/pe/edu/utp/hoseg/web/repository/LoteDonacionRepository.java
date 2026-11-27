@@ -11,4 +11,14 @@ public interface LoteDonacionRepository extends JpaRepository<LoteDonacion, Inte
     /** Comunidades distintas con al menos un lote en el estado indicado. */
     @Query("select count(distinct l.comunidad.id) from LoteDonacion l where l.estado = :estado")
     long contarComunidades(@Param("estado") EstadoLote estado);
+
+        /** Todos los lotes ordenados del más reciente al más antiguo. */
+    @Query("""
+            select l from LoteDonacion l
+              join fetch l.comunidad
+              join fetch l.ong
+             order by l.fechaCreacion desc
+            """)
+    java.util.List<LoteDonacion> todosConComunidadYOng();
+
 }

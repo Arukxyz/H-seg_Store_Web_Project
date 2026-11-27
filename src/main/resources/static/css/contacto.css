@@ -1,0 +1,51 @@
+/* =====================================================================
+   HÖSÉG Web · Contacto (/contacto, templates/institucional/contacto.html)
+   Formulario en tarjeta, como Consulta tu impacto: al escribir, el borde
+   de la tarjeta se enciende. Etiquetas, campos y errores son los comunes
+   de hoseg.css ("Formularios"). Sin colores literales.
+   ===================================================================== */
+
+/* Deja libre el óvalo de navegación móvil al final de la página */
+.hs-pagina-contacto {
+    padding-bottom: 4rem;
+}
+
+.hs-contacto {
+    display: grid;
+    gap: 1.125rem;
+    padding: 1.5rem;
+    border: 1px solid var(--hs-sand);
+    border-radius: 20px;
+    background: var(--hs-card);
+    box-shadow: var(--hs-shadow-card);
+    transition: border-color var(--hs-t-fast), box-shadow var(--hs-t-fast);
+}
+
+@media (min-width: 576px) {
+    .hs-contacto {
+        padding: 2rem;
+    }
+}
+
+.hs-contacto:focus-within {
+    border-color: var(--hs-terracotta);
+    box-shadow: var(--hs-shadow-card), var(--hs-anillo-foco);
+}
+
+.hs-contacto textarea.hs-input {
+    min-height: 8rem;
+    resize: vertical;
+}
+
+.hs-contacto__alternativa {
+    margin: 1.25rem 0 0;
+    font-size: 0.875rem;
+    color: var(--hs-muted);
+    text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hs-contacto {
+        transition: none;
+    }
+}

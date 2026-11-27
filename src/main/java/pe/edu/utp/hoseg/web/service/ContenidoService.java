@@ -1,15 +1,23 @@
 package pe.edu.utp.hoseg.web.service;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.UriUtils;
 import pe.edu.utp.hoseg.web.dto.BloqueContenido;
 import pe.edu.utp.hoseg.web.dto.ContenidoForm;
+import pe.edu.utp.hoseg.web.dto.FotoEvidencia;
 import pe.edu.utp.hoseg.web.model.ContenidoWeb;
 import pe.edu.utp.hoseg.web.repository.ContenidoWebRepository;
 import pe.edu.utp.hoseg.web.repository.UsuarioRepository;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -42,6 +50,27 @@ public class ContenidoService {
         Map<String, BloqueContenido> mapa = new HashMap<>();
         contenidoRepository.findAllById(List.of(claves)).forEach(c -> mapa.put(c.getClave(), aBloque(c)));
         return mapa;
+    }
+
+    /**
+     * Fotos reales de entregas para la galería de Nosotros: los archivos .jpg, .jpeg, .png o
+     * .webp de static/images/evidencia/, ordenados por nombre. Si no hay ninguno la lista
+     * queda vacía y la página no muestra la galería: sin fotos propias no hay "evidencia".
+     */
+    public List<FotoEvidencia> fotosEvidencia() {
+        try {
+            Resource[] archivos = new PathMatchingResourcePatternResolver()
+                    .getResources("classpath:/static/images/evidencia/*");
+            return Arrays.stream(archivos)
+                    .map(Resource::getFilename)
+                    .filter(n -> n != null && n.toLowerCase(Locale.ROOT).matches(".+\\.(jpe?g|png|webp)"))
+                    .sorted()
+                    .map(n -> new FotoEvidencia("/images/evidencia/" + UriUtils.encodePathSegment(n, StandardCharsets.UTF_8),
+                            FotoEvidencia.pieDesdeArchivo(n)))
+                    .toList();
+        } catch (IOException e) {
+            return List.of();
+        }
     }
 
     // ---------- Panel (4.5) ----------

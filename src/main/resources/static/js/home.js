@@ -1,8 +1,15 @@
 /* =====================================================================
    HÖSÉG Web · Página principal
-   - Carrusel de destacados: auto-avance cada 5 s, pausa al pasar el
-     cursor, controles, puntos y deslizamiento táctil. El ancho de cada
-     tarjeta lo fija CSS (--visibles); aquí solo se desplaza la pista.
+   - Carrusel de destacados, dos modos:
+       · < 992 px, lineal: auto-avance cada 5 s, puntos y deslizamiento
+         táctil. El ancho de cada tarjeta lo fija CSS (--visibles); aquí
+         solo se desplaza la pista.
+       · ≥ 992 px, arco: las tarjetas se reparten en arco alrededor de la
+         central (home.css, "Carrusel en arco"). Flechas, arrastre con el
+         puntero solo sobre el carrusel y teclado (← → Inicio Fin). Sin
+         rueda. Es circular: la tarjeta que da la vuelta viaja oculta.
+     En ambos, el auto-avance se pausa con el cursor encima, con el foco
+     dentro o mientras se arrastra, y se reinicia tras cada acción manual.
    - Contadores de impacto: conteo animado al entrar en pantalla.
    - Scroll-spy: marca en la navegación la sección visible.
    Requiere navbar.js cargado antes (window.hsNavActivar).
@@ -11,36 +18,92 @@
     'use strict';
 
     const menosMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const consultaArco = window.matchMedia('(min-width: 992px)');
 
     /* ---------- Carrusel de destacados ---------- */
     const iniciarCarrusel = (carrusel) => {
-        const UMBRAL_DESLIZAR = 40; // px de desplazamiento táctil para cambiar de tarjeta
+        const UMBRAL_DESLIZAR = 40;    // px de desplazamiento táctil para cambiar de tarjeta (lineal)
+        const UMBRAL_ARRASTRE = 6;     // px antes de considerar que el puntero arrastra (arco)
+        const SEPARACION_ARCO = 0.74;  // igual que el 74 % de translateX en home.css
         const seccion = carrusel.closest('section');
         const pista = carrusel.querySelector('.hs-carrusel__pista');
-        const items = pista.children;
+        const items = [...pista.children];
+        const total = items.length;
         const puntos = seccion.querySelector('[data-carrusel-puntos]');
         const intervalo = parseInt(carrusel.dataset.intervalo, 10) || 5000;
         let indice = 0;
         let temporizador = null;
-        let pausado = false;
-        let toqueInicioX = null;
+        let cursorEncima = false;
+        let focoDentro = false;
+        let modoArco = false;
 
+        if (!total) {
+            return;
+        }
+
+        items.forEach((item, i) => {
+            item.setAttribute('role', 'group');
+            item.setAttribute('aria-roledescription', 'diapositiva');
+            item.setAttribute('aria-label', `${i + 1} de ${total}`);
+        });
+
+        /* ----- Modo lineal ----- */
         const visibles = () => parseFloat(getComputedStyle(carrusel).getPropertyValue('--visibles')) || 1;
-
-        /* Última posición útil: no se avanza hasta dejar hueco vacío a la derecha. */
-        const indiceMaximo = () => Math.max(0, Math.ceil(items.length - visibles()));
 
         const separacion = () => {
             const estilo = getComputedStyle(pista);
             return parseFloat(estilo.columnGap || estilo.gap) || 16;
         };
 
-        const pintar = () => {
-            if (!items.length) {
-                return;
-            }
+        /* Lineal: última posición útil, sin dejar hueco a la derecha. Arco: cualquier tarjeta. */
+        const indiceMaximo = () => (modoArco ? total - 1 : Math.max(0, Math.ceil(total - visibles())));
+
+        const pintarLineal = () => {
             const paso = items[0].offsetWidth + separacion();
             pista.style.transform = `translateX(${-indice * paso}px)`;
+        };
+
+        /* ----- Modo arco ----- */
+        /* Posición circular de la tarjeta i respecto del centro (puede tener decimales). */
+        const posicionEnArco = (i, centro) => {
+            let pos = (((i - centro) % total) + total) % total;
+            if (pos > total / 2) {
+                pos -= total;
+            }
+            return pos;
+        };
+
+        const pintarArco = (desplazamiento = 0) => {
+            const centro = indice + desplazamiento;
+            items.forEach((item, i) => {
+                const pos = posicionEnArco(i, centro);
+                const dist = Math.abs(pos);
+                item.style.setProperty('--pos', pos.toFixed(3));
+                item.style.setProperty('--dist', dist.toFixed(3));
+                item.style.setProperty('--dist2', (dist * dist).toFixed(3));
+                item.style.zIndex = String(100 - Math.round(dist * 10));
+                item.classList.toggle('is-actual', dist < 0.5);
+                item.classList.toggle('is-lejos', dist > 2.5);
+                item.inert = dist > 2.5;   // lo oculto no recibe foco ni clics
+            });
+        };
+
+        const limpiarArco = () => {
+            items.forEach((item) => {
+                ['--pos', '--dist', '--dist2'].forEach((v) => item.style.removeProperty(v));
+                item.style.zIndex = '';
+                item.classList.remove('is-actual', 'is-lejos');
+                item.inert = false;
+            });
+        };
+
+        /* ----- Común ----- */
+        const pintar = () => {
+            if (modoArco) {
+                pintarArco();
+            } else {
+                pintarLineal();
+            }
             [...puntos.children].forEach((boton, i) => {
                 boton.classList.toggle('is-active', i === indice);
                 boton.setAttribute('aria-selected', String(i === indice));
@@ -48,8 +111,12 @@
         };
 
         const irA = (n) => {
-            const maximo = indiceMaximo();
-            indice = n > maximo ? 0 : (n < 0 ? maximo : n);
+            if (modoArco) {
+                indice = ((n % total) + total) % total;
+            } else {
+                const maximo = indiceMaximo();
+                indice = n > maximo ? 0 : (n < 0 ? maximo : n);
+            }
             pintar();
         };
 
@@ -62,7 +129,7 @@
                 return;
             }
             temporizador = window.setInterval(() => {
-                if (!pausado) {
+                if (!cursorEncima && !focoDentro && !carrusel.classList.contains('is-arrastrando')) {
                     siguiente();
                 }
             }, intervalo);
@@ -76,11 +143,11 @@
 
         const construirPuntos = () => {
             puntos.replaceChildren();
-            const total = indiceMaximo() + 1;
-            if (total <= 1) {
+            const cantidad = indiceMaximo() + 1;
+            if (cantidad <= 1) {
                 return;
             }
-            for (let i = 0; i < total; i++) {
+            for (let i = 0; i < cantidad; i++) {
                 const boton = document.createElement('button');
                 boton.type = 'button';
                 boton.setAttribute('role', 'tab');
@@ -90,17 +157,68 @@
             }
         };
 
+        const aplicarModo = () => {
+            modoArco = consultaArco.matches;
+            carrusel.classList.toggle('hs-carrusel--arco', modoArco);
+            if (modoArco) {
+                pista.style.transform = '';
+                carrusel.tabIndex = 0;
+            } else {
+                limpiarArco();
+                carrusel.removeAttribute('tabindex');
+                indice = Math.min(indice, indiceMaximo());
+            }
+            construirPuntos();
+            pintar();
+            reiniciarAutoavance();
+        };
+
         seccion.querySelector('[data-carrusel-anterior]').addEventListener('click', conReinicio(anterior));
         seccion.querySelector('[data-carrusel-siguiente]').addEventListener('click', conReinicio(siguiente));
 
-        carrusel.addEventListener('mouseenter', () => { pausado = true; });
-        carrusel.addEventListener('mouseleave', () => { pausado = false; });
+        carrusel.addEventListener('mouseenter', () => { cursorEncima = true; });
+        carrusel.addEventListener('mouseleave', () => { cursorEncima = false; });
+        carrusel.addEventListener('focusin', (e) => {
+            focoDentro = true;
+            // Arco: si el foco entra en una tarjeta lateral (Tab), esa pasa al centro
+            if (modoArco) {
+                const item = e.target.closest('.hs-carrusel__item');
+                if (item && !item.classList.contains('is-actual')) {
+                    irA(items.indexOf(item));
+                }
+            }
+        });
+        carrusel.addEventListener('focusout', (e) => {
+            focoDentro = carrusel.contains(e.relatedTarget);
+        });
 
+        /* Teclado (arco): el carrusel es enfocable y responde a las flechas */
+        carrusel.addEventListener('keydown', (e) => {
+            if (!modoArco) {
+                return;
+            }
+            const acciones = {
+                ArrowLeft: anterior,
+                ArrowRight: siguiente,
+                Home: () => irA(0),
+                End: () => irA(total - 1)
+            };
+            if (acciones[e.key]) {
+                e.preventDefault();
+                conReinicio(acciones[e.key])();
+            }
+        });
+
+        /* Toque (lineal) */
+        let toqueInicioX = null;
         carrusel.addEventListener('touchstart', (e) => {
+            if (modoArco) {
+                return;
+            }
             toqueInicioX = e.touches[0].clientX;
         }, { passive: true });
         carrusel.addEventListener('touchend', (e) => {
-            if (toqueInicioX === null) {
+            if (modoArco || toqueInicioX === null) {
                 return;
             }
             const dx = e.changedTouches[0].clientX - toqueInicioX;
@@ -113,16 +231,92 @@
             reiniciarAutoavance();
         });
 
+        /* Arrastre con el puntero (arco). Solo se captura el puntero cuando de
+           verdad arrastra: así un clic normal sigue llegando a "Ver detalle". */
+        let punteroInicioX = null;
+        let arrastrando = false;
+        let ignorarClic = false;
+        const pasoArco = () => items[0].offsetWidth * SEPARACION_ARCO;
+
+        carrusel.addEventListener('pointerdown', (e) => {
+            if (!modoArco || e.button !== 0) {
+                return;
+            }
+            punteroInicioX = e.clientX;
+            arrastrando = false;
+        });
+
+        carrusel.addEventListener('pointermove', (e) => {
+            if (punteroInicioX === null) {
+                return;
+            }
+            const dx = e.clientX - punteroInicioX;
+            if (!arrastrando && Math.abs(dx) > UMBRAL_ARRASTRE) {
+                arrastrando = true;
+                carrusel.classList.add('is-arrastrando');
+                carrusel.setPointerCapture(e.pointerId);
+            }
+            if (arrastrando) {
+                pintarArco(-dx / pasoArco());
+            }
+        });
+
+        const soltar = (e) => {
+            if (punteroInicioX === null) {
+                return;
+            }
+            const dx = e.clientX - punteroInicioX;
+            punteroInicioX = null;
+            if (!arrastrando) {
+                return;
+            }
+            arrastrando = false;
+            ignorarClic = true;
+            carrusel.classList.remove('is-arrastrando');
+            irA(indice + Math.round(-dx / pasoArco()));
+            reiniciarAutoavance();
+        };
+        carrusel.addEventListener('pointerup', soltar);
+        carrusel.addEventListener('pointercancel', soltar);
+
+        /* Clic (arco): tras arrastrar no se abre nada; en una tarjeta lateral,
+           primero se trae al centro. */
+        carrusel.addEventListener('click', (e) => {
+            if (!modoArco) {
+                return;
+            }
+            if (ignorarClic) {
+                ignorarClic = false;
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+            }
+            const item = e.target.closest('.hs-carrusel__item');
+            if (item && !item.classList.contains('is-actual')) {
+                e.preventDefault();
+                conReinicio(() => irA(items.indexOf(item)))();
+            }
+        }, true);
+
+        /* Las imágenes no se arrastran como archivos */
+        carrusel.addEventListener('dragstart', (e) => {
+            if (modoArco) {
+                e.preventDefault();
+            }
+        });
+
+        consultaArco.addEventListener('change', aplicarModo);
         window.addEventListener('resize', () => {
+            if (modoArco) {
+                return;
+            }
             indice = Math.min(indice, indiceMaximo());
             construirPuntos();
             pintar();
             reiniciarAutoavance();
         });
 
-        construirPuntos();
-        pintar();
-        reiniciarAutoavance();
+        aplicarModo();
     };
 
     const carrusel = document.querySelector('[data-carrusel]');

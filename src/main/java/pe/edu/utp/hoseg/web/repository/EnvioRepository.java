@@ -14,4 +14,8 @@ public interface EnvioRepository extends JpaRepository<Envio, Integer> {
 
     /** Envíos de varias ventas de una vez ("Mis pedidos", panel). */
     List<Envio> findByVentaIdIn(Collection<Integer> idsVenta);
+
+    /** Pedidos con pago confirmado, ordenados del más reciente al más antiguo. */
+    List<Envio> findByVentaEstadoOrderByCreadoEnDesc(pe.edu.utp.hoseg.web.model.EstadoVenta estadoVenta);
+
 }

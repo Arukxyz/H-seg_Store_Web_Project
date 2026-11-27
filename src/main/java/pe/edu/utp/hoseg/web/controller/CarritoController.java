@@ -1,5 +1,6 @@
 package pe.edu.utp.hoseg.web.controller;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -13,6 +14,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import pe.edu.utp.hoseg.web.config.ClienteAutenticado;
 import pe.edu.utp.hoseg.web.dto.CompraRegistrada;
 import pe.edu.utp.hoseg.web.dto.DatosEnvioForm;
+import pe.edu.utp.hoseg.web.dto.PagoBilleteraForm;
+import pe.edu.utp.hoseg.web.dto.PagoTarjetaForm;
 import pe.edu.utp.hoseg.web.dto.ProblemaCarrito;
 import pe.edu.utp.hoseg.web.model.TipoEnvio;
 import pe.edu.utp.hoseg.web.service.CafeService;
@@ -23,16 +26,14 @@ import pe.edu.utp.hoseg.web.service.NegocioException;
 import pe.edu.utp.hoseg.web.service.NotificacionService;
 import pe.edu.utp.hoseg.web.service.VentaService;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Carrito y compra (bloque 1: CU-04, CU-15). El carrito vive en la sesión;
- * confirmar exige cliente con sesión (SecurityConfig) y crea el pedido
- * PENDIENTE. La web no cobra: el pago lo confirma el encargado en el escritorio.
- */
 @Controller
 public class CarritoController {
+
+    private static final String SESION_ENVIO = "datosEnvioCheckout";
 
     private final CarritoService carritoService;
     private final CatalogoService catalogoService;
@@ -69,7 +70,6 @@ public class CarritoController {
         return "redirect:/carrito";
     }
 
-    /** Botones − / +; cantidad 0 quita la línea. */
     @PostMapping("/carrito/actualizar")
     public String actualizar(@RequestParam String codigo, @RequestParam int cantidad) {
         carritoService.actualizar(codigo, cantidad);
@@ -82,30 +82,111 @@ public class CarritoController {
         return "redirect:/carrito";
     }
 
-    /** "Confirmar compra" (1.5): resumen y entrega precargada con los datos de la cuenta. */
     @GetMapping("/carrito/confirmar")
-    public String confirmar(@AuthenticationPrincipal ClienteAutenticado cliente, Model model) {
+    public String confirmarCompatibilidad() {
+        return "redirect:/carrito/entrega";
+    }
+
+    @GetMapping("/carrito/entrega")
+    public String entrega(@AuthenticationPrincipal ClienteAutenticado cliente,
+                          HttpSession session,
+                          Model model) {
         if (carritoService.estaVacio()) {
             return "redirect:/carrito";
         }
-        model.addAttribute("envioForm", ventaService.datosEnvioIniciales(cliente.id()));
-        prepararConfirmacion(model);
-        return "carrito/confirmar";
+        DatosEnvioForm envioForm = (DatosEnvioForm) session.getAttribute(SESION_ENVIO);
+        if (envioForm == null) {
+            envioForm = ventaService.datosEnvioIniciales(cliente.id());
+        }
+        model.addAttribute("envioForm", envioForm);
+        prepararEntrega(model);
+        return "carrito/entrega";
     }
 
-    @PostMapping("/carrito/confirmar")
-    public String registrar(@AuthenticationPrincipal ClienteAutenticado cliente,
-                            @Valid @ModelAttribute("envioForm") DatosEnvioForm envioForm,
-                            BindingResult errores,
-                            Model model,
-                            RedirectAttributes flash) {
-        if (errores.hasErrors()) {
-            prepararConfirmacion(model);
-            return "carrito/confirmar";
+    @PostMapping("/carrito/entrega")
+    public String guardarEntrega(@Valid @ModelAttribute("envioForm") DatosEnvioForm envioForm,
+                                 BindingResult errores,
+                                 HttpSession session,
+                                 Model model) {
+        if (carritoService.estaVacio()) {
+            return "redirect:/carrito";
         }
+        if (errores.hasErrors()) {
+            prepararEntrega(model);
+            return "carrito/entrega";
+        }
+        session.setAttribute(SESION_ENVIO, envioForm);
+        return "redirect:/carrito/pago";
+    }
+    @GetMapping("/carrito/pago")
+    public String pago(HttpSession session, Model model) {
+        if (carritoService.estaVacio()) {
+            return "redirect:/carrito";
+        }
+        DatosEnvioForm envioForm = (DatosEnvioForm) session.getAttribute(SESION_ENVIO);
+        if (envioForm == null) {
+            return "redirect:/carrito/entrega";
+        }
+        model.addAttribute("tarjetaForm", new PagoTarjetaForm());
+        model.addAttribute("billeteraForm", new PagoBilleteraForm());
+        model.addAttribute("medioActivo", "TARJETA");
+        prepararPago(model, envioForm);
+        return "carrito/pago";
+    }
+
+    @PostMapping("/carrito/procesar-pago")
+    public String procesarPago(@AuthenticationPrincipal ClienteAutenticado cliente,
+                               @RequestParam(defaultValue = "TARJETA") String medioPago,
+                               @Valid @ModelAttribute("tarjetaForm") PagoTarjetaForm tarjetaForm,
+                               BindingResult erroresTarjeta,
+                               @Valid @ModelAttribute("billeteraForm") PagoBilleteraForm billeteraForm,
+                               BindingResult erroresBilletera,
+                               HttpSession session,
+                               Model model,
+                               RedirectAttributes flash) {
+        if (carritoService.estaVacio()) {
+            return "redirect:/carrito";
+        }
+        DatosEnvioForm envioForm = (DatosEnvioForm) session.getAttribute(SESION_ENVIO);
+        if (envioForm == null) {
+            return "redirect:/carrito/entrega";
+        }
+
+        String referenciaPago;
+        if ("BILLETERA".equalsIgnoreCase(medioPago)) {
+            if (erroresBilletera.hasErrors()) {
+                model.addAttribute("medioActivo", "BILLETERA");
+                prepararPago(model, envioForm);
+                return "carrito/pago";
+            }
+            referenciaPago = billeteraForm.getBilletera().toUpperCase();
+        } else {
+            medioPago = "TARJETA";
+            if (erroresTarjeta.hasErrors()) {
+                model.addAttribute("medioActivo", "TARJETA");
+                prepararPago(model, envioForm);
+                return "carrito/pago";
+            }
+            if (!tarjetaForm.esLuhnValido()) {
+                model.addAttribute("errorPago", "El número de tarjeta no es válido. Verifica los 16 dígitos.");
+                model.addAttribute("medioActivo", "TARJETA");
+                prepararPago(model, envioForm);
+                return "carrito/pago";
+            }
+            if (tarjetaForm.simulaRechazo()) {
+                model.addAttribute("errorPago", "Pago rechazado por el emisor de la tarjeta. Intenta con otra tarjeta o usa Yape/Plin.");
+                model.addAttribute("medioActivo", "TARJETA");
+                prepararPago(model, envioForm);
+                return "carrito/pago";
+            }
+            referenciaPago = tarjetaForm.referenciaSegura();
+        }
+
         try {
-            CompraRegistrada compra = ventaService.confirmarCompra(cliente.id(), carritoService.items(), envioForm);
+            CompraRegistrada compra = ventaService.pagarYRegistrar(
+                    cliente.id(), carritoService.items(), envioForm, referenciaPago);
             carritoService.vaciar();
+            session.removeAttribute(SESION_ENVIO);
             notificacionService.pedidoRegistrado(cliente.email(), cliente.nombre(), compra);
             flash.addFlashAttribute("compra", compra);
             return "redirect:/compra-exito";
@@ -115,7 +196,6 @@ public class CarritoController {
         }
     }
 
-    /** "Compra registrada" (1.6). Solo se llega aquí justo después de confirmar. */
     @GetMapping("/compra-exito")
     public String exito(Model model) {
         if (!model.containsAttribute("compra")) {
@@ -136,10 +216,18 @@ public class CarritoController {
         model.addAttribute("sePuedeConfirmar", problemas.isEmpty());
     }
 
-    private void prepararConfirmacion(Model model) {
+    private void prepararEntrega(Model model) {
         prepararResumen(model);
         model.addAttribute("tiposEnvio", TipoEnvio.values());
         model.addAttribute("costoDelivery", ventaService.costoEnvio(TipoEnvio.DELIVERY));
         model.addAttribute("localesRecojo", cafeService.locales());
+    }
+
+    private void prepararPago(Model model, DatosEnvioForm envioForm) {
+        prepararResumen(model);
+        BigDecimal costoEnvio = ventaService.costoEnvio(envioForm.getTipo());
+        model.addAttribute("envioForm", envioForm);
+        model.addAttribute("costoEnvio", costoEnvio);
+        model.addAttribute("totalConEnvio", carritoService.total().add(costoEnvio));
     }
 }

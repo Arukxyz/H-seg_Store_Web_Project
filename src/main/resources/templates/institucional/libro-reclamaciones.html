@@ -7,59 +7,189 @@
                    global documentoValido). "codigoComprobante" recibe error si el pedido no existe.
     tiposReclamo   TipoReclamo[] (RECLAMO, QUEJA) · tiposDocumento TipoDocumento[] · tiposBien TipoBien[]
   Variante ?registrado: muestra numeroHoja (flash, "LR-000001") y se envía constancia por correo.
+
+  Rediseño visual (banner con la foto de la comunidad + tarjetas que se montan encima):
+  solo cambian clases y se agregan etiquetas/íconos. Los th:field, th:errors, th:each,
+  la acción del formulario y las variables del modelo son los mismos de antes.
+  Estilos propios en css/reclamaciones.css (usa solo variables de tokens.css).
 -->
-<html lang="es" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout/base :: pagina(titulo='Libro de Reclamaciones · HÖSÉG', activa='',
-                                          transparente=false, contenido=~{::main}, estilos=~{}, scripts=~{})}">
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: pagina(titulo='Libro de Reclamaciones · HÖSÉG', activa='',
+                                          transparente=false, contenido=~{::main}, estilos=~{::link}, scripts=~{})}">
+
+<head>
+    <link rel="stylesheet" th:href="@{/css/reclamaciones.css}">
+</head>
+
 <body>
-<main class="hs-main--bajo-nav">
-    <section class="hs-seccion">
-        <div class="container hs-ancho-form">
-            <h1 class="hs-h2 mb-3">Libro de Reclamaciones</h1>
-            <div class="alert alert-success" th:if="${param.registrado}">
-                Registramos tu hoja <strong th:text="${numeroHoja}">LR-000001</strong>. Te enviamos la constancia por correo.
+    <main class="hs-main--bajo-nav hs-rec-pagina">
+
+        <!-- BANNER: foto de la comunidad (ya está en /images) con velo de marca -->
+        <section class="hs-rec-banner">
+            <img th:src="@{/images/comunidad-cusco.jpg}" alt="" class="hs-rec-banner__img">
+            <div class="hs-rec-banner__velo"></div>
+            <div class="container hs-ancho-sm hs-entrada" style="--hs-i: 0">
+                <span class="hs-rec-icono"><i class="bi bi-journal-text"></i></span>
+                <p class="hs-kicker">Hoja de reclamación virtual</p>
+                <h1 class="hs-h2 mb-2">Libro de Reclamaciones</h1>
+                <p class="hs-texto-secundario mb-0">Cuéntanos qué pasó y lo revisaremos. Los campos con * son
+                    obligatorios.</p>
             </div>
-            <form th:unless="${param.registrado}" th:object="${reclamoForm}" method="post" th:action="@{/libro-reclamaciones}">
-                <fieldset>
-                    <legend class="h6">Tipo</legend>
-                    <label th:each="t : ${tiposReclamo}" class="me-3"><input type="radio" th:field="*{tipo}" th:value="${t}"> <span th:text="${t}">RECLAMO</span></label>
-                    <div class="text-danger" th:errors="*{tipo}"></div>
-                </fieldset>
-                <input class="hs-input mt-2" th:field="*{nombre}" placeholder="Nombre completo">
-                <div class="text-danger" th:errors="*{nombre}"></div>
-                <select class="form-select mt-2" th:field="*{tipoDoc}">
-                    <option value="">Tipo de documento</option>
-                    <option th:each="t : ${tiposDocumento}" th:value="${t}" th:text="${t.etiqueta}">DNI</option>
-                </select>
-                <div class="text-danger" th:errors="*{tipoDoc}"></div>
-                <input class="hs-input mt-2" th:field="*{numDoc}" placeholder="Número de documento">
-                <div class="text-danger" th:errors="*{numDoc}"></div>
-                <div class="text-danger" th:errors="*{documentoValido}"></div>
-                <input class="hs-input mt-2" th:field="*{domicilio}" placeholder="Domicilio">
-                <div class="text-danger" th:errors="*{domicilio}"></div>
-                <input class="hs-input mt-2" type="email" th:field="*{email}" placeholder="Email">
-                <div class="text-danger" th:errors="*{email}"></div>
-                <input class="hs-input mt-2" th:field="*{telefono}" placeholder="Teléfono (opcional)">
-                <div class="text-danger" th:errors="*{telefono}"></div>
-                <fieldset class="mt-2">
-                    <legend class="h6">Sobre</legend>
-                    <label th:each="b : ${tiposBien}" class="me-3"><input type="radio" th:field="*{tipoBien}" th:value="${b}"> <span th:text="${b}">PRODUCTO</span></label>
-                    <div class="text-danger" th:errors="*{tipoBien}"></div>
-                </fieldset>
-                <input class="hs-input mt-2" th:field="*{descripcionBien}" placeholder="Producto o servicio">
-                <div class="text-danger" th:errors="*{descripcionBien}"></div>
-                <input class="hs-input mt-2" th:field="*{montoReclamado}" placeholder="Monto reclamado (opcional)">
-                <div class="text-danger" th:errors="*{montoReclamado}"></div>
-                <input class="hs-input mt-2" th:field="*{codigoComprobante}" placeholder="Código de pedido (opcional)">
-                <div class="text-danger" th:errors="*{codigoComprobante}"></div>
-                <textarea class="hs-input mt-2" th:field="*{detalle}" rows="4" placeholder="Detalle"></textarea>
-                <div class="text-danger" th:errors="*{detalle}"></div>
-                <textarea class="hs-input mt-2" th:field="*{pedidoConsumidor}" rows="3" placeholder="Pedido del consumidor"></textarea>
-                <div class="text-danger" th:errors="*{pedidoConsumidor}"></div>
-                <button class="hs-btn hs-btn--primario mt-2" type="submit">Registrar</button>
-            </form>
-        </div>
-    </section>
-</main>
+        </section>
+
+        <!-- CUERPO: las tarjetas suben y se montan sobre el banner -->
+        <section class="hs-rec-cuerpo">
+            <div class="container hs-ancho-sm">
+
+                <!-- ÉXITO (?registrado) -->
+                <div class="hs-rec-exito hs-entrada" style="--hs-i: 1" th:if="${param.registrado}">
+                    <span class="hs-rec-exito__icono"><i class="bi bi-check2-circle"></i></span>
+                    <h2 class="h4 fw-bold mb-1">Hoja registrada</h2>
+                    <div class="hs-rec-hoja" th:text="${numeroHoja}">LR-000001</div>
+                    <p class="hs-texto-secundario mb-0">Registramos tu hoja. Te enviamos la constancia por correo.</p>
+                </div>
+
+                <form th:unless="${param.registrado}" th:object="${reclamoForm}" method="post"
+                    th:action="@{/libro-reclamaciones}">
+
+                    <!-- 1 · TUS DATOS -->
+                    <div class="hs-rec-seccion hs-entrada" style="--hs-i: 1">
+                        <h2 class="hs-rec-seccion__titulo"><span class="hs-rec-numero">1</span>Tus datos</h2>
+                        <div class="hs-rec-grid">
+                            <div class="hs-rec-campo hs-rec-completo">
+                                <label for="nombre">Nombre completo *</label>
+                                <input class="hs-input" th:field="*{nombre}" placeholder="Nombre completo">
+                                <div class="text-danger" th:errors="*{nombre}"></div>
+                            </div>
+                            <div class="hs-rec-campo">
+                                <label for="tipoDoc">Tipo de documento *</label>
+                                <select class="hs-select" th:field="*{tipoDoc}">
+                                    <option value="">Tipo de documento</option>
+                                    <option th:each="t : ${tiposDocumento}" th:value="${t}" th:text="${t.etiqueta}">DNI
+                                    </option>
+                                </select>
+                                <div class="text-danger" th:errors="*{tipoDoc}"></div>
+                            </div>
+                            <div class="hs-rec-campo">
+                                <label for="numDoc">Número de documento *</label>
+                                <input class="hs-input" th:field="*{numDoc}" placeholder="Número de documento">
+                                <div class="text-danger" th:errors="*{numDoc}"></div>
+                                <div class="text-danger" th:errors="*{documentoValido}"></div>
+                            </div>
+                            <div class="hs-rec-campo hs-rec-completo">
+                                <label for="domicilio">Domicilio *</label>
+                                <input class="hs-input" th:field="*{domicilio}" placeholder="Domicilio">
+                                <div class="text-danger" th:errors="*{domicilio}"></div>
+                            </div>
+                            <div class="hs-rec-campo">
+                                <label for="email">Email *</label>
+                                <input class="hs-input" type="email" th:field="*{email}" placeholder="Email">
+                                <div class="text-danger" th:errors="*{email}"></div>
+                            </div>
+                            <div class="hs-rec-campo">
+                                <label for="telefono">Teléfono<span class="hs-rec-opcional">(opcional)</span></label>
+                                <input class="hs-input" th:field="*{telefono}" placeholder="Teléfono (opcional)">
+                                <div class="text-danger" th:errors="*{telefono}"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2 · TU RECLAMO -->
+                    <div class="hs-rec-seccion hs-entrada" style="--hs-i: 2">
+                        <h2 class="hs-rec-seccion__titulo"><span class="hs-rec-numero">2</span>Tu reclamo</h2>
+                        <div class="hs-rec-grid">
+
+                            <fieldset class="hs-rec-campo hs-rec-completo">
+                                <legend class="hs-rec-etiqueta">Tipo *</legend>
+                                <div class="hs-rec-opciones">
+                                    <label th:each="t : ${tiposReclamo}" class="hs-rec-opcion">
+                                        <input type="radio" th:field="*{tipo}" th:value="${t}">
+                                        <span class="hs-rec-opcion__cuerpo">
+                                            <span class="hs-rec-opcion__icono">
+                                                <i class="bi bi-exclamation-triangle"
+                                                    th:if="${t.name() == 'RECLAMO'}"></i>
+                                                <i class="bi bi-chat-left-dots"
+                                                    th:unless="${t.name() == 'RECLAMO'}"></i>
+                                            </span>
+                                            <span>
+                                                <span class="hs-rec-opcion__nombre" th:text="${t}">RECLAMO</span>
+                                                <span class="hs-rec-opcion__detalle"
+                                                    th:if="${t.name() == 'RECLAMO'}">Disconformidad con el producto o
+                                                    servicio.</span>
+                                                <span class="hs-rec-opcion__detalle"
+                                                    th:unless="${t.name() == 'RECLAMO'}">Malestar con la
+                                                    atención.</span>
+                                            </span>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="text-danger" th:errors="*{tipo}"></div>
+                            </fieldset>
+
+                            <fieldset class="hs-rec-campo hs-rec-completo">
+                                <legend class="hs-rec-etiqueta">Sobre *</legend>
+                                <div class="hs-rec-opciones">
+                                    <label th:each="b : ${tiposBien}" class="hs-rec-opcion">
+                                        <input type="radio" th:field="*{tipoBien}" th:value="${b}">
+                                        <span class="hs-rec-opcion__cuerpo">
+                                            <span class="hs-rec-opcion__icono">
+                                                <i class="bi bi-bag" th:if="${b.name() == 'PRODUCTO'}"></i>
+                                                <i class="bi bi-cup-hot" th:unless="${b.name() == 'PRODUCTO'}"></i>
+                                            </span>
+                                            <span class="hs-rec-opcion__nombre" th:text="${b}">PRODUCTO</span>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="text-danger" th:errors="*{tipoBien}"></div>
+                            </fieldset>
+
+                            <div class="hs-rec-campo hs-rec-completo">
+                                <label for="descripcionBien">Producto o servicio *</label>
+                                <input class="hs-input" th:field="*{descripcionBien}" placeholder="Producto o servicio">
+                                <div class="text-danger" th:errors="*{descripcionBien}"></div>
+                            </div>
+                            <div class="hs-rec-campo">
+                                <label for="montoReclamado">Monto reclamado<span
+                                        class="hs-rec-opcional">(opcional)</span></label>
+                                <input class="hs-input" th:field="*{montoReclamado}"
+                                    placeholder="Monto reclamado (opcional)">
+                                <div class="text-danger" th:errors="*{montoReclamado}"></div>
+                            </div>
+                            <div class="hs-rec-campo">
+                                <label for="codigoComprobante">Código de pedido<span
+                                        class="hs-rec-opcional">(opcional)</span></label>
+                                <input class="hs-input" th:field="*{codigoComprobante}"
+                                    placeholder="Código de pedido (opcional)">
+                                <div class="text-danger" th:errors="*{codigoComprobante}"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3 · CUÉNTANOS -->
+                    <div class="hs-rec-seccion hs-entrada" style="--hs-i: 3">
+                        <h2 class="hs-rec-seccion__titulo"><span class="hs-rec-numero">3</span>Cuéntanos qué pasó</h2>
+                        <div class="hs-rec-grid">
+                            <div class="hs-rec-campo hs-rec-completo">
+                                <label for="detalle">Detalle *</label>
+                                <textarea class="hs-input" th:field="*{detalle}" rows="4"
+                                    placeholder="Detalle"></textarea>
+                                <div class="text-danger" th:errors="*{detalle}"></div>
+                            </div>
+                            <div class="hs-rec-campo hs-rec-completo">
+                                <label for="pedidoConsumidor">Pedido del consumidor *</label>
+                                <textarea class="hs-input" th:field="*{pedidoConsumidor}" rows="3"
+                                    placeholder="Pedido del consumidor"></textarea>
+                                <div class="text-danger" th:errors="*{pedidoConsumidor}"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="hs-btn hs-btn--primario hs-brillo hs-rec-enviar" type="submit"><i
+                            class="bi bi-send"></i>Registrar</button>
+                    <p class="hs-texto-secundario hs-rec-nota">Al registrar, te enviamos la constancia por correo.</p>
+                </form>
+            </div>
+        </section>
+    </main>
 </body>
+
 </html>

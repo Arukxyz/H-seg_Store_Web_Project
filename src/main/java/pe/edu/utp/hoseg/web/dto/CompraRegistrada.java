@@ -5,10 +5,7 @@ import pe.edu.utp.hoseg.web.model.TipoEnvio;
 import java.math.BigDecimal;
 
 /**
- * Resultado de confirmar la compra, para "Compra registrada" (1.6).
- *
- * @param totalProductos lo que se guarda en venta.total (solo mercadería)
- * @param totalAPagar    productos + envío: lo que el cliente debe pagar
+ * Resultado de pagar y registrar la compra, para "Compra registrada" (1.6).
  */
 public record CompraRegistrada(
         String codigoComprobante,
@@ -16,5 +13,13 @@ public record CompraRegistrada(
         BigDecimal costoEnvio,
         BigDecimal totalAPagar,
         TipoEnvio tipoEnvio,
-        ImpactoCompra impacto) {
+        ImpactoCompra impacto,
+        String metodoPago,
+        String codigoTransaccion) {
+
+    /** Constructor de compatibilidad para código/tests previos sin pasarela. */
+    public CompraRegistrada(String codigoComprobante, BigDecimal totalProductos, BigDecimal costoEnvio,
+                            BigDecimal totalAPagar, TipoEnvio tipoEnvio, ImpactoCompra impacto) {
+        this(codigoComprobante, totalProductos, costoEnvio, totalAPagar, tipoEnvio, impacto, null, null);
+    }
 }

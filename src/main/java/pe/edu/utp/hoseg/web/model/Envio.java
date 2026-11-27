@@ -114,5 +114,9 @@ public class Envio {
     public String getCodigoSeguimiento() { return codigoSeguimiento; }
     public OffsetDateTime getFechaDespacho() { return fechaDespacho; }
     public OffsetDateTime getFechaEntrega() { return fechaEntrega; }
+    public void setCourier(String courier) { this.courier = courier; }
+    public void setCodigoSeguimiento(String codigoSeguimiento) { this.codigoSeguimiento = codigoSeguimiento; }
+    public void setFechaDespacho(OffsetDateTime fechaDespacho) { this.fechaDespacho = fechaDespacho; }
+    public void setFechaEntrega(OffsetDateTime fechaEntrega) { this.fechaEntrega = fechaEntrega; }
     public OffsetDateTime getCreadoEn() { return creadoEn; }
 }

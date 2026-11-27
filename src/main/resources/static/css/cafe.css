@@ -1,0 +1,485 @@
+/* =====================================================================
+   HÖSÉG Web · Höség Café (/cafe, templates/institucional/cafe.html)
+   Hero con degradado y contador, cinta en bucle, carta con pestañas y
+   línea punteada, y el local. Todo color sale de tokens.css; tarjetas de
+   producto, botones y aparición al scroll vienen de hoseg.css.
+   ===================================================================== */
+
+/* ---------- 1 · Hero ------------------------------------------------- */
+.hs-cafe__hero {
+    position: relative;
+    padding: 3.5rem 0 3rem;
+    background:
+        radial-gradient(ellipse 70% 60% at 15% 0%, var(--hs-terracota-12) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 60% at 90% 100%, var(--hs-salvia-10) 0%, transparent 70%),
+        var(--hs-cream-dark);
+}
+
+@media (min-width: 768px) {
+    .hs-cafe__hero {
+        padding: 5rem 0 4.5rem;
+    }
+}
+
+.hs-cafe__kicker {
+    color: var(--hs-terracotta);
+}
+
+.hs-cafe__titulo {
+    margin: 0.5rem 0 1.5rem;
+    font-size: clamp(2rem, 6vw, 3rem);
+    font-weight: 600;
+    line-height: 1.12;
+    color: var(--hs-bark);
+}
+
+.hs-cafe__bajada {
+    max-width: 30rem;
+    margin: 1.5rem auto 0;
+}
+
+/* Píldora del contador. El brillo la cruza solo al pasar el cursor. */
+.hs-cafe__contador {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 22px 8px 8px;
+    overflow: hidden;
+    border: 1px solid var(--hs-sand);
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-card);
+    box-shadow: var(--hs-shadow-card);
+}
+
+.hs-cafe__contador::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 35%, var(--hs-destello) 50%, transparent 65%);
+    transform: translateX(-110%);
+    pointer-events: none;
+}
+
+.hs-cafe__contador:hover::after {
+    transform: translateX(110%);
+    transition: transform 1s var(--hs-ease-seda);
+}
+
+.hs-cafe__contador-icono {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-sage-light);
+    color: var(--hs-sage);
+    font-size: 1.375rem;
+}
+
+.hs-cafe__contador-texto {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--hs-muted);
+    text-align: left;
+}
+
+.hs-cafe__contador-texto strong {
+    font-family: var(--hs-font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--hs-bark);
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 575.98px) {
+    .hs-cafe__contador {
+        padding-right: 16px;
+    }
+
+    .hs-cafe__contador-texto {
+        font-size: 0.875rem;
+    }
+
+    .hs-cafe__contador-texto strong {
+        font-size: 1.25rem;
+    }
+}
+
+/* ---------- 2 · Cinta en bucle -------------------------------------- */
+/* Dos copias del texto seguidas; la pista se desplaza la mitad de su ancho
+   y vuelve a empezar sin corte. Solo transform. */
+@keyframes hsCinta {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+}
+
+.hs-cinta {
+    overflow: hidden;
+    padding: 14px 0;
+    background: var(--hs-bark);
+    color: var(--hs-cream);
+}
+
+.hs-cinta__pista {
+    display: flex;
+    width: max-content;
+    animation: hsCinta 36s linear infinite;
+}
+
+.hs-cinta:hover .hs-cinta__pista {
+    animation-play-state: paused;
+}
+
+.hs-cinta__texto {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding-right: 6px;
+    font-family: var(--hs-font-display);
+    font-size: 1rem;
+    font-style: italic;
+    white-space: nowrap;
+}
+
+.hs-cinta__texto .bi {
+    color: var(--hs-terracotta);
+    font-size: 1.5rem;
+}
+
+/* ---------- 3 · Carta con pestañas ----------------------------------- */
+.hs-carta__pestanas {
+    position: relative;   /* referencia de offsetLeft para centrar la pestaña elegida (cafe.js) */
+    display: flex;
+    gap: 8px;
+    margin: 0 -12px 1.5rem;
+    padding: 4px 12px 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+}
+
+.hs-carta__pestanas::-webkit-scrollbar {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .hs-carta__pestanas {
+        flex-wrap: wrap;
+        justify-content: center;
+        overflow: visible;
+    }
+}
+
+.hs-carta__pestana {
+    flex: none;
+    padding: 8px 18px;
+    border: 1px solid var(--hs-sand);
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-card);
+    color: var(--hs-bark);
+    font-family: var(--hs-font-body);
+    font-size: 0.875rem;
+    font-weight: 500;
+    scroll-snap-align: start;
+    transition: background var(--hs-t-fast), border-color var(--hs-t-fast), color var(--hs-t-fast),
+                transform var(--hs-t-medio) var(--hs-ease-seda);
+}
+
+.hs-carta__pestana:hover {
+    border-color: var(--hs-terracotta);
+    transform: translateY(-1px);
+}
+
+.hs-carta__pestana:focus-visible {
+    outline: none;
+    box-shadow: var(--hs-anillo-foco-oscuro);
+}
+
+.hs-carta__pestana[aria-selected="true"] {
+    border-color: var(--hs-terracotta);
+    background: var(--hs-terracotta);
+    color: var(--hs-sobre-acento);
+    font-weight: 600;
+}
+
+.hs-carta__panel {
+    padding: 1.5rem;
+    border: 1px solid var(--hs-sand);
+    border-radius: 20px;
+    background: var(--hs-card);
+}
+
+.hs-carta__panel + .hs-carta__panel {
+    margin-top: 1.25rem;
+}
+
+@media (min-width: 768px) {
+    .hs-carta__panel {
+        padding: 2rem 2.5rem;
+    }
+}
+
+/* Con JS (cafe.js añade .is-pestanas) se ve un panel a la vez y su
+   título lo dice la pestaña. */
+.hs-carta.is-pestanas .hs-carta__panel + .hs-carta__panel {
+    margin-top: 0;
+}
+
+.hs-carta.is-pestanas .hs-carta__categoria {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.hs-carta.is-pestanas .hs-carta__panel:not([hidden]) {
+    animation: hsFadeSlide 0.4s var(--hs-ease-seda);
+}
+
+.hs-carta__categoria {
+    margin: 0 0 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+/* Platos en dos columnas desde md: así ninguna categoría deja huecos */
+.hs-carta__lista {
+    display: grid;
+    gap: 4px 40px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+@media (min-width: 768px) {
+    .hs-carta__lista {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.hs-plato {
+    padding: 12px;
+    margin: 0 -12px;
+    border-radius: 12px;
+    transition: background var(--hs-t-fast);
+}
+
+.hs-plato:hover {
+    background: var(--hs-cream);
+}
+
+.hs-carta.is-pestanas .hs-plato {
+    animation: hsFadeSlide 0.4s var(--hs-ease-seda) both;
+    animation-delay: calc(var(--hs-i, 0) * 35ms);
+}
+
+/* Nombre ······· precio */
+.hs-plato__fila {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.hs-plato__nombre {
+    font-weight: 600;
+    color: var(--hs-bark);
+}
+
+.hs-plato__puntos {
+    flex: 1;
+    min-width: 16px;
+    border-bottom: 2px dotted var(--hs-sand);
+    transform: translateY(-4px);
+}
+
+.hs-plato__precio {
+    font-family: var(--hs-font-display);
+    font-weight: 600;
+    color: var(--hs-terracotta);
+    white-space: nowrap;
+}
+
+.hs-plato__descripcion {
+    margin: 4px 0 0;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--hs-muted);
+}
+
+/* Agotado hoy: el plato se atenúa y el precio se tacha */
+.hs-plato--agotado .hs-plato__nombre,
+.hs-plato--agotado .hs-plato__descripcion,
+.hs-plato--agotado .hs-plato__puntos {
+    opacity: 0.5;
+}
+
+.hs-plato--agotado .hs-plato__precio {
+    color: var(--hs-muted);
+    text-decoration: line-through;
+}
+
+.hs-plato__agotado {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 2px 10px;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-terracotta-light);
+    color: var(--hs-terracotta-hover);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+/* ---------- 4 y 5 · Cafés en grano y merchandising -------------------- */
+.hs-cafe__sello {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 0.75rem;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-terracotta-light);
+    color: var(--hs-terracotta);
+    font-size: 1.375rem;
+}
+
+.hs-cafe__grilla {
+    max-width: 1000px;
+}
+
+@media (max-width: 575.98px) {
+    .hs-cafe__grilla .hs-card {
+        max-width: 22rem;
+        margin-inline: auto;
+    }
+}
+
+/* ---------- 6 · Local ------------------------------------------------ */
+.hs-local {
+    display: grid;
+    overflow: hidden;
+    border-radius: 20px;
+    background: var(--hs-bark);
+    color: var(--hs-cream);
+    box-shadow: var(--hs-shadow-card);
+}
+
+.hs-local + .hs-local {
+    margin-top: 1.25rem;
+}
+
+@media (min-width: 768px) {
+    .hs-local {
+        grid-template-columns: 2fr 3fr;
+    }
+}
+
+.hs-local__foto {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 12rem;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 30% 30%, var(--hs-terracota-35) 0%, transparent 65%),
+        var(--hs-bark-light);
+    color: var(--hs-crema-60);
+    font-size: 3.5rem;
+}
+
+.hs-local__foto img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--hs-t-lento) var(--hs-ease-seda);
+}
+
+.hs-local:hover .hs-local__foto img {
+    transform: scale(1.04);
+}
+
+.hs-local__cuerpo {
+    padding: 2rem;
+}
+
+@media (min-width: 768px) {
+    .hs-local__cuerpo {
+        padding: 2.5rem;
+    }
+}
+
+.hs-local__kicker {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--hs-amber);
+}
+
+.hs-local__nombre {
+    margin: 0 0 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--hs-cream);
+}
+
+.hs-local__dato {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0 0 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--hs-cream-82);
+}
+
+.hs-local__dato .bi {
+    flex: none;
+    color: var(--hs-amber);
+}
+
+.hs-local .hs-btn {
+    margin-top: 1rem;
+}
+
+/* ---------- Menos movimiento ---------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    .hs-cinta__pista,
+    .hs-carta.is-pestanas .hs-carta__panel:not([hidden]),
+    .hs-carta.is-pestanas .hs-plato {
+        animation: none;
+    }
+
+    /* La cinta se queda quieta y se puede leer desplazándola */
+    .hs-cinta {
+        overflow-x: auto;
+    }
+
+    .hs-cafe__contador::after {
+        display: none;
+    }
+
+    .hs-carta__pestana,
+    .hs-plato,
+    .hs-local__foto img {
+        transition: none;
+    }
+
+    .hs-carta__pestana:hover,
+    .hs-local:hover .hs-local__foto img {
+        transform: none;
+    }
+}

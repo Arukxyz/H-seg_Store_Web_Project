@@ -15,6 +15,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,18 +30,10 @@ import pe.edu.utp.hoseg.web.service.UsuarioDetailsService;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-/**
- * Dos inicios de sesión independientes:
- * <ul>
- *   <li>Panel {@code /admin/**}: personal de la tabla usuario (SHA-256 + salt,
- *       igual que el escritorio), solo rol ADMINISTRADOR.</li>
- *   <li>Resto del portal: clientes (BCrypt). El catálogo, la Home, la consulta
- *       de impacto, el Café, las páginas institucionales y los formularios
- *       públicos no exigen sesión; comprar, la cuenta y reseñar, sí.</li>
- * </ul>
- * En ambos, 3 intentos fallidos bloquean 5 minutos (BloqueoAccesoService).
- */
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -53,21 +46,25 @@ public class SecurityConfig {
 
     @Bean
     @Order(1)
-    SecurityFilterChain cadenaAdministracion(HttpSecurity http, UsuarioDetailsService usuarioDetailsService) throws Exception {
+    SecurityFilterChain cadenaPersonal(HttpSecurity http, UsuarioDetailsService usuarioDetailsService) throws Exception {
         http
-                .securityMatcher("/admin/**")
+                .securityMatcher("/admin/**", "/logistica/**", "/gestion-impacto/**")
                 .authenticationManager(gestor(usuarioDetailsService, new Sha256ConSaltPasswordEncoder()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/admin/login").permitAll()
-                        .anyRequest().hasRole(RolUsuario.ADMINISTRADOR.name()))
+                        .requestMatchers("/admin/**").hasRole(RolUsuario.ADMINISTRADOR.name())
+                        .requestMatchers("/logistica/**").hasRole(RolUsuario.LOGISTICA.name())
+                        .requestMatchers("/gestion-impacto/**").hasRole(RolUsuario.GESTOR_IMPACTO.name())
+                        .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/admin/login")
-                        .successHandler(this::ingresoAdministrador)
-                        .failureHandler(falloAdministrador())
+                        .successHandler(this::ingresoPersonal)
+                        .failureHandler(falloPersonal())
                         .permitAll())
                 .logout(logout -> logout
                         .logoutUrl("/admin/logout")
-                        .logoutSuccessUrl("/admin/login?salir"));
+                        .logoutSuccessUrl("/admin/login?salir")
+                        .permitAll());
         return http.build();
     }
 
@@ -79,11 +76,15 @@ public class SecurityConfig {
         volverADondeIba.setDefaultTargetUrl("/");
         http
                 .authenticationManager(gestor(clienteDetailsService, codificadorContrasena))
-                // Lo que exige sesión de cliente se lista aquí. Todo lo demás del portal es
-                // público o no existe (y responde con la página 404, no con el login).
-                // Una ruta nueva que necesite sesión DEBE agregarse a la primera línea.
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/carrito/confirmar", "/compra-exito", "/cuenta/**").hasRole(ClienteAutenticado.ROL)
+                        .requestMatchers(
+                                "/carrito/entrega",
+                                "/carrito/pago",
+                                "/carrito/procesar-pago",
+                                "/carrito/confirmar",
+                                "/compra-exito",
+                                "/cuenta/**"
+                        ).hasRole(ClienteAutenticado.ROL)
                         .requestMatchers(HttpMethod.POST, "/tienda/*/resenas").hasRole(ClienteAutenticado.ROL)
                         .anyRequest().permitAll())
                 .formLogin(form -> form
@@ -114,11 +115,6 @@ public class SecurityConfig {
         return new ProviderManager(proveedor);
     }
 
-    /**
-     * /login?error (credenciales incorrectas) o /login?bloqueado=5 (minutos).
-     * Una cuenta ya bloqueada no suma intentos: el chequeo de bloqueo va antes
-     * que el de contraseña, como en el escritorio.
-     */
     private AuthenticationFailureHandler falloCliente() {
         return (request, response, error) -> {
             String email = valor(request, "email");
@@ -131,7 +127,7 @@ public class SecurityConfig {
         };
     }
 
-    private AuthenticationFailureHandler falloAdministrador() {
+    private AuthenticationFailureHandler falloPersonal() {
         return (request, response, error) -> {
             String username = valor(request, "username");
             Optional<Integer> bloqueo = error instanceof LockedException
@@ -143,18 +139,26 @@ public class SecurityConfig {
         };
     }
 
-    /** Un encargado tiene cuenta pero no acceso al panel: se cierra la sesión y se le avisa. */
-    private void ingresoAdministrador(HttpServletRequest request, HttpServletResponse response,
-                                      Authentication autenticacion) throws IOException {
+    /** Redirige a cada miembro del personal según su rol; ENCARGADO solo usa el escritorio. */
+    private void ingresoPersonal(HttpServletRequest request, HttpServletResponse response,
+                                 Authentication autenticacion) throws IOException {
         bloqueoAccesoService.ingresoDeUsuario(autenticacion.getName());
-        boolean esAdministrador = autenticacion.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_" + RolUsuario.ADMINISTRADOR.name()));
-        if (!esAdministrador) {
+        Set<String> roles = autenticacion.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet());
+
+        String ctx = request.getContextPath();
+        if (roles.contains("ROLE_" + RolUsuario.ADMINISTRADOR.name())) {
+            response.sendRedirect(ctx + "/admin/panel");
+        } else if (roles.contains("ROLE_" + RolUsuario.LOGISTICA.name())) {
+            response.sendRedirect(ctx + "/logistica/pedidos");
+        } else if (roles.contains("ROLE_" + RolUsuario.GESTOR_IMPACTO.name())) {
+            // Como los demás roles, entra por la primera opción de su menú
+            response.sendRedirect(ctx + "/gestion-impacto/donaciones");
+        } else {
             new SecurityContextLogoutHandler().logout(request, response, autenticacion);
-            response.sendRedirect(request.getContextPath() + "/admin/login?sinPermiso");
-            return;
+            response.sendRedirect(ctx + "/admin/login?sinPermiso");
         }
-        response.sendRedirect(request.getContextPath() + "/admin/panel");
     }
 
     private static String motivo(AuthenticationException error, Optional<Integer> bloqueo) {

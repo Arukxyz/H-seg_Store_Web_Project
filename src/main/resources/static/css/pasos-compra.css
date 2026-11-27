@@ -1,0 +1,117 @@
+/* =====================================================================
+   HÖSÉG Web · Indicador de pasos de la compra (fragments/pasos-compra.html)
+   Usado en Entrega y Pago. La estructura (lista, flex, separaciones) es de
+   Bootstrap; aquí solo están los colores de la paleta y el círculo numerado.
+   Sin colores literales: todo sale de tokens.css.
+   ===================================================================== */
+
+.hs-pasos {
+    padding: 0;
+    color: var(--hs-muted);
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.hs-pasos__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hs-pasos__enlace {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: inherit;
+    text-decoration: none;
+}
+.hs-pasos__enlace:hover {
+    color: var(--hs-terracotta);
+}
+
+/* Círculo con el número (o la marca de verificación) */
+.hs-pasos__num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--hs-sand);
+    border-radius: 50%;
+    background: var(--hs-card);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+/* Paso ya completado: verde salvia */
+.hs-pasos__item.is-hecho .hs-pasos__num {
+    border-color: color-mix(in srgb, var(--hs-sage) 35%, transparent);
+    background: var(--hs-sage-light);
+    color: var(--hs-sage);
+}
+
+/* Paso actual: terracota, con el texto más fuerte */
+.hs-pasos__item.is-actual {
+    color: var(--hs-bark);
+    font-weight: 700;
+}
+.hs-pasos__item.is-actual .hs-pasos__num {
+    border-color: var(--hs-terracotta);
+    background: var(--hs-terracotta);
+    color: var(--hs-sobre-acento);
+    /* Llega después de que se dibujan las rayas */
+    animation: hsPopExito 0.5s var(--hs-ease-seda) 0.35s backwards;
+}
+
+.hs-pasos__enlace .hs-pasos__num {
+    transition: transform var(--hs-t-medio) var(--hs-ease-seda);
+}
+
+.hs-pasos__enlace:hover .hs-pasos__num {
+    transform: scale(1.1);
+}
+
+/* Raya entre pasos. La parte cumplida (salvia) se dibuja de izquierda a
+   derecha al cargar: es un ::after que crece con scaleX. */
+@keyframes hsRayaPaso {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+}
+
+.hs-pasos__raya {
+    position: relative;
+    width: 28px;
+    height: 2px;
+    overflow: hidden;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-sand);
+}
+
+.hs-pasos__raya.is-hecho::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--hs-sage);
+    transform-origin: left;
+    animation: hsRayaPaso 0.4s var(--hs-ease-seda) backwards;
+}
+
+/* La segunda raya cumplida empieza cuando termina la primera */
+.hs-pasos__raya.is-hecho ~ .hs-pasos__raya.is-hecho::after {
+    animation-delay: 0.2s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hs-pasos__item.is-actual .hs-pasos__num,
+    .hs-pasos__raya.is-hecho::after {
+        animation: none;
+    }
+
+    .hs-pasos__enlace .hs-pasos__num {
+        transition: none;
+    }
+
+    .hs-pasos__enlace:hover .hs-pasos__num {
+        transform: none;
+    }
+}

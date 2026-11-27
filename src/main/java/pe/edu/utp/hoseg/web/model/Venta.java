@@ -20,8 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Tabla venta: el "pedido" del enunciado. La web la inserta con
- * origen=WEB y estado=PENDIENTE; el escritorio la confirma y descuenta stock.
+ * Tabla venta: el "pedido" del enunciado.
  */
 @Entity
 @Table(name = "venta")
@@ -57,6 +56,13 @@ public class Venta {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal total;
 
+    /** Referencia del pago simulado: "TARJETA ****4512", "YAPE". Nunca el número completo. */
+    @Column(name = "metodo_pago", length = 30)
+    private String metodoPago;
+
+    @Column(name = "codigo_transaccion", length = 30)
+    private String codigoTransaccion;
+
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetalleVenta> detalles = new ArrayList<>();
 
@@ -79,5 +85,9 @@ public class Venta {
     public void setEstado(EstadoVenta estado) { this.estado = estado; }
     public BigDecimal getTotal() { return total; }
     public void setTotal(BigDecimal total) { this.total = total; }
+    public String getMetodoPago() { return metodoPago; }
+    public void setMetodoPago(String metodoPago) { this.metodoPago = metodoPago; }
+    public String getCodigoTransaccion() { return codigoTransaccion; }
+    public void setCodigoTransaccion(String codigoTransaccion) { this.codigoTransaccion = codigoTransaccion; }
     public List<DetalleVenta> getDetalles() { return detalles; }
 }

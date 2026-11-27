@@ -16,23 +16,30 @@ import pe.edu.utp.hoseg.web.model.EstadoDonacion;
 import pe.edu.utp.hoseg.web.model.EstadoEnvio;
 import pe.edu.utp.hoseg.web.model.EstadoResena;
 import pe.edu.utp.hoseg.web.model.EstadoVenta;
+import pe.edu.utp.hoseg.web.model.Producto;
 import pe.edu.utp.hoseg.web.model.RolUsuario;
 import pe.edu.utp.hoseg.web.model.TipoCompromiso;
 import pe.edu.utp.hoseg.web.model.TipoEnvio;
 import pe.edu.utp.hoseg.web.service.*;
+import pe.edu.utp.hoseg.web.service.BoletaPdfService;
+import pe.edu.utp.hoseg.web.service.LogisticaService;
+import pe.edu.utp.hoseg.web.config.JwtTokenProvider;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesRegex;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
@@ -42,6 +49,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
@@ -82,6 +90,12 @@ class VistasTest {
     @MockitoBean private BoletinService boletinService;
     @MockitoBean private ReclamacionService reclamacionService;
     @MockitoBean private PanelAdminService panelAdminService;
+    @MockitoBean private LogisticaService logisticaService;
+    @MockitoBean private GestorImpactoService gestorImpactoService;
+    @MockitoBean private BoletaPdfService boletaPdfService;
+    @MockitoBean private JwtTokenProvider jwtTokenProvider;
+    @MockitoBean private ConsultaDocumentoService consultaDocumentoService;
+
 
     // ---------- Bloque 1 ----------
 
@@ -116,13 +130,36 @@ class VistasTest {
         mvc.perform(get("/tienda/HSG-CAS-001"))
                 .andExpect(status().isOk())
                 // M disponible y elegida; L agotada y deshabilitada
-                .andExpect(content().string(containsString("value=\"HSG-CAS-001\" data-precio=\"259.90\" data-maximo=\"3\" data-pocas=\"true\" checked")))
+                .andExpect(content().string(matchesRegex(
+                        "(?s).*value=\"HSG-CAS-001\"\\s+data-precio=\"259.90\"\\s+data-maximo=\"3\"\\s+data-pocas=\"true\"\\s+checked.*")))
                 .andExpect(content().string(containsString("data-maximo=\"0\" data-pocas=\"false\" disabled=\"disabled\"")))
                 .andExpect(content().string(containsString("Esta compra abriga a 1 niño en Cusco.")))
                 .andExpect(content().string(containsString("Guía de tallas")))
                 .andExpect(content().string(containsString("Este producto aún no tiene reseñas.")))
                 .andExpect(content().string(containsString("para dejar tu reseña")))
                 .andExpect(content().string(not(containsString("Escribe tu reseña"))));
+    }
+
+    @Test
+    void tiendaPaginaYConservaLosFiltrosEnElPaginador() throws Exception {
+        when(catalogoService.tarjetas(any(FiltroCatalogo.class))).thenReturn(Collections.nCopies(14, tarjeta()));
+        mvc.perform(get("/tienda").param("impacto", "ABRIGO").param("porPagina", "6").param("pagina", "2"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Mostrando 7–12 de 14 productos")))
+                .andExpect(content().string(containsString("aria-current=\"page\"")))
+                // El paginador va dentro del formulario de filtros: así conserva impacto y orden
+                .andExpect(content().string(matchesRegex("(?s).*<form[^>]*data-tienda-filtros.*name=\"pagina\".*</form>.*")));
+    }
+
+    @Test
+    void tiendaConCabeceraParcialDevuelveSoloLosResultados() throws Exception {
+        when(catalogoService.tarjetas(any(FiltroCatalogo.class))).thenReturn(List.of(tarjeta()));
+        mvc.perform(get("/tienda").header("X-Hoseg-Parcial", "true"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("data-tienda-resultados")))
+                .andExpect(content().string(containsString("Casaca Älpafill Cusco")))
+                .andExpect(content().string(not(containsString("<html"))))
+                .andExpect(content().string(not(containsString("Ropa que abriga dos veces."))));
     }
 
     @Test
@@ -159,7 +196,7 @@ class VistasTest {
                 .andExpect(redirectedUrlPattern("**/login"));
     }
 
-    @Test
+   @Test
     void confirmarCompraConSesion() throws Exception {
         when(carritoService.items()).thenReturn(List.of(item()));
         when(carritoService.total()).thenReturn(new BigDecimal("259.90"));
@@ -168,19 +205,28 @@ class VistasTest {
         when(ventaService.costoEnvio(TipoEnvio.DELIVERY)).thenReturn(new BigDecimal("10.00"));
         when(cafeService.locales()).thenReturn(List.of(new LocalCafe("Höség Café Cusco", "Calle Palacio 110", "8:30 a 19:30", null, null)));
 
-        mvc.perform(get("/carrito/confirmar").with(user(ANA)))
+        mvc.perform(get("/carrito/entrega").with(user(ANA)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Recojo en tienda")));
     }
 
-    @Test
-    void confirmarRegistraLimpiaElCarritoYMuestraElCodigo() throws Exception {
-        CompraRegistrada compra = new CompraRegistrada("WEB-000113", new BigDecimal("259.90"), BigDecimal.ZERO,
-                new BigDecimal("259.90"), TipoEnvio.RECOJO_TIENDA, new ImpactoCompra(1, 0));
-        when(ventaService.confirmarCompra(eq(7), any(), any())).thenReturn(compra);
 
-        mvc.perform(post("/carrito/confirmar").with(user(ANA)).with(csrf())
-                        .param("tipo", "RECOJO_TIENDA").param("nombreReceptor", "Ana Torres"))
+   @Test
+    void confirmarRegistraLimpiaElCarritoYMuestraElCodigo() throws Exception {
+        DatosEnvioForm envio = new DatosEnvioForm();
+        envio.setTipo(TipoEnvio.RECOJO_TIENDA);
+        envio.setNombreReceptor("Ana Torres");
+
+        CompraRegistrada compra = new CompraRegistrada("WEB-000113", new BigDecimal("259.90"), BigDecimal.ZERO,
+                new BigDecimal("259.90"), TipoEnvio.RECOJO_TIENDA, new ImpactoCompra(1, 0),
+                "YAPE", "TRX-123456");
+        when(ventaService.pagarYRegistrar(eq(7), any(), any(), eq("YAPE"))).thenReturn(compra);
+
+        mvc.perform(post("/carrito/procesar-pago").with(user(ANA)).with(csrf())
+                        .sessionAttr("datosEnvioCheckout", envio)
+                        .param("medioPago", "BILLETERA")
+                        .param("billetera", "YAPE")
+                        .param("celular", "987654321"))
                 .andExpect(redirectedUrl("/compra-exito"))
                 .andExpect(flash().attribute("compra", compra));
         verify(carritoService).vaciar();
@@ -188,15 +234,16 @@ class VistasTest {
 
         mvc.perform(get("/compra-exito").with(user(ANA)).flashAttr("compra", compra))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("WEB-000113")));
+                .andExpect(content().string(containsString("WEB-000113")))
+                .andExpect(content().string(containsString("TRX-123456")));
     }
 
-    @Test
+     @Test
     void deliverySinDireccionVuelveAlFormularioConElError() throws Exception {
         when(carritoService.total()).thenReturn(BigDecimal.ZERO);
         when(carritoService.impacto()).thenReturn(ImpactoCompra.NINGUNO);
         when(ventaService.costoEnvio(any())).thenReturn(BigDecimal.TEN);
-        mvc.perform(post("/carrito/confirmar").with(user(ANA)).with(csrf())
+        mvc.perform(post("/carrito/entrega").with(user(ANA)).with(csrf())
                         .param("tipo", "DELIVERY").param("nombreReceptor", "Ana Torres"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Para delivery indica la dirección y el distrito.")));
@@ -238,9 +285,12 @@ class VistasTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("2 abrigos + 1 árbol")))
                 .andExpect(content().string(containsString("WEB-000113")));
+        // Celular y dirección son opcionales (DatosClienteForm): el navegador no debe exigirlos.
         mvc.perform(get("/cuenta").param("seccion", "datos").with(user(ANA)))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Cambiar contraseña")));
+                .andExpect(content().string(containsString("Cambiar contraseña")))
+                .andExpect(content().string(not(matchesRegex("(?s).*id=\"telefono\"[^>]*required.*"))))
+                .andExpect(content().string(not(matchesRegex("(?s).*id=\"direccion\"[^>]*required.*"))));
     }
 
     @Test
@@ -256,7 +306,12 @@ class VistasTest {
         mvc.perform(get("/cuenta/pedidos/WEB-000106").with(user(ANA)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Ccatca")))
-                .andExpect(content().string(containsString("Reseñar")))
+                .andExpect(content().string(containsString("/tienda/HSG-ACC-005#resenas")))
+                .andExpect(content().string(containsString("hs-linea-tiempo")))
+                .andExpect(content().string(containsString("Total pagado")))
+                // Provincia y departamento vienen null: la ubicación no debe imprimir "null".
+                .andExpect(content().string(containsString("Cusco")))
+                .andExpect(content().string(not(containsString(", null"))))
                 .andExpect(content().string(containsString("En camino")));
     }
 
@@ -282,8 +337,9 @@ class VistasTest {
                 List.of(new CategoriaCarta.Item("Latte", null, new BigDecimal("9.00"), false)))));
         when(cafeService.arbolesSembrados()).thenReturn(5018L);
         mvc.perform(get("/cafe")).andExpect(status().isOk())
-                .andExpect(content().string(containsString("5,018 árboles sembrados")))
-                .andExpect(content().string(containsString("agotado hoy")));
+                .andExpect(content().string(containsString("data-valor=\"5018\">5,018</strong>")))
+                .andExpect(content().string(containsString("árboles sembrados")))
+                .andExpect(content().string(containsString("Agotado hoy")));
 
         when(impactoService.resumen()).thenReturn(new ResumenImpacto(10, 20, 3, 5));
         when(contenidoService.bloques(any())).thenReturn(Map.of("nosotros.historia",
@@ -335,9 +391,20 @@ class VistasTest {
                 2, 3, new BigDecimal("1500.00"), new ImpactoCompra(4, 5), 1, 0));
         when(panelAdminService.pedidos(any(), any())).thenReturn(List.of(new PedidoAdmin("WEB-000113", "Ana Torres", AHORA,
                 new BigDecimal("259.90"), BigDecimal.ZERO, EstadoVenta.PENDIENTE, TipoEnvio.RECOJO_TIENDA, EstadoEnvio.PENDIENTE)));
+        // El panel no lista los pedidos: solo los deja como datos para los gráficos
         mvc.perform(get("/admin/panel").with(admin)).andExpect(status().isOk())
                 .andExpect(content().string(containsString("Admin Höség")))
-                .andExpect(content().string(containsString("WEB-000113")));
+                .andExpect(content().string(containsString("data-pedido")))
+                .andExpect(content().string(not(containsString("WEB-000113"))));
+        // La tabla vive en su propia pantalla, con el mismo rango de fechas (aunque llegue invertido)
+        mvc.perform(get("/admin/pedidos").param("desde", "2026-10-23").param("hasta", "2026-10-01").with(admin))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("desde", LocalDate.of(2026, 10, 1)))
+                .andExpect(model().attribute("hasta", LocalDate.of(2026, 10, 23)))
+                .andExpect(content().string(containsString("WEB-000113")))
+                .andExpect(content().string(containsString("Ana Torres")));
+        verify(panelAdminService).pedidos(LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 23));
+        mvc.perform(get("/admin/pedidos").with(user(ANA))).andExpect(status().isForbidden());
 
         when(catalogoService.paraAdministrar()).thenReturn(List.of(new ProductoAdmin("HSG-CAS-001", "Casaca", "M", "Casacas",
                 TipoCompromiso.ABRIGO, 25, true, false)));
@@ -407,6 +474,78 @@ class VistasTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/csv"))
                 .andExpect(content().string(containsString("ana@correo.pe")));
+    }
+
+    @Test
+    void elExcelDeSuscriptoresSeDescarga() throws Exception {
+        byte[] excel = {1, 2, 3};
+        when(boletinService.exportarExcelActivos()).thenReturn(excel);
+        mvc.perform(get("/admin/suscriptores.xlsx").with(user(ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .andExpect(header().string("Content-Disposition", containsString("suscriptores-hoseg.xlsx")))
+                .andExpect(content().bytes(excel));
+    }
+
+    // ---------- Logística ----------
+
+    private static final AdministradorAutenticado LOGISTICA =
+            new AdministradorAutenticado(2, "Lucía Logística", "logistica", "s:h", RolUsuario.LOGISTICA, true, false);
+
+    @Test
+    void elAvisoDeEstadoDelPedidoSaleUnaSolaVez() throws Exception {
+        mvc.perform(get("/logistica/pedidos").with(user(LOGISTICA))
+                        .flashAttr("exito", "Estado del pedido actualizado a En ruta."))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Estado del pedido actualizado a En ruta.")))
+                .andExpect(content().string(not(matchesRegex(
+                        "(?s).*actualizado a En ruta\\..*actualizado a En ruta\\..*"))));
+    }
+
+    @Test
+    void elInventarioOfreceEditarCadaProducto() throws Exception {
+        Producto casaca = new Producto();
+        casaca.setCodigo("HSG-CAS-001");
+        casaca.setNombre("Casaca Älpafill Cusco");
+        casaca.setCategoria("Casacas");
+        casaca.setColeccion("Älpafill");
+        casaca.setTalla("M");
+        casaca.setPrecio(new BigDecimal("259.90"));
+        casaca.setStockComercial(10);
+        casaca.setStockMinimo(3);
+        casaca.setTipoCompromiso(TipoCompromiso.ABRIGO);
+        when(logisticaService.inventarioActivo()).thenReturn(List.of(casaca));
+        when(catalogoService.categorias()).thenReturn(List.of("Casacas", "Chullos"));
+        when(catalogoService.colecciones()).thenReturn(List.of("Älpafill"));
+
+        mvc.perform(get("/logistica/inventario").with(user(LOGISTICA)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("id=\"modal-editar-producto\"")))
+                .andExpect(content().string(containsString("data-codigo=\"HSG-CAS-001\"")))
+                .andExpect(content().string(containsString("data-precio=\"259.90\"")))
+                .andExpect(content().string(containsString("<option value=\"Chullos\">Chullos</option>")));
+    }
+
+    @Test
+    void editarUnProductoLoGuardaYVuelveAlInventario() throws Exception {
+        mvc.perform(post("/logistica/inventario/HSG-CAS-001/editar").with(user(LOGISTICA)).with(csrf())
+                        .param("nombre", "Casaca Älpafill Cusco").param("categoria", "Casacas")
+                        .param("coleccion", "").param("talla", "M").param("precio", "249.90")
+                        .param("stockMinimo", "4").param("tipoCompromiso", ""))
+                .andExpect(redirectedUrl("/logistica/inventario"))
+                .andExpect(flash().attribute("exito", "Producto HSG-CAS-001 actualizado."));
+        verify(logisticaService).editarProducto(eq("HSG-CAS-001"), any(ProductoEdicionForm.class));
+    }
+
+    @Test
+    void editarConPrecioInvalidoNoLlegaAlServicio() throws Exception {
+        mvc.perform(post("/logistica/inventario/HSG-CAS-001/editar").with(user(LOGISTICA)).with(csrf())
+                        .param("nombre", "Casaca").param("categoria", "Casacas")
+                        .param("precio", "0").param("stockMinimo", "3"))
+                .andExpect(redirectedUrl("/logistica/inventario"))
+                .andExpect(flash().attribute("error", "El precio debe ser mayor a cero."));
+        verify(logisticaService, never()).editarProducto(anyString(), any());
     }
 
     // ---------- Datos de ejemplo ----------

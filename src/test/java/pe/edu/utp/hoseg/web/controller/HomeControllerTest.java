@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesRegex;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
@@ -102,7 +103,7 @@ class HomeControllerTest {
                 .andExpect(content().string(containsString("/js/navbar.js")))
                 // Iconos: Bootstrap Icons, sin SVG en línea
                 .andExpect(content().string(containsString("bootstrap-icons.min.css")))
-                .andExpect(content().string(containsString("bi bi-gift-fill")))
+                .andExpect(content().string(containsString("bi bi-casaca-fill")))
                 .andExpect(content().string(containsString("bi bi-tree-fill")))
                 .andExpect(content().string(containsString("hs-badge--arbol")))
                 .andExpect(content().string(not(containsString("<svg"))))
@@ -140,7 +141,10 @@ class HomeControllerTest {
                 .andExpect(content().string(containsString("href=\"/cuenta?seccion=datos\"")))
                 .andExpect(content().string(containsString("action=\"/logout\"")))
                 .andExpect(content().string(containsString("Cerrar sesión")))
-                .andExpect(content().string(containsString("href=\"/cuenta\" data-seccion=\"cuenta\"")))
+                // Óvalo móvil: Cuenta abre el mismo menú (con su Cerrar sesión) en vez de ir a /cuenta
+                .andExpect(content().string(containsString("data-seccion=\"cuenta\" data-bs-toggle=\"dropdown\"")))
+                .andExpect(content().string(matchesRegex("(?s).*action=\"/logout\".*action=\"/logout\".*")))
+                .andExpect(content().string(not(containsString("href=\"/cuenta\" data-seccion=\"cuenta\""))))
                 .andExpect(content().string(not(containsString("Ingresar"))));
     }
 
@@ -152,8 +156,9 @@ class HomeControllerTest {
         mvc.perform(get("/").with(user(new AdministradorAutenticado(1, "Admin", "admin", "s:h",
                         RolUsuario.ADMINISTRADOR, true, false))))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("href=\"/admin/panel\"")))
+                .andExpect(content().string(containsString("href=\"/admin/panel\" data-seccion=\"cuenta\"")))
                 .andExpect(content().string(not(containsString("Mis pedidos e impacto"))))
+                .andExpect(content().string(not(containsString("data-bs-toggle=\"dropdown\""))))
                 .andExpect(content().string(not(containsString("Ingresar"))));
     }
 

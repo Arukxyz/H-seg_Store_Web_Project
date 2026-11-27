@@ -2,84 +2,98 @@
    HÖSÉG Web · Páginas de error (error.html, error/404.html)
    Solo las usa el Bloque 5. No se reutiliza en otras plantillas, así que
    vive aparte de hoseg.css para no mezclarse con estilos de otros bloques.
+   Movimiento solo con transform y opacity; la entrada escalonada es
+   .hs-entrada (hoseg.css).
    ===================================================================== */
 
+.hs-error {
+    min-height: 60vh;
+}
+
+/* Icono en círculo con un aro que se expande y se desvanece (tres veces).
+   El aro es un ::after: se anima su escala y su opacidad, no la sombra. */
 @keyframes hsPulso {
-  0% {
-    box-shadow: 0 0 0 0 var(--hs-pulso-color);
-  }
-  70% {
-    box-shadow: 0 0 0 16px transparent;
-  }
-  100% {
-    box-shadow: 0 0 0 0 transparent;
-  }
+    from { opacity: 0.6; transform: scale(1); }
+    to   { opacity: 0;   transform: scale(1.4); }
 }
 
-.hs-icono-pulso {
-  animation: hsPulso 2.2s var(--hs-ease) infinite;
+.hs-error__icono {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 88px;
+    height: 88px;
+    margin-bottom: 1.5rem;
+    border-radius: 50%;
+    background: var(--hs-cream-dark);
+    color: var(--hs-terracotta);
+    font-size: 2.25rem;
 }
 
-.hs-icono-pulso--terracota {
-  --hs-pulso-color: color-mix(in srgb, var(--hs-terracotta) 35%, transparent);
-}
-.hs-icono-pulso--salvia {
-  --hs-pulso-color: color-mix(in srgb, var(--hs-sage) 35%, transparent);
+.hs-error__icono::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 2px solid currentColor;
+    border-radius: inherit;
+    opacity: 0;
+    animation: hsPulso 1.8s var(--hs-ease-seda) 0.6s 3;
+    pointer-events: none;
 }
 
+.hs-error__icono--salvia {
+    color: var(--hs-sage);
+}
+
+/* Cuenta atrás de la redirección: la barra se vacía con scaleX */
 @keyframes hsProgreso {
-  from {
-    width: 100%;
-  }
-  to {
-    width: 0%;
-  }
+    from { transform: scaleX(1); }
+    to   { transform: scaleX(0); }
 }
 
 .hs-barra-progreso {
-  width: 160px;
-  height: 4px;
-  margin: 0 auto;
-  border-radius: var(--hs-radius-pill);
-  background: var(--hs-sand);
-  overflow: hidden;
+    width: 160px;
+    height: 4px;
+    margin: 0 auto;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-sand);
+    overflow: hidden;
 }
 
 .hs-barra-progreso__relleno {
-  height: 100%;
-  width: 100%;
-  border-radius: var(--hs-radius-pill);
-  animation: hsProgreso 8s linear forwards;
+    height: 100%;
+    width: 100%;
+    border-radius: var(--hs-radius-pill);
+    transform-origin: left;
+    animation: hsProgreso 8s linear forwards;
 }
 
-.hs-barra-progreso__relleno--terracota {
-  background: var(--hs-terracotta);
-}
-.hs-barra-progreso__relleno--salvia {
-  background: var(--hs-sage);
+.hs-barra-progreso__relleno--terracota { background: var(--hs-terracotta); }
+.hs-barra-progreso__relleno--salvia    { background: var(--hs-sage); }
+
+.hs-error__aviso {
+    font-size: 0.8125rem;
+    color: var(--hs-muted);
 }
 
 /* Textura de fondo: la foto de comunidad, casi invisible, detrás de la tarjeta */
 .hs-fondo-comunidad {
-  position: relative;
-  isolation: isolate;
+    position: relative;
+    isolation: isolate;
 }
 
 .hs-fondo-comunidad::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: url("../images/comunidad-cusco.jpg") center/cover no-repeat;
-  opacity: 0.08;
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: url('../images/comunidad-cusco.jpg') center/cover no-repeat;
+    opacity: 0.08;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hs-icono-pulso {
-    animation: none;
-  }
-  .hs-barra-progreso__relleno {
-    animation: none;
-    width: 0%;
-  }
+    .hs-error__icono::after { animation: none; }
+    /* Sin animación la barra queda llena: el texto ya dice cuántos segundos faltan */
+    .hs-barra-progreso__relleno { animation: none; }
 }

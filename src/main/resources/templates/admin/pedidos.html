@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<!--
+  Pedidos web (GET /admin/pedidos, AdminController.pedidos). Solo lectura para el administrador.
+  Modelo: desde, hasta (LocalDate) y pedidos (List<PedidoAdmin>), los mismos del panel.
+  La tabla, el filtro por estado y la paginación son los del panel, copiados sin cambios: admin.js los activa
+  por [data-order-filter], [data-order-status] y los ids panel-*.
+-->
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+    th:replace="~{layout/admin :: pagina(titulo='Pedidos · HÖSÉG', activa='pedidos', contenido=~{::main})}">
+
+<body>
+    <main class="hs-admin-page hs-orders-page">
+        <header class="hs-page-heading">
+            <div>
+                <p class="hs-eyebrow">VENTAS · HÖSÉG</p>
+                <h1>Pedidos</h1>
+                <p class="hs-page-desc">Consulta los pedidos de la tienda web por rango de fechas.</p>
+            </div>
+            <form method="get" th:action="@{/admin/pedidos}" class="hs-date-filter"
+                aria-label="Filtrar pedidos por fecha">
+                <div class="hs-field">
+                    <label for="desde">Desde</label>
+                    <input class="hs-admin-input" id="desde" type="date" name="desde" th:value="${desde}" required>
+                </div>
+                <div class="hs-field">
+                    <label for="hasta">Hasta</label>
+                    <input class="hs-admin-input" id="hasta" type="date" name="hasta" th:value="${hasta}" required>
+                </div>
+                <button class="hs-admin-btn hs-admin-btn--primary" type="submit">
+                    <i class="bi bi-funnel" aria-hidden="true"></i> Aplicar
+                </button>
+            </form>
+        </header>
+
+        <!-- Tabla de pedidos del periodo -->
+        <section class="hs-admin-card hs-order-card" aria-labelledby="titulo-pedidos">
+            <div class="hs-card-head hs-card-head--wrap">
+                <div>
+                    <h2 id="titulo-pedidos">Pedidos web</h2>
+                    <p>Consulta consolidada de pedidos en el rango seleccionado (atendidos por Logística).</p>
+                </div>
+                <span class="hs-soft-label">
+                    <i class="bi bi-shield-lock" aria-hidden="true"></i> Solo lectura
+                </span>
+            </div>
+
+            <div class="hs-tab-strip hs-filter-tabs" role="group" aria-label="Filtrar pedidos mostrados">
+                <button type="button" class="hs-tab is-active" data-order-filter="TODOS" aria-pressed="true">
+                    Todos <span th:text="${#lists.size(pedidos)}">0</span>
+                </button>
+                <button type="button" class="hs-tab" data-order-filter="PENDIENTE"
+                    aria-pressed="false">Pendientes</button>
+                <button type="button" class="hs-tab" data-order-filter="PAGADO" aria-pressed="false">Pagados</button>
+                <button type="button" class="hs-tab" data-order-filter="ANULADO" aria-pressed="false">Anulados</button>
+            </div>
+
+            <!-- Aviso de desplazamiento horizontal solo en móvil -->
+            <p class="hs-aviso-deslizar d-md-none px-3 pt-2 mb-1">
+                <span>Desliza la tabla para ver más</span>
+                <i class="bi bi-arrow-right hs-aviso-deslizar__flecha" aria-hidden="true"></i>
+            </p>
+
+            <div class="hs-table-scroll">
+                <table class="hs-admin-table hs-orders-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Comprobante</th>
+                            <th scope="col">Cliente</th>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Costo de envío</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col">Tipo de envío</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="p : ${pedidos}" th:attr="data-order-status=${p.estado.name()}">
+                            <td>
+                                <span class="hs-code-pill" th:text="${p.codigoComprobante}">WEB-000110</span>
+                            </td>
+                            <td class="hs-cell-strong" th:text="${p.cliente}">Cliente</td>
+                            <td class="hs-date" th:text="${#temporals.format(p.fecha, 'dd/MM/yyyy HH:mm')}">23/10/2026
+                            </td>
+                            <td class="hs-cell-strong"
+                                th:text="'S/ ' + ${#numbers.formatDecimal(p.total, 1, 'COMMA', 2, 'POINT')}">S/ 259.90
+                            </td>
+                            <td
+                                th:text="${p.costoEnvio != null} ? 'S/ ' + ${#numbers.formatDecimal(p.costoEnvio, 1, 'COMMA', 2, 'POINT')} : '—'">
+                                S/ 0.00</td>
+                            <td>
+                                <span class="hs-state"
+                                    th:classappend="'hs-state--' + ${#strings.toLowerCase(p.estado.name())}"
+                                    th:text="${p.estado.etiqueta}">Pendiente</span>
+                            </td>
+                            <td
+                                th:text="${p.tipoEnvio != null} ? ${p.tipoEnvio.etiqueta} + (${p.estadoEnvio != null} ? ' · ' + ${p.estadoEnvio.etiqueta} : '') : '—'">
+                                Recojo</td>
+                        </tr>
+                        <tr th:if="${pedidos.isEmpty()}">
+                            <td colspan="7" class="hs-empty-row">
+                                <div class="hs-empty-box">
+                                    <i class="bi bi-inbox" aria-hidden="true"></i>
+                                    <span>No hay pedidos registrados en este periodo.</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="hs-filter-empty" hidden>
+                            <td colspan="7" class="hs-empty-row">
+                                <div class="hs-empty-box">
+                                    <i class="bi bi-filter-circle" aria-hidden="true"></i>
+                                    <span>No hay pedidos con este estado en el rango actual.</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Barra de paginación limpia para Pedidos web -->
+            <div class="hs-pagination" id="panel-paginacion" hidden>
+                <span class="hs-pagination__info" id="panel-paginacion-info">Mostrando 1–10</span>
+                <div class="hs-pagination__controls">
+                    <button type="button" class="hs-admin-btn hs-admin-btn--ghost hs-admin-btn--sm" id="panel-prev">
+                        <i class="bi bi-chevron-left" aria-hidden="true"></i> Anterior
+                    </button>
+                    <span class="hs-pagination__page" id="panel-paginacion-num">1 / 1</span>
+                    <button type="button" class="hs-admin-btn hs-admin-btn--ghost hs-admin-btn--sm" id="panel-next">
+                        Siguiente <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

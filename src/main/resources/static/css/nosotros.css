@@ -1,0 +1,871 @@
+/* =====================================================================
+   HÖSÉG Web · Nosotros
+   Estilos propios de /nosotros (templates/institucional/nosotros.html).
+   Todo sale de tokens.css: aquí no hay colores literales (las mezclas con
+   transparencia usan color-mix sobre variables de la paleta). Lo que ya
+   existe se reutiliza tal cual (hs-btn, hs-badge, hs-chip-vidrio,
+   hs-contador, hsFadeSlide, el velo y el vidrio del hero de la Home).
+   ===================================================================== */
+
+/* ---------- Animaciones propias (hsFadeSlide ya vive en tokens.css) ---- */
+/* Zoom de entrada de la foto del banner: arranca un poco acercada y se aleja en 2 s */
+@keyframes hsAcercar {
+    from {
+        transform: scale(1.08);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+@keyframes hsTrazo {
+    from {
+        transform: scaleX(0);
+    }
+    to {
+        transform: scaleX(1);
+    }
+}
+
+/* La entrada escalonada del banner es .hs-entrada y la aparición al hacer
+   scroll ([data-revelar]) es la común del sitio (revelar.js + hoseg.css).
+   La cascada se marca con --hs-i en la plantilla. */
+
+/* ---------- Ritmo vertical: menos aire que el valor global ----------- */
+.hs-nosotros .hs-seccion {
+    padding: 3.5rem 0;
+}
+
+@media (min-width: 768px) {
+    .hs-nosotros .hs-seccion {
+        padding: 4.5rem 0;
+    }
+}
+
+/* ---------- Manchas de color tras el vidrio --------------------------
+   El vidrio solo se nota si hay color detrás: dos manchas difuminadas con
+   terracota y salvia, que además dan vida al fondo liso. */
+.hs-aurora {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.hs-aurora::before,
+.hs-aurora::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    width: 30rem;
+    height: 30rem;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+}
+
+.hs-aurora::before {
+    top: -10rem;
+    left: -9rem;
+    background: var(--hs-terracotta);
+    opacity: 0.22;
+}
+
+.hs-aurora::after {
+    right: -9rem;
+    bottom: -11rem;
+    background: var(--hs-sage);
+    opacity: 0.28;
+}
+
+.hs-aurora--inversa::before {
+    top: auto;
+    bottom: -11rem;
+    left: auto;
+    right: -9rem;
+}
+.hs-aurora--inversa::after {
+    top: -10rem;
+    bottom: auto;
+    right: auto;
+    left: -9rem;
+}
+
+/* La franja oscura reutiliza las manchas con más fuerza */
+.hs-cifras.hs-aurora::before {
+    opacity: 0.45;
+}
+.hs-cifras.hs-aurora::after {
+    opacity: 0.4;
+}
+
+/* ---------- 1 · Historia (banner con foto a todo el ancho) -----------
+   Misma receta que el hero de la Home: foto + velo + panel de vidrio. */
+.hs-nosotros__hero {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    min-height: 34rem;
+    /* El banner sube hasta el borde de la pantalla, bajo la barra transparente.
+     Este relleno (56 px móvil / 64 px escritorio = alto de la barra) evita que el panel quede tapado. */
+    padding-top: 56px;
+    overflow: hidden;
+    background: var(--hs-bark); /* si la foto no carga, el texto claro sigue legible */
+}
+
+@media (min-width: 768px) {
+    /* Altura de la barra en escritorio */
+    .hs-nosotros__hero {
+        padding-top: 64px;
+    }
+}
+
+@media (min-width: 992px) {
+    .hs-nosotros__hero {
+        align-items: center;
+        /* No se resta la barra: el banner empieza en el borde superior */
+        min-height: min(40rem, 100svh);
+    }
+}
+
+.hs-nosotros__fondo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* En móvil se encuadra hacia la derecha, donde están las alpacas. */
+    object-position: 65% center;
+    animation: hsAcercar 2s var(--hs-ease) both;
+}
+
+@media (min-width: 768px) {
+    .hs-nosotros__fondo {
+        object-position: center;
+    }
+}
+
+.hs-nosotros__velo {
+    position: absolute;
+    inset: 0;
+    background: var(--hs-velo-hero);
+}
+
+.hs-nosotros__contenido {
+    position: relative;
+    z-index: 1;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+/* ---------- Panel: tarjeta 3D con aros concéntricos ------------------
+   Idea de la tarjeta "card3" de Smit Prajapati (CodePen GRPogVz, MIT),
+   rehecha con la paleta y solo con transform. Tres capas en un mismo
+   espacio 3D (preserve-3d):
+     .hs-nosotros__vidrio          el fondo de vidrio (z = 0)
+     .hs-aros                      cinco aros en la esquina superior
+                                   derecha, que asoman fuera de la tarjeta
+                                   y se escalonan en profundidad
+     .hs-nosotros__panel-contenido el texto, un poco por delante (z = 24 px)
+   El vidrio va en su propia capa porque backdrop-filter aplana el 3D del
+   elemento que lo lleva. Al pasar el cursor la tarjeta se inclina y los
+   aros se despegan hacia el frente uno tras otro. */
+.hs-nosotros__panel {
+    position: relative;
+    max-width: 35rem;
+    padding: 28px;
+    color: var(--hs-cream);
+    transform-style: preserve-3d;
+    /* La perspectiva va en la propia tarjeta (centrada en ella): así el texto,
+       que está unos píxeles por delante, no se corre en reposo. */
+    transform: perspective(1000px) rotate3d(1, 1, 0, 0deg);
+    transition: transform var(--hs-t-lento) var(--hs-ease-seda);
+}
+
+@media (min-width: 768px) {
+    .hs-nosotros__panel {
+        padding: 40px;
+    }
+}
+
+.hs-nosotros__vidrio {
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--hs-pill-border);
+    border-radius: 24px;
+    background: var(--hs-pill-bg);
+    -webkit-backdrop-filter: var(--hs-pill-blur);
+    backdrop-filter: var(--hs-pill-blur);
+    box-shadow: var(--hs-shadow-pill);
+}
+
+.hs-nosotros__panel-contenido {
+    position: relative;
+    transform: translateZ(16px);
+}
+
+/* Los aros: todos anclados a la misma esquina, cada uno más chico y más
+   adentro que el anterior. Las medidas van en em para achicarlos todos
+   juntos en móvil (font-size del contenedor). */
+.hs-aros {
+    position: absolute;
+    top: -2.25rem;
+    right: -2.25rem;
+    font-size: 1rem;
+    transform-style: preserve-3d;
+    pointer-events: none;
+}
+
+.hs-aros__aro {
+    position: absolute;
+    top: var(--hs-aro-borde);
+    right: var(--hs-aro-borde);
+    width: var(--hs-aro-ancho);
+    aspect-ratio: 1;
+    border: 1px solid var(--hs-vidrio-borde-suave);
+    border-radius: 50%;
+    background: var(--hs-terracota-22);
+    box-shadow: var(--hs-sombra-aro);
+    transform: translateZ(var(--hs-aro-z));
+    transition: transform var(--hs-t-lento) var(--hs-ease-seda) var(--hs-aro-retraso, 0s);
+}
+
+.hs-aros__aro--1 { --hs-aro-ancho: 9em;   --hs-aro-borde: 0;      --hs-aro-z: 12px; --hs-aro-z-hover: 24px; }
+.hs-aros__aro--2 { --hs-aro-ancho: 7.5em; --hs-aro-borde: 0.2em;  --hs-aro-z: 24px; --hs-aro-z-hover: 56px;  --hs-aro-retraso: 0.08s; }
+.hs-aros__aro--3 { --hs-aro-ancho: 6em;   --hs-aro-borde: 0.55em; --hs-aro-z: 36px; --hs-aro-z-hover: 84px;  --hs-aro-retraso: 0.16s; }
+.hs-aros__aro--4 { --hs-aro-ancho: 4.5em; --hs-aro-borde: 0.9em;  --hs-aro-z: 48px; --hs-aro-z-hover: 112px; --hs-aro-retraso: 0.24s; }
+
+/* El aro central lleva la casaca, sobre terracota sólido */
+.hs-aros__aro--5 {
+    --hs-aro-ancho: 3em;
+    --hs-aro-borde: 1.3em;
+    --hs-aro-z: 60px;
+    --hs-aro-z-hover: 140px;
+    --hs-aro-retraso: 0.32s;
+    display: grid;
+    place-content: center;
+    background: var(--hs-terracotta);
+    color: var(--hs-cream);
+}
+
+.hs-aros__aro--5 .bi {
+    font-size: 1.25em;
+}
+
+/* Inclinación y aros que se despegan: solo con mouse y sin "reducir movimiento" */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .hs-nosotros__panel:hover {
+        transform: perspective(1000px) rotate3d(1, 1, 0, 12deg);
+    }
+
+    .hs-nosotros__panel:hover .hs-aros__aro {
+        transform: translateZ(var(--hs-aro-z-hover));
+    }
+}
+
+@media (max-width: 575.98px) {
+    .hs-aros {
+        top: -1.25rem;
+        right: -0.5rem;
+        font-size: 0.65rem;
+    }
+}
+
+.hs-nosotros__panel .hs-kicker {
+    margin: 1.25rem 0 0;
+    color: var(--hs-cream-75);
+}
+
+.hs-nosotros__titulo {
+    margin: 0.5rem 0 1.25rem;
+    font-size: clamp(2.25rem, 5vw, 3.25rem);
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--hs-cream);
+}
+
+/* Trazo terracota que se dibuja bajo el titular */
+.hs-nosotros__titulo::after {
+    content: "";
+    display: block;
+    width: 72px;
+    height: 3px;
+    margin-top: 1.25rem;
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-terracotta);
+    transform-origin: left;
+    animation: hsTrazo 0.8s var(--hs-ease) 0.7s both;
+}
+
+.hs-nosotros__bajada {
+    margin: 0 0 1.75rem;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--hs-cream-82);
+}
+
+/* Elevación, brillo y flecha que avanza del botón: comunes (hoseg.css).
+   En móvil el botón ocupa todo el ancho del panel. */
+@media (max-width: 575.98px) {
+    .hs-nosotros__boton {
+        width: 100%;
+    }
+
+    .hs-nosotros__contenido {
+        padding-top: 2rem;
+        padding-bottom: 6.5rem;   /* sitio para el óvalo de navegación */
+    }
+
+    .hs-nosotros__panel {
+        padding: 22px;
+    }
+}
+
+/* ---------- Vidrio claro (modelos, ONG y resultado de la consulta de impacto) ---------- */
+.hs-modelo,
+.hs-aliada,
+.hs-resultado {
+    border: 1px solid var(--hs-sand);
+    border-radius: 20px;
+    background: color-mix(in srgb, var(--hs-card) 62%, transparent);
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+    backdrop-filter: blur(18px) saturate(170%);
+    box-shadow: var(--hs-shadow-card), var(--hs-brillo-badge);
+}
+
+/* ---------- 2 · Triple impacto -------------------------------------- */
+.hs-modelo {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    height: 100%;
+    padding: 28px;
+    overflow: hidden;
+    transition:
+        transform var(--hs-t-medio) var(--hs-ease-seda),
+        border-color var(--hs-t-fast),
+        box-shadow 0.25s var(--hs-ease);
+}
+
+/* Hover terracota (abrigo) o salvia (árbol): borde y título toman el color del modelo */
+.hs-modelo:hover {
+    transform: translateY(-4px);
+    border-color: var(--hs-acento);
+    box-shadow: var(--hs-shadow-card-hover), var(--hs-brillo-badge);
+}
+
+.hs-modelo:hover .hs-modelo__titulo {
+    color: var(--hs-acento);
+}
+
+/* Barra de color que se extiende al pasar el cursor */
+.hs-modelo::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--hs-acento);
+    transform: scaleX(0.18);
+    transform-origin: left;
+    transition: transform 0.45s var(--hs-ease);
+}
+
+.hs-modelo:hover::before {
+    transform: scaleX(1);
+}
+
+.hs-modelo--abrigo {
+    --hs-acento: var(--hs-terracotta);
+    --hs-acento-suave: var(--hs-terracotta-light);
+}
+.hs-modelo--arbol {
+    --hs-acento: var(--hs-sage);
+    --hs-acento-suave: var(--hs-sage-light);
+}
+
+/* Icono grande de fondo, decorativo */
+.hs-modelo__marca {
+    position: absolute;
+    right: -16px;
+    bottom: -28px;
+    color: var(--hs-acento-suave);
+    font-size: 9rem;
+    line-height: 1;
+    pointer-events: none;
+    transition: transform 0.5s var(--hs-ease);
+}
+
+.hs-modelo:hover .hs-modelo__marca {
+    transform: rotate(-8deg) scale(1.08);
+}
+
+.hs-modelo__icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: var(--hs-acento-suave);
+    color: var(--hs-acento);
+    font-size: 28px;
+    transition: transform 0.3s var(--hs-ease);
+}
+
+.hs-modelo:hover .hs-modelo__icono {
+    transform: scale(1.1) rotate(-6deg);
+}
+
+.hs-modelo__cabecera {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.hs-modelo__titulo {
+    position: relative;
+    margin: 0;
+    font-size: 1.375rem;
+    font-weight: 600;
+    color: var(--hs-bark);
+}
+
+.hs-modelo__texto {
+    position: relative;
+    max-width: 26rem;
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--hs-muted);
+}
+
+/* ---------- 3 · Cifras de impacto (franja oscura) -------------------
+   Reutiliza fragments/impacto :: contador, vestido de vidrio sobre fondo
+   corteza con las mismas variables del hero de la Home. */
+.hs-cifras {
+    background: var(--hs-bark);
+    color: var(--hs-cream);
+}
+
+.hs-cifras__titulo {
+    color: var(--hs-cream);
+}
+
+.hs-cifras__bajada {
+    max-width: 32rem;
+    margin: 0 auto;
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: var(--hs-cream-75);
+}
+
+.hs-cifras .hs-contador {
+    border-color: var(--hs-vidrio-borde);
+    background: var(--hs-vidrio-bg);
+    box-shadow: var(--hs-brillo-vidrio);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    backdrop-filter: blur(18px) saturate(160%);
+    transition:
+        background var(--hs-t-fast),
+        border-color var(--hs-t-fast);
+}
+
+/* Son de vidrio (backdrop-filter): al pasar el cursor se aclaran pero no se
+   desplazan, porque mover un vidrio obliga a recalcular el desenfoque. */
+.hs-cifras .hs-contador:hover {
+    background: var(--hs-vidrio-bg-hover);
+    border-color: var(--hs-vidrio-borde);
+}
+
+.hs-cifras .hs-contador.hs-elevable:hover {
+    transform: none;
+}
+
+.hs-cifras .hs-contador__icono {
+    background: var(--hs-chip-terracota-bg);
+    color: var(--hs-cream);
+}
+
+.hs-cifras .hs-contador__cifra {
+    color: var(--hs-cream);
+}
+.hs-cifras .hs-contador__etiqueta {
+    color: var(--hs-cream-82);
+}
+
+/* ---------- 4 · Comunidades y ONG aliada ---------------------------- */
+/* Las píldoras de comunidades usan .hs-chip--vivo (hoseg.css). */
+/* De vidrio: al pasar el cursor cambia el borde, sin desplazarse */
+.hs-aliada {
+    padding: 28px;
+    transition: border-color var(--hs-t-fast);
+}
+
+.hs-aliada:hover {
+    border-color: var(--hs-sage);
+}
+
+.hs-aliada__etiqueta {
+    margin: 0 0 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--hs-muted);
+}
+
+.hs-aliada__fila {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.hs-aliada__fila + .hs-aliada__fila {
+    margin-top: 12px;
+}
+
+.hs-aliada__icono {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--hs-sage-light);
+    color: var(--hs-sage);
+    font-size: 22px;
+}
+
+.hs-aliada__icono--sello {
+    background: var(--hs-amber-light);
+    color: var(--hs-amber);
+}
+
+.hs-aliada__nombre {
+    font-family: var(--hs-font-display);
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--hs-bark);
+}
+
+.hs-aliada__sello {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--hs-muted);
+}
+
+.hs-aliada__separador {
+    height: 1px;
+    margin: 20px 0;
+    border: 0;
+    background: var(--hs-sand);
+    opacity: 0.7;
+}
+
+/* ---------- 5 · Locales: abanico (escritorio) y píldoras (móvil) -------
+   Abanico propio, solo con transform: las cartas se apilan giradas en el
+   centro; al pasar el cursor o al enfocar con Tab (:focus-within) se
+   enderezan y se reparten en fila. --n = cantidad, --i = posición.
+   Muestra solo foto y nombre; los datos van en la ficha de abajo. */
+.hs-abanico {
+    --ancho: 10.5rem;
+    position: relative;
+    height: 15rem;
+    margin: 1rem auto 2rem;
+}
+
+.hs-abanico__carta {
+    --desde-centro: calc(var(--i) - (var(--n) - 1) / 2);
+    position: absolute;
+    top: 0;
+    left: 50%;
+    display: flex;
+    flex-direction: column;
+    width: var(--ancho);
+    margin-left: calc(var(--ancho) / -2);
+    padding: 8px 8px 12px;
+    border: 1px solid var(--hs-sand);
+    border-radius: 16px;
+    background: var(--hs-card);
+    box-shadow: var(--hs-shadow-card);
+    color: var(--hs-bark);
+    font-family: var(--hs-font-body);
+    text-align: left;
+    cursor: pointer;
+    transform-origin: 50% 130%;
+    transform: rotate(calc(var(--desde-centro) * 9deg));
+    transition: transform var(--hs-t-lento) var(--hs-ease-seda), border-color var(--hs-t-fast);
+}
+
+.hs-abanico:hover .hs-abanico__carta,
+.hs-abanico:focus-within .hs-abanico__carta {
+    transform: translateX(calc(var(--desde-centro) * 105%)) rotate(0);
+}
+
+.hs-abanico__carta:hover,
+.hs-abanico__carta:focus-visible {
+    z-index: 5;
+    border-color: var(--hs-terracotta);
+}
+
+.hs-abanico:hover .hs-abanico__carta:hover,
+.hs-abanico:focus-within .hs-abanico__carta:focus-visible {
+    transform: translateX(calc(var(--desde-centro) * 105%)) translateY(-10px);
+}
+
+.hs-abanico__carta:focus-visible {
+    outline: none;
+    box-shadow: var(--hs-shadow-card), var(--hs-anillo-foco-oscuro);
+}
+
+/* La carta elegida queda arriba del montón y con borde terracota */
+.hs-abanico__carta[aria-pressed="true"] {
+    z-index: 4;
+    border-color: var(--hs-terracotta);
+}
+
+.hs-abanico__foto,
+.hs-ficha-local__foto {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 30% 25%, var(--hs-terracota-35) 0%, transparent 65%),
+        var(--hs-bark-light);
+    color: var(--hs-crema-60);
+}
+
+.hs-abanico__foto {
+    aspect-ratio: 4 / 5;
+    border-radius: 10px;
+    font-size: 2.5rem;
+}
+
+.hs-abanico__foto img,
+.hs-ficha-local__foto img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hs-abanico__nombre {
+    margin-top: 10px;
+    padding: 0 4px;
+    font-family: var(--hs-font-display);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+/* Píldoras: la versión móvil del selector */
+.hs-locales__pildoras {
+    display: flex;
+    gap: 8px;
+    margin: 0 -12px 1.25rem;
+    padding: 4px 12px 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.hs-locales__pildora {
+    flex: none;
+    padding: 8px 16px;
+    border: 1px solid var(--hs-sand);
+    border-radius: var(--hs-radius-pill);
+    background: var(--hs-card);
+    color: var(--hs-bark);
+    font-family: var(--hs-font-body);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background var(--hs-t-fast), border-color var(--hs-t-fast), color var(--hs-t-fast);
+}
+
+.hs-locales__pildora[aria-pressed="true"] {
+    border-color: var(--hs-terracotta);
+    background: var(--hs-terracotta);
+    color: var(--hs-sobre-acento);
+    font-weight: 600;
+}
+
+.hs-locales__pildora:focus-visible {
+    outline: none;
+    box-shadow: var(--hs-anillo-foco-oscuro);
+}
+
+/* locales.js muestra uno u otro según el ancho */
+@media (max-width: 767.98px) {
+    .hs-abanico { display: none; }
+}
+
+@media (min-width: 768px) {
+    .hs-locales__pildoras { display: none; }
+}
+
+/* Ficha con los datos del local */
+.hs-ficha-local {
+    display: grid;
+    overflow: hidden;
+    border: 1px solid var(--hs-sand);
+    border-radius: 20px;
+    background: var(--hs-card);
+    box-shadow: var(--hs-shadow-card);
+}
+
+.hs-ficha-local + .hs-ficha-local {
+    margin-top: 1rem;
+}
+
+.hs-locales.is-interactivo .hs-ficha-local + .hs-ficha-local {
+    margin-top: 0;
+}
+
+.hs-locales.is-interactivo .hs-ficha-local:not([hidden]) {
+    animation: hsFadeSlide 0.45s var(--hs-ease-seda);
+}
+
+.hs-ficha-local__foto {
+    min-height: 10rem;
+    font-size: 3rem;
+}
+
+/* En escritorio la foto ya está en el abanico: la ficha es solo texto */
+@media (min-width: 768px) {
+    .hs-locales.is-interactivo .hs-ficha-local__foto {
+        display: none;
+    }
+}
+
+.hs-ficha-local__cuerpo {
+    padding: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .hs-ficha-local__cuerpo {
+        padding: 2rem 2.5rem;
+    }
+}
+
+.hs-ficha-local__tipo {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--hs-terracotta);
+}
+
+.hs-ficha-local__nombre {
+    margin: 0 0 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.hs-ficha-local__dato {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0 0 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--hs-muted);
+}
+
+.hs-ficha-local__dato .bi {
+    flex: none;
+    color: var(--hs-terracotta);
+}
+
+.hs-ficha-local .hs-enlace-flecha {
+    margin-top: 0.5rem;
+}
+
+/* ---------- 6 · Evidencia de impacto ------------------------------- */
+.hs-galeria-evidencia {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+    gap: 1rem;
+}
+
+.hs-evidencia {
+    margin: 0;
+}
+
+.hs-evidencia__enlace {
+    display: block;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 16px;
+    background: var(--hs-cream-dark);
+}
+
+.hs-evidencia__enlace img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--hs-t-lento) var(--hs-ease-seda);
+}
+
+.hs-evidencia__enlace:hover img,
+.hs-evidencia__enlace:focus-visible img {
+    transform: scale(1.05);
+}
+
+.hs-evidencia__enlace:focus-visible {
+    outline: none;
+    box-shadow: var(--hs-anillo-foco-oscuro);
+}
+
+.hs-evidencia__pie {
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--hs-muted);
+}
+
+/* Respetar a quien pide menos movimiento (accesibilidad) */
+@media (prefers-reduced-motion: reduce) {
+    .hs-nosotros__titulo::after,
+    .hs-nosotros__fondo,
+    .hs-locales.is-interactivo .hs-ficha-local:not([hidden]) {
+        animation: none;
+    }
+    .hs-nosotros__panel,
+    .hs-aros__aro,
+    .hs-modelo,
+    .hs-modelo::before,
+    .hs-modelo__marca,
+    .hs-modelo__icono,
+    .hs-cifras .hs-contador,
+    .hs-aliada,
+    .hs-abanico__carta,
+    .hs-locales__pildora,
+    .hs-evidencia__enlace img {
+        transition: none;
+    }
+    .hs-modelo:hover,
+    .hs-modelo:hover .hs-modelo__marca,
+    .hs-modelo:hover .hs-modelo__icono,
+    .hs-cifras .hs-contador:hover,
+    .hs-aliada:hover,
+    .hs-evidencia__enlace:hover img {
+        transform: none;
+    }
+    /* El abanico se muestra ya abierto y quieto */
+    .hs-abanico__carta,
+    .hs-abanico:hover .hs-abanico__carta,
+    .hs-abanico:focus-within .hs-abanico__carta,
+    .hs-abanico:hover .hs-abanico__carta:hover {
+        transform: translateX(calc(var(--desde-centro) * 105%));
+    }
+}

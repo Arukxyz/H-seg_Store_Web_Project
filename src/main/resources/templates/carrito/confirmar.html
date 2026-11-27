@@ -17,7 +17,7 @@
 <main class="hs-main--bajo-nav hs-pagina">
     <th:block th:replace="~{fragments/avisos :: avisos}"/>
 
-    <header class="hs-pagina-cabecera">
+    <header class="hs-pagina-cabecera hs-entrada" style="--hs-i: 0">
         <div class="container">
             <nav aria-label="Ruta">
                 <ol class="hs-migas">
@@ -31,7 +31,7 @@
 
     <div class="container">
         <form id="form-confirmar" th:object="${envioForm}" method="post" th:action="@{/carrito/confirmar}" data-confirmar novalidate>
-            <div class="row g-4 g-lg-5">
+            <div class="row g-4 g-lg-5 hs-entrada" style="--hs-i: 1">
                 <div class="col-12 col-lg-7">
                     <!-- Paso 1: entrega -->
                     <section class="mb-5" aria-labelledby="paso-entrega">
@@ -133,12 +133,12 @@
                         <div class="hs-impacto-caja mb-3" th:if="${impacto.tieneImpacto()}"
                              th:classappend="${impacto.abrigos == 0} ? 'hs-impacto-caja--arbol'">
                             <span class="hs-impacto-caja__icono">
-                                <i class="bi" th:classappend="${impacto.abrigos > 0} ? 'bi-gift-fill' : 'bi-tree-fill'" aria-hidden="true"></i>
+                                <i class="bi" th:classappend="${impacto.abrigos > 0} ? 'bi-casaca-fill' : 'bi-tree-fill'" aria-hidden="true"></i>
                             </span>
                             <span>Con esta compra generas <strong th:text="${impacto.texto}">1 abrigo</strong>.</span>
                         </div>
 
-                        <button class="hs-btn hs-btn--primario w-100" type="submit" th:disabled="${!sePuedeConfirmar}">
+                        <button class="hs-btn hs-btn--primario hs-brillo w-100" type="submit" th:disabled="${!sePuedeConfirmar}">
                             <i class="bi bi-lock" aria-hidden="true"></i> Confirmar compra
                         </button>
                         <p class="hs-texto-secundario text-center mt-2 mb-0">

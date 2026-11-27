@@ -9,11 +9,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import pe.edu.utp.hoseg.web.config.ClienteAutenticado;
 import pe.edu.utp.hoseg.web.dto.DetalleProducto;
 import pe.edu.utp.hoseg.web.dto.FiltroCatalogo;
 import pe.edu.utp.hoseg.web.dto.OrdenCatalogo;
+import pe.edu.utp.hoseg.web.dto.PaginaCatalogo;
 import pe.edu.utp.hoseg.web.dto.ResenaForm;
 import pe.edu.utp.hoseg.web.dto.TarjetaProducto;
 import pe.edu.utp.hoseg.web.model.TipoCompromiso;
@@ -35,13 +38,27 @@ public class TiendaController {
         this.resenaService = resenaService;
     }
 
-    /** /tienda?q=&categoria=&coleccion=&impacto=&disponibles=&orden= (todos opcionales). */
+    /** Cabecera que envía tienda.js para pedir solo la zona de resultados. */
+    static final String CABECERA_PARCIAL = "X-Hoseg-Parcial";
+
+    /**
+     * /tienda?q=&categoria=&coleccion=&impacto=&disponibles=&orden=&pagina=&porPagina= (todos opcionales).
+     * Con la cabecera {@value #CABECERA_PARCIAL} devuelve solo el fragmento de resultados
+     * (filtrar y paginar sin recargar); sin ella, la página completa.
+     */
     @GetMapping("/tienda")
-    public String tienda(FiltroCatalogo filtro, Model model) {
+    public String tienda(FiltroCatalogo filtro,
+                         @RequestParam(required = false) Integer pagina,
+                         @RequestParam(required = false) Integer porPagina,
+                         @RequestHeader(name = CABECERA_PARCIAL, required = false) String parcial,
+                         Model model) {
         List<TarjetaProducto> productos = catalogoService.tarjetas(filtro);
-        model.addAttribute("productos", productos);
-        model.addAttribute("total", productos.size());
+        model.addAttribute("pagina", PaginaCatalogo.de(productos, pagina, porPagina));
+        model.addAttribute("tamanosPagina", PaginaCatalogo.TAMANOS);
         model.addAttribute("filtro", filtro);
+        if (parcial != null) {
+            return "tienda/lista :: resultados";
+        }
         model.addAttribute("categorias", catalogoService.categorias());
         model.addAttribute("colecciones", catalogoService.colecciones());
         model.addAttribute("compromisos", TipoCompromiso.values());

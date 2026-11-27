@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.concurrent.ThreadLocalRandom;
+
 
 /**
  * Ventas web. La web CREA el pedido (PENDIENTE) y el escritorio lo confirma:
@@ -221,6 +223,91 @@ public class VentaService {
 
         return new CompraRegistrada(venta.getCodigoComprobante(), total, envio.getCosto(),
                 total.add(envio.getCosto()), envio.getTipo(), new ImpactoCompra(abrigos, arboles));
+    }
+
+        /**
+     * Pasarela de pago en línea: valida stock, cobra (simulado) y registra la venta
+     * directamente en estado PAGADO en una sola transacción atómica.
+     */
+    @Transactional
+    public CompraRegistrada pagarYRegistrar(Integer idCliente,
+                                            List<ItemCarrito> items,
+                                            DatosEnvioForm datosEnvio,
+                                            String metodoPago) {
+        if (idCliente == null) {
+            throw new NegocioException("Inicia sesión para completar tu pago; tu carrito se conserva.");
+        }
+        Map<String, Producto> productos = cargarProductos(items);
+        List<ProblemaCarrito> problemas = validar(items, productos);
+        if (!problemas.isEmpty()) {
+            throw new CarritoInvalidoException(problemas);
+        }
+        Cliente cliente = clienteRepository.findById(idCliente)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Cliente inexistente: " + idCliente));
+
+        String codigoTransaccion = "TRX-" + ThreadLocalRandom.current().nextInt(100000, 1000000);
+
+        Venta venta = new Venta();
+        venta.setCodigoComprobante(nuevoCodigoComprobante());
+        venta.setFecha(OffsetDateTime.now());
+        venta.setCliente(cliente);
+        venta.setOrigen(OrigenVenta.WEB);
+        venta.setEstado(EstadoVenta.PAGADO);
+        venta.setMetodoPago(metodoPago);
+        venta.setCodigoTransaccion(codigoTransaccion);
+
+        BigDecimal total = BigDecimal.ZERO;
+        for (ItemCarrito item : items) {
+            Producto producto = productos.get(item.codigoProducto());
+            int filas = productoRepository.descontarStockComercial(producto.getCodigo(), item.cantidad());
+            if (filas == 0) {
+                throw new CarritoInvalidoException(List.of(
+                        new ProblemaCarrito(producto.getCodigo(),
+                                "Stock insuficiente para " + producto.getNombre() + " al momento de procesar el pago.")));
+            }
+
+            DetalleVenta linea = new DetalleVenta();
+            linea.setProducto(producto);
+            linea.setCantidad(item.cantidad());
+            linea.setPrecioUnitario(producto.getPrecio());
+            linea.setSubtotal(producto.getPrecio().multiply(BigDecimal.valueOf(item.cantidad())));
+            venta.agregarDetalle(linea);
+            total = total.add(linea.getSubtotal());
+        }
+        venta.setTotal(total);
+        ventaRepository.save(venta);
+
+        long abrigos = 0;
+        long arboles = 0;
+        for (DetalleVenta linea : venta.getDetalles()) {
+            Producto producto = linea.getProducto();
+            if (!producto.tieneCompromiso()) {
+                continue;
+            }
+            productoRepository.sumarStockComprometido(producto.getCodigo(), linea.getCantidad());
+
+            Donacion donacion = new Donacion();
+            donacion.setDetalleVenta(linea);
+            donacion.setProducto(producto);
+            donacion.setCantidad(linea.getCantidad());
+            donacion.setTipo(producto.getTipoCompromiso());
+            donacion.setEstado(EstadoDonacion.PENDIENTE);
+            donacionRepository.save(donacion);
+
+            if (producto.getTipoCompromiso() == TipoCompromiso.ABRIGO) {
+                abrigos += linea.getCantidad();
+            } else {
+                arboles += linea.getCantidad();
+            }
+        }
+
+        Envio envio = nuevoEnvio(venta, datosEnvio);
+        envio.setEstado(EstadoEnvio.PREPARANDO);
+        envioRepository.save(envio);
+
+        return new CompraRegistrada(venta.getCodigoComprobante(), total, envio.getCosto(),
+                total.add(envio.getCosto()), envio.getTipo(), new ImpactoCompra(abrigos, arboles),
+                metodoPago, codigoTransaccion);
     }
 
     private Envio nuevoEnvio(Venta venta, DatosEnvioForm datos) {

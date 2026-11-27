@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://thymeleaf.org"
+      th:replace="~{layout/admin :: pagina(titulo='Reportes de impacto · HÖSÉG', activa='impacto-reportes', contenido=~{::main})}">
+<body>
+<main class="hs-admin-page">
+    <div class="hs-page-heading">
+        <div>
+            <p class="hs-eyebrow">IMPACTO SOCIAL · MÉTRICAS</p>
+            <h1>Reportes e indicadores</h1>
+            <p class="hs-page-desc">Resumen general de lotes entregados, compromisos pendientes y exportación de datos.</p>
+        </div>
+        <a class="hs-admin-btn hs-admin-btn--primary" th:href="@{/gestion-impacto/lotes.csv}">
+            <i class="bi bi-file-earmark-spreadsheet me-1" aria-hidden="true"></i> Exportar reporte (CSV / Excel)
+        </a>
+    </div>
+
+    <div class="hs-metrics mb-4">
+        <article class="hs-metric">
+            <span class="hs-metric-icon"><i class="bi bi-box2-heart" aria-hidden="true"></i></span>
+            <span class="hs-metric-label">Total de lotes</span>
+            <strong th:text="${totalLotes}">0</strong>
+            <span class="hs-metric-note">Registrados en el sistema</span>
+        </article>
+        <article class="hs-metric hs-metric--impacto">
+            <span class="hs-metric-icon"><i class="bi bi-patch-check" aria-hidden="true"></i></span>
+            <span class="hs-metric-label">Lotes entregados</span>
+            <strong th:text="${lotesEntregados}">0</strong>
+            <span class="hs-metric-note">Confirmados en comunidades</span>
+        </article>
+        <article class="hs-metric">
+            <span class="hs-metric-icon"><i class="bi bi-truck" aria-hidden="true"></i></span>
+            <span class="hs-metric-label">Lotes en ruta</span>
+            <strong th:text="${lotesEnRuta}">0</strong>
+            <span class="hs-metric-note">En camino a destino</span>
+        </article>
+        <article class="hs-metric" th:classappend="${!pendientes.isEmpty()} ? 'hs-metric--alerta'">
+            <span class="hs-metric-icon"><i class="bi bi-hourglass-split" aria-hidden="true"></i></span>
+            <span class="hs-metric-label">Sin asignar a lote</span>
+            <strong th:text="${#lists.size(pendientes)}">0</strong>
+            <span class="hs-metric-note" th:text="${totalAbrigosPend + ' abrigos · ' + totalArbolesPend + ' árboles'}">0 abrigos</span>
+        </article>
+    </div>
+
+    <section class="hs-admin-card">
+        <div class="hs-card-head">
+            <div>
+                <h2>Donaciones en cola de asignación</h2>
+                <p>Compromisos que aún esperan ser agrupados en un lote para su entrega.</p>
+            </div>
+            <a th:if="${!pendientes.isEmpty()}" th:href="@{/gestion-impacto/donaciones}" class="hs-admin-btn hs-admin-btn--secondary">
+                Ir a asignar <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        <p class="hs-aviso-deslizar d-md-none px-3 pt-2 mb-1">
+    <span>Desliza la tabla para ver más</span>
+    <i class="bi bi-arrow-right hs-aviso-deslizar__flecha" aria-hidden="true"></i>
+</p>
+
+
+        <div class="hs-table-scroll">
+            <table class="hs-admin-table">
+                <thead>
+                <tr>
+                    <th>Comprobante</th>
+                    <th>Tipo de compromiso</th>
+                    <th>Unidades</th>
+                    <th>Prenda</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="d : ${pendientes}">
+                    <td><span class="hs-code-pill" th:text="${d.detalleVenta.venta.codigoComprobante}">WEB-000126</span></td>
+                    <td th:text="${d.tipo.name()}">ABRIGO</td>
+                    <td class="hs-cell-strong" th:text="${d.cantidad}">1</td>
+                    <td th:text="${d.producto.nombre}">Casaca</td>
+                </tr>
+                <tr th:if="${pendientes.isEmpty()}">
+                    <td colspan="4" class="hs-empty-row">No hay donaciones rezagadas sin lote.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

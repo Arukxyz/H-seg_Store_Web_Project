@@ -1,10 +1,13 @@
 /* =====================================================================
    HÖSÉG Web · Navbar y óvalo móvil
    - La barra superior recibe .is-scrolled al bajar más de 60 px (sobre el
-     banner arranca transparente y aquí se vuelve opaca).
+     banner arranca transparente y aquí se vuelve opaca; en escritorio
+     además se encoge de 64 a 56 px).
+   - El contador del carrito late si creció desde la página anterior.
    - El indicador del óvalo se coloca sobre el destino activo y, al tocar
      otro, se estira hasta cubrir ambos y luego se encoge sobre el nuevo
-     (dos fases de 0,22 s, como en el diseño).
+     (dos fases de 0,22 s, como en el diseño). "Cuenta" del cliente abre su
+     menú (dropdown de Bootstrap) y no mueve el indicador.
    - Expone window.hsNavActivar(seccion) para que la Home marque la
      sección visible al hacer scroll.
    ===================================================================== */
@@ -25,6 +28,23 @@
     if (barras.length) {
         window.addEventListener('scroll', alDesplazar, { passive: true });
         alDesplazar();
+    }
+
+    /* ---------- Carrito: latido cuando el contador creció ----------
+       El contador lo pinta el servidor. Se guarda el último valor visto en
+       sessionStorage; si al cargar una página es mayor (se acaba de agregar
+       algo y se volvió), el badge late dos veces. */
+    const badgeCarrito = document.querySelector('.hs-carrito-icono__badge');
+    const unidades = badgeCarrito ? parseInt(badgeCarrito.textContent, 10) || 0 : 0;
+    try {
+        const anteriores = parseInt(sessionStorage.getItem('hs-carrito-unidades'), 10);
+        const menosMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (badgeCarrito && !menosMovimiento && Number.isFinite(anteriores) && unidades > anteriores) {
+            badgeCarrito.classList.add('is-latido');
+        }
+        sessionStorage.setItem('hs-carrito-unidades', String(unidades));
+    } catch (e) {
+        // Sin sessionStorage (modo privado estricto) no hay latido; nada más cambia.
     }
 
     /* ---------- Óvalo móvil: indicador deslizante ---------- */
@@ -73,7 +93,9 @@
         colocarSinAnimar();
         window.addEventListener('resize', colocarSinAnimar);
         document.fonts?.ready.then(colocarSinAnimar); // el ancho cambia al cargar Outfit
-        itemsPill.forEach((item) => item.addEventListener('click', () => moverA(item)));
+        // El botón de cuenta del cliente solo abre su menú: el indicador se queda donde está
+        itemsPill.filter((item) => !item.matches('[data-bs-toggle]'))
+            .forEach((item) => item.addEventListener('click', () => moverA(item)));
     }
 
     /* ---------- Marcar sección activa (barra y óvalo) ---------- */
